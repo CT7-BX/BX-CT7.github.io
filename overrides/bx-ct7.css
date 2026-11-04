@@ -39,3 +39,37 @@
  #bx-dev-overlay .bx-dev-head h2{font-size:17px}
  #bx-dev-overlay .bx-dev-actions button{width:100%}
 }
+
+
+/* BX-HEN 0.1: isolated read-only diagnostic interface. */
+#bx-hen-settings-button{display:block;width:100%;margin:0 0 14px;padding:12px 14px;
+ border:1px solid rgba(130,233,199,.45);border-radius:9px;
+ background:#164c49!important;color:#effff8;font:bold 14px Arial,sans-serif;
+ text-align:left;cursor:pointer}
+#bx-hen-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+ z-index:99999;align-items:center;justify-content:center;
+ background:rgba(0,0,0,.86);padding:14px;box-sizing:border-box}
+#bx-hen-overlay *{box-sizing:border-box}
+#bx-hen-overlay .bx-hen-panel{width:100%;max-width:620px;max-height:92vh;
+ overflow-y:auto;background:#112b32;color:#fff;border:1px solid #34817a;
+ border-radius:13px;padding:20px;font:14px Arial,sans-serif}
+#bx-hen-overlay .bx-hen-head{display:flex;align-items:center;
+ justify-content:space-between;gap:12px}
+#bx-hen-overlay h2{font-size:20px;font-weight:bold;margin:0}
+#bx-hen-overlay button,#bx-hen-overlay a{display:inline-block;
+ padding:11px 13px;border:1px solid #467c82;border-radius:8px;
+ background:#1d5359;color:white;text-decoration:none;cursor:pointer}
+#bx-hen-overlay .bx-hen-explain{color:#b3d5cf;line-height:1.5;
+ margin:15px 0;font-size:13px}
+#bx-hen-overlay .bx-hen-row{display:flex;justify-content:space-between;
+ gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.14)}
+#bx-hen-overlay .bx-hen-row span{color:#b2cfd1;max-width:50%}
+#bx-hen-overlay .bx-hen-row strong{text-align:right;max-width:50%;
+ overflow-wrap:break-word}
+#bx-hen-overlay .bx-hen-actions{display:flex;flex-wrap:wrap;
+ margin-top:18px;gap:10px}
+@media(max-width:540px){
+ #bx-hen-overlay .bx-hen-panel{padding:14px}
+ #bx-hen-overlay h2{font-size:17px}
+ #bx-hen-overlay .bx-hen-actions>*{flex:1 1 100%}
+}
