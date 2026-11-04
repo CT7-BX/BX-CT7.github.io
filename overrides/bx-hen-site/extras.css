@@ -1,0 +1,21 @@
+
+/* BX-HEN dashboard enhancements, compatible with PS4 legacy WebKit */
+.bx-release{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin:17px 0;padding:13px 16px}
+.bx-release strong{color:#d9faff;font-size:14px}
+.bx-release small{display:block;color:#95b8d4;margin-top:5px;line-height:1.5}
+.bx-release-actions{display:flex;gap:8px;flex-wrap:wrap}
+.bx-mini{border:1px solid #2d86bc;border-radius:8px;color:#e8faff;background:#123b61;padding:9px 11px;font-size:12px}
+.bx-mini:hover{background:#1c5478}
+.bx-testgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.bx-test{background:#081d37;border:1px solid #245078;padding:11px;border-radius:9px;min-width:0}
+.bx-test b{display:block;font-size:12px;color:#dceefd}
+.bx-test span{display:block;margin-top:6px;color:#8bd7c9;font-size:12px;overflow-wrap:break-word}
+.bx-alert{font-size:12px;color:#adcade;line-height:1.55;margin:11px 0}
+.bx-log{font:12px/1.65 monospace;padding:13px;max-height:170px;overflow:auto;color:#b7d5e6;background:#041025;border:1px solid #1d527c;border-radius:9px;white-space:pre-wrap;word-break:break-word}
+.bx-compact .emblem-area{min-height:160px}
+.bx-compact .emblem-area svg{max-width:165px}
+.bx-compact .featuregrid{gap:6px;padding:9px}
+.bx-compact .feature{padding:7px}
+.bx-compact .hero{margin-bottom:9px}
+.bx-compact .main{padding-top:12px}
+@media(max-width:760px){.bx-testgrid{grid-template-columns:1fr}.bx-release{align-items:stretch}.bx-release-actions{width:100%}.bx-release-actions button{flex:1}}
