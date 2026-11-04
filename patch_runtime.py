@@ -42,30 +42,52 @@ update('index.html',
 
 # Launcher shells use the actual existing click handlers, not mock buttons.
 # Two wholly different layouts are provided by their respective CSS files.
-launcher_intro = '''<div id="bx-launcher-intro">
-    <div class="bx-overline">🇧🇷 BX-CT7 • EDIÇÃO 2.2</div>
-    <h1>Seu console.<br>Seu launcher.</h1>
-    <p>Central do PS4 com ferramentas, biblioteca de payloads e personalização.
-       Escolha uma opção para navegar.</p>
+# Duas interfaces distintas, ocultas em Padrão/Compacto via CSS global.
+# Os botões chamam as funções já presentes no WebKitty.
+launcher_intro = '''<div id="bx-neon-launcher" class="bx-launcher-only">
+  <nav class="bx-neon-rail" aria-label="Menu lateral Neon">
+    <div class="bx-neon-logo">BX<span>CT7</span><small>COMMAND CENTER</small></div>
+    <button onclick="ui.exploitScreen.scrollIntoView({block:'start'});">▦ <span>Biblioteca</span></button>
+    <button onclick="themePopup();">◈ <span>Aparência</span></button>
+    <button onclick="settingsPopup();">⚙ <span>Ajustes</span></button>
+    <button onclick="aboutPopup();">ⓘ <span>Informações</span></button>
+    <button class="bx-neon-cache" onclick="document.getElementById('updateCache').click();">⟳ <span>Atualizar cache</span></button>
+  </nav>
+  <div class="bx-neon-stage">
+    <div class="bx-neon-header"><span class="bx-neon-dot"></span> PS4 HOST SYSTEM <em>EDIÇÃO 2.2</em></div>
+    <div class="bx-neon-content">
+      <div class="bx-neon-kicker">CENTRO DE COMANDO / BX-CT7</div>
+      <h1>CONTROLE<br><b>TOTAL.</b></h1>
+      <p>Ferramentas, ajustes e biblioteca numa central construída para o seu console.</p>
+      <div class="bx-neon-buttons">
+        <button class="bx-neon-primary" onclick="document.getElementById('pslogo').click();">▶ INICIAR HOST</button>
+        <button onclick="ui.exploitScreen.scrollIntoView({block:'start'});">ABRIR BIBLIOTECA ↗</button>
+      </div>
+    </div>
+    <div class="bx-neon-bottom"><span>● PS4 WEB HOST</span><span>BX-CT7 / 2026</span></div>
+  </div>
 </div>
-<div id="bx-launcher-actions" aria-label="Navegação do BX-CT7">
-    <button type="button" class="bx-action"
-        onclick="ui.exploitScreen.scrollIntoView({block:'start'});">
-        <span class="bx-number">01 / BIBLIOTECA</span>
-        <strong>Ferramentas</strong><span>Abrir biblioteca do host</span>
-    </button>
-    <button type="button" class="bx-action" onclick="themePopup();">
-        <span class="bx-number">02 / VISUAL</span>
-        <strong>Personalizar</strong><span>Layouts e temas</span>
-    </button>
-    <button type="button" class="bx-action" onclick="settingsPopup();">
-        <span class="bx-number">03 / SISTEMA</span>
-        <strong>Configurações</strong><span>Preferências do host</span>
-    </button>
-    <button type="button" class="bx-action" onclick="aboutPopup();">
-        <span class="bx-number">04 / INFORMAÇÕES</span>
-        <strong>Sobre</strong><span>Versão e créditos</span>
-    </button>
+<div id="bx-painel-launcher" class="bx-launcher-only">
+  <div class="bx-painel-top"><strong>◉ BX-CT7</strong><span>PS4 LAUNCHER <b>2.2</b></span>
+    <button onclick="themePopup();">PERSONALIZAR ⚙</button></div>
+  <div class="bx-painel-feature">
+    <div class="bx-painel-feature-copy">
+      <div class="bx-painel-kicker">ÁREA PRINCIPAL / HOST</div>
+      <h1>PRONTO<br>PARA JOGAR.</h1>
+      <p>Seu espaço de ferramentas para PlayStation 4.</p>
+      <button onclick="document.getElementById('pslogo').click();">▶ INICIAR</button>
+    </div>
+    <div class="bx-painel-symbol" aria-hidden="true">PS4</div>
+  </div>
+  <div class="bx-painel-sectiontitle">ACESSO RÁPIDO <span>ESCOLHA UMA ÁREA</span></div>
+  <div class="bx-painel-tiles">
+    <button onclick="ui.exploitScreen.scrollIntoView({block:'start'});"><span>01</span><strong>▦ Biblioteca</strong><small>Ferramentas e homebrew</small></button>
+    <button onclick="settingsPopup();"><span>02</span><strong>⚙ Sistema</strong><small>Configurações</small></button>
+    <button onclick="themePopup();"><span>03</span><strong>◈ Temas</strong><small>Alterar visual</small></button>
+    <button onclick="aboutPopup();"><span>04</span><strong>ⓘ Sobre</strong><small>Projeto e créditos</small></button>
+  </div>
+  <div class="bx-painel-footer"><span>BX-CT7 • CONSOLE DASHBOARD</span>
+    <button onclick="document.getElementById('updateCache').click();">⟳ CACHE</button></div>
 </div>'''
 update('index.html', '            <!-- Header Buttons -->',
        '            ' + launcher_intro + '\n            <!-- Header Buttons -->')
