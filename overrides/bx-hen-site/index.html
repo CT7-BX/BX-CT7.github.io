@@ -24,6 +24,7 @@ body:before{content:"";position:fixed;pointer-events:none;inset:0;background:rad
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 <link rel="stylesheet" href="./extras.css">
+<link rel="stylesheet" href="./test-monitor.css">
 </head>
 <body>
 <header class="topbar"><div class="brand"><div class="controller" aria-hidden="true">✣</div><div><h1>BX-CT7 PS4 Host <em>v2.2</em></h1><p>HEN • Ferramentas • PS4 • Painel experimental</p></div></div><div class="topright"><div class="detected"><span class="dot" id="device-dot"></span><span id="device-name">Verificando navegador...</span><strong id="header-fw">Firmware não identificado</strong></div><a class="smalllink" href="../" title="Voltar ao host">⌂ Host</a></div></header>
@@ -86,5 +87,6 @@ byId('open-logs').onclick=function(){showDiag();};
 })();
 </script>
 <script src="./extras.js"></script>
+<script src="./test-monitor.js"></script>
 </body>
 </html>
