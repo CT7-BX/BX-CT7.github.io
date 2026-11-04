@@ -73,3 +73,52 @@
  #bx-hen-overlay h2{font-size:17px}
  #bx-hen-overlay .bx-hen-actions>*{flex:1 1 100%}
 }
+
+
+/* BX-HEN 0.2: polish panel. Does not change host exploit controls. */
+#bx-hen-settings-button{background:linear-gradient(100deg,#142c57,#105667)!important;
+ border:1px solid #3eadd1!important;color:#e7f9ff!important;
+ letter-spacing:.1px;box-shadow:0 4px 18px rgba(13,154,200,.15)}
+#bx-hen-overlay .bx-hen-panel{max-width:790px;background:#08162b;
+ border-color:#218ab7;border-radius:17px;
+ box-shadow:0 22px 75px rgba(0,0,0,.72)}
+#bx-hen-overlay .bx-hen-head{display:flex;align-items:center;justify-content:space-between;
+ flex-wrap:wrap;gap:12px;padding-bottom:12px;border-bottom:1px solid #24435d}
+#bx-hen-overlay .bx-hen-logo{width:76px;min-width:76px;height:76px;display:block}
+#bx-hen-overlay .bx-hen-brand{flex:1 1 160px}
+#bx-hen-overlay .bx-hen-brand h2{font-size:28px;font-weight:900;
+ color:#e9f9ff;margin:0 0 4px;letter-spacing:.5px}
+#bx-hen-overlay .bx-hen-brand span{display:block;color:#61dfff;
+ font-size:10px;letter-spacing:1px;line-height:1.5;font-weight:800}
+#bx-hen-overlay .bx-hen-status{display:flex;flex-direction:column;gap:6px;
+ border:1px solid #296581;background:linear-gradient(110deg,#122e4b,#103d4f);
+ border-radius:13px;padding:16px;margin-bottom:18px}
+#bx-hen-overlay .bx-hen-status span{color:#9bd1e4;font-size:11px;
+ text-transform:uppercase;letter-spacing:1.2px}
+#bx-hen-overlay .bx-hen-status strong{color:#ecfcff;font-size:17px}
+#bx-hen-overlay .bx-hen-status small{color:#5ee7e0;font-size:12px}
+#bx-hen-overlay .bx-hen-section-title{font-size:16px;font-weight:800;
+ margin:16px 0 11px;color:#f2fbff}
+#bx-hen-overlay .bx-hen-features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:10px;margin-bottom:16px}
+#bx-hen-overlay .bx-hen-feature{display:flex;flex-direction:column;gap:7px;
+ border-radius:11px;border:1px solid #294c69;background:#11233e;padding:13px;
+ min-width:0;line-height:1.45}
+#bx-hen-overlay .bx-hen-feature strong{font-size:13px;color:#f2f9ff}
+#bx-hen-overlay .bx-hen-feature span{font-size:12px;color:#a6bfd4}
+#bx-hen-overlay .bx-hen-feature.ready{border-left:3px solid #3cdbb5}
+#bx-hen-overlay .bx-hen-feature.future{border-left:3px solid #76839a;background:#161f36}
+#bx-hen-overlay .bx-hen-row{border-bottom-color:#1d3a56}
+#bx-hen-overlay .bx-hen-timestamp,#bx-hen-overlay .bx-hen-note{font-size:11px;
+ color:#89acc3;margin-top:12px;line-height:1.5}
+#bx-hen-overlay .bx-hen-report{display:none;width:100%;height:130px;
+ background:#06101e;color:#e0f8ff;border:1px solid #30647f;border-radius:9px;
+ padding:10px;font:12px monospace;margin-top:13px}
+#bx-hen-overlay .bx-hen-actions button,#bx-hen-overlay .bx-hen-actions a{
+ background:#144968;border-color:#338dac;font-size:12px;font-weight:bold}
+@media(max-width:540px){
+ #bx-hen-overlay .bx-hen-logo{width:56px;min-width:56px;height:56px}
+ #bx-hen-overlay .bx-hen-logo svg{width:56px;height:56px}
+ #bx-hen-overlay .bx-hen-brand h2{font-size:23px}
+ #bx-hen-overlay .bx-hen-features{grid-template-columns:1fr}
+}
