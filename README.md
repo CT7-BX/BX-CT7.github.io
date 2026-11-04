@@ -1,5 +1,9 @@
 # BX-CT7 PS4 Host — Recuperação
 
+**🌐 Site oficial do host:** https://ct7-bx.github.io/BX-CT7.github.io/
+
+**[Abrir BX-CT7 PS4 Host](https://ct7-bx.github.io/BX-CT7.github.io/)**
+
 Repositório de reconstrução do **BX-CT7 PS4 Host**, baseado na revisão pública do [WebKitty](https://github.com/ArabPixel/WebKitty) (`6bdb9f764ba428978cb657a718296c3d6752e9b0`, 03/11/2026).
 
 Este repositório contém o **código de reconstrução e as personalizações**, não uma cópia integral do antigo repositório suspenso. O WebKitty e os seus arquivos binários são obtidos diretamente da origem pública durante a compilação.
