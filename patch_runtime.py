@@ -24,13 +24,19 @@ if not index.exists():
 
 # Neon é o layout padrão. Compacto foi retirado do seletor; resta o Painel.
 # A opção antiga "Default" não é exibida no seletor.
-# Remover somente a entrada visual antiga; conservar index.css como fallback.
+# Restaurar o layout nativo do WebKitty como opção independente.
+# Seus temas de cor continuam sendo os arquivos originais, sem alterações.
 update('index.html',
        '''                    <label class="flex items-center text-white/80">
                         <input type="radio" name="theme" value="index" onchange="setLayout(this.value);">
                         <p id="defaultTheme">Default</p>
                     </label>
-''', '')
+''',
+       '''                    <label class="flex items-center text-white/80">
+                        <input type="radio" name="theme" value="index" onchange="setLayout(this.value);">
+                        <p id="defaultTheme">Padrão (WebKitty original)</p>
+                    </label>
+''')
 # Substituir a opção Compacto pelas duas opções de launcher.
 update('index.html',
        '''                    <label class="flex items-center text-white/80">
@@ -128,7 +134,7 @@ update('index.html', '<!-- Language options -->',
 update('index.html',
        "var savedTheme = localStorage.getItem('theme') || \"index\";",
        "var savedTheme = localStorage.getItem('theme') || 'neon';"
-       " if (savedTheme === 'index' || savedTheme === 'compact') { savedTheme = 'neon';"
+       " if (savedTheme === 'compact') { savedTheme = 'neon';"
        " try { localStorage.setItem('theme', 'neon'); } catch(e) {} }")
 update('index.html', 'var savedColor = localStorage.getItem(\'color\') || "default";',
        'try { if (localStorage.getItem("bxCT7LanguageInitialized") !== "1") { localStorage.setItem("language","pt-br"); localStorage.setItem("bxCT7LanguageInitialized","1"); } } catch(e) {}\n        var savedColor = localStorage.getItem(\'color\') || "default";')
@@ -170,7 +176,7 @@ if base_path.exists():
 update('includes/js/design.js',
        "var savedTheme = storage.getString('theme', 'index');",
        "var savedTheme = storage.getString('theme', 'neon');"
-       " if (savedTheme === 'index' || savedTheme === 'compact') { savedTheme = 'neon'; storage.set('theme', 'neon'); }")
+       " if (savedTheme === 'compact') { savedTheme = 'neon'; storage.set('theme', 'neon'); }")
 update('includes/js/design.js',
        "savedTheme = 'index';",
        "savedTheme = 'neon';")
@@ -189,9 +195,22 @@ update('includes/js/design.js', 'function setLayout(theme) {',
     if (painel) painel.style.setProperty('display', theme === 'painel' ? 'flex' : 'none', 'important');
 }
 function setLayout(theme) {
-    if (theme === 'index' || theme === 'compact') theme = 'neon';''')
+    if (theme === 'compact') theme = 'neon';''')
 update('includes/js/design.js', "storage.set('theme', theme);",
        "storage.set('theme', theme);\n        bxApplyLauncherVisibility(theme);")
+# Sincronização de cores independentemente do layout (inclusive no PS4).
+# Não alterar o CSS original dos temas do WebKitty.
+update('includes/js/design.js', "storage.set('color', color);",
+       "storage.set('color', color);\\n        bxApplyColorTheme(color);")
+update('includes/js/design.js', 'function setTheme(color) {',
+       '''function bxApplyColorTheme(color) {
+    if (document.body) document.body.setAttribute('data-bx-color', color);
+}
+function setTheme(color) {''')
+update('includes/js/design.js',
+       "    if (radioElement) {\\n        radioElement.checked = true;\\n    }\\n}\\n",
+       "    if (radioElement) {\\n        radioElement.checked = true;\\n    }\\n    bxApplyColorTheme(savedColor);\\n}\\n") 
+
 update('includes/js/design.js',
        "    if (radioElement) {\n        radioElement.checked = true;\n    }\n}\n\nfunction loadTheme()",
        "    if (radioElement) {\n        radioElement.checked = true;\n    }\n    bxApplyLauncherVisibility(savedTheme);\n}\n\nfunction loadTheme()")
@@ -391,6 +410,7 @@ if not (root / 'LICENSE').is_file():
 # download as proof that customizations survived upstream changes.
 out = index.read_text(encoding='utf-8')
 checks = {
+    'layout Padrão original': 'value="index" onchange="setLayout(this.value);"',
     'layout Neon': 'value="neon" onchange="setLayout(this.value);"',
     'layout Painel': 'value="painel" onchange="setLayout(this.value);"',
     'versão 2.2': 'Version: 2.2',
@@ -403,8 +423,7 @@ checks = {
 for desc, token in checks.items():
     if token not in out:
         raise RuntimeError('Verificação falhou: ' + desc)
-for old in ('value="compact" onchange="setLayout(this.value);"',
-            'value="index" onchange="setLayout(this.value);"'):
+for old in ('value="compact" onchange="setLayout(this.value);"',):
     if old in out:
         raise RuntimeError('Layout removido ainda aparece: ' + old)
 for asset in ('includes/css/layouts/neon.css', 'includes/css/layouts/painel.css',
