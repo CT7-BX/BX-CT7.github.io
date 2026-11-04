@@ -66,6 +66,52 @@ if base_path.exists():
         html = html[:anchor.end()] + options + html[anchor.end():]
         index.write_text(html, encoding='utf-8')
 
+# Opções experimentais: mostrar controles em firmwares reconhecidos.
+# Não ampliar a lista de firmwares nem alterar payloads ou exploit chains.
+update('index.html', '<li class="hidden flex-1 advancedPayloadsTab"',
+       '<li class="flex-1 advancedPayloadsTab"')
+update('index.html', '<li class="hidden flex-1" id="customPayloadsTab"',
+       '<li class="flex-1" id="customPayloadsTab"')
+update('index.html', '                loadSettings();',
+       '''                loadSettings();
+                if (typeof setAdvancedPayloads === 'function') {
+                    setAdvancedPayloads(true);
+                }''')
+update('includes/js/initial.js',
+       "advancedPayloads: storage.getBoolean('advancedPayloads', false),",
+       "advancedPayloads: storage.getBoolean('advancedPayloads', true),")
+update('includes/js/checkFw.js',
+       "'click-to-start-text', 'chooseGoldHEN', 'advancedPayloads', 'chooseExploitChain', 'reloadAfterJb',",
+       "'click-to-start-text', 'chooseGoldHEN', 'chooseExploitChain', 'reloadAfterJb',")
+update('includes/js/checkFw.js',
+       "var toRemove = ['exploit-main-screen', 'scrollDown', 'advancedPayloads'];",
+       "var toRemove = ['exploit-main-screen', 'scrollDown'];")
+update('includes/js/checkFw.js',
+       "var toRemove2 = ['exploit-main-screen', 'scrollDown', 'advancedPayloads', 'custom-tab'];",
+       "var toRemove2 = ['exploit-main-screen', 'scrollDown', 'custom-tab'];")
+
+# nexHEN aparece quando a cadeia do próprio WebKitty é reconhecida.
+# Evitar prometer funcionamento do HEN com base apenas nesse reconhecimento.
+update('includes/js/HENs.js',
+       'var hidenexHEN = !devMode;',
+       'var hidenexHEN = !isFirmwareSupported(fwNum);')
+update('includes/js/HENs.js',
+       "function saveJbFlavor(name, value) {\n    storage.set('jailbreakFlavor', value);",
+       """function saveJbFlavor(name, value) {
+    if (value === 'nexHEN') {
+        var fw = getPs4FwVersion();
+        if (!fw || !isFirmwareSupported(fw)) {
+            alert('nexHEN experimental: o host não reconhece uma cadeia compatível neste firmware.');
+            loadJbFlavor();
+            return;
+        }
+        if (!confirm('O nexHEN é experimental; firmware reconhecido não comprova suporte do HEN. Deseja selecioná-lo?')) {
+            loadJbFlavor();
+            return;
+        }
+    }
+    storage.set('jailbreakFlavor', value);""")
+
 # Existing compatibility checks are preserved.
 for f in source.iterdir():
     if f.is_file():
