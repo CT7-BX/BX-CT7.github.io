@@ -950,9 +950,10 @@ body.bg-gray-900{background:linear-gradient(135deg,#071515 0%,#102222 48%,#132b2
 #pslogo #ps-logo-container{border-radius:20px!important;width:160px;height:160px;padding:14px!important;background:rgba(255,255,255,.07)!important;
  border:1px solid rgba(181,255,201,.17)}
 #pslogo #ps-logo{width:105px!important;height:105px!important}
-#choosejb-initial{grid-column:2;grid-row:3;display:flex!important;flex-direction:column;justify-content:center;
+#choosejb-initial{grid-column:2;grid-row:3;flex-direction:column;justify-content:center;
  background:rgba(9,28,31,.70)!important;border:1px solid rgba(181,255,201,.23);
  border-radius:20px!important;box-shadow:none!important;width:100%!important;max-width:none!important;padding:24px!important}
+#choosejb-initial:not(.hidden){display:flex!important}
 #choosejb-initial h3{text-align:left!important;font-size:22px!important;color:#e5fdec}
 #choosejb-initial>div{justify-content:flex-start!important;flex-wrap:wrap;gap:12px!important}
 #choosejb-initial label{flex:1 1 170px;min-height:75px;justify-content:center;background:rgba(167,255,190,.075)!important;
@@ -1014,3 +1015,6 @@ body.bg-gray-900{background:linear-gradient(135deg,#071515 0%,#102222 48%,#132b2
  #exploit-status-panel #DebugConsole{width:100%!important}
  #payloadsSection{min-height:480px!important}
 }
+
+/* Preserve native show/hide flow when switching between launcher and tools. */
+#initial-screen.hidden,#exploit-main-screen.hidden,#choosejb-initial.hidden{display:none!important}
