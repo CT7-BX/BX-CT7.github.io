@@ -307,6 +307,16 @@ if not bx_site_src.is_file():
     raise RuntimeError('Página BX-HEN não encontrada')
 bx_site_dest.parent.mkdir(parents=True, exist_ok=True)
 shutil.copy2(bx_site_src, bx_site_dest)
+# Loja de PKGs: catálogo estático para URLs HTTPS autorizadas, sem instalador.
+store_source = source / 'bx-hen-site' / 'store'
+store_dest = bx_site_dest.parent / 'store'
+store_dest.mkdir(parents=True, exist_ok=True)
+for store_name in ('index.html', 'catalog.json'):
+    store_file = store_source / store_name
+    if not store_file.is_file():
+        raise RuntimeError('Arquivo da loja BX-HEN ausente: ' + store_name)
+    shutil.copy2(store_file, store_dest / store_name)
+
 for extra_name in ('extras.css', 'extras.js', 'test-monitor.css', 'test-monitor.js', 'compatibility.css', 'compatibility.js'):
     extra_src = source / 'bx-hen-site' / extra_name
     if not extra_src.is_file():
@@ -460,4 +470,7 @@ for token in ('BX-HEN 0.2', 'id="diagnostics"', 'Não implementado', 'id="run-ch
 for asset in ('extras.css', 'extras.js', 'test-monitor.css', 'test-monitor.js', 'compatibility.css', 'compatibility.js'):
     if './' + asset not in bx_html or not (root / 'bx-hen' / asset).is_file():
         raise RuntimeError('Recurso BX-HEN ausente da publicação: ' + asset)
+for store_file in ('bx-hen/store/index.html', 'bx-hen/store/catalog.json'):
+    if not (root / store_file).is_file():
+        raise RuntimeError('Loja não publicada: ' + store_file)
 print('BX-CT7: pacote personalizado e hashes confirmados.')
