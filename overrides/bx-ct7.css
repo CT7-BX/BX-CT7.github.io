@@ -8,3 +8,34 @@
 /* Launcher variants are never visible in upstream Padrão/Compacto layouts.
    Layout-specific stylesheets explicitly activate only their own interface. */
 #bx-neon-launcher,#bx-painel-launcher{display:none!important}
+
+
+/* BX-CT7 developer diagnostics: isolated, responsive and PS4 browser friendly. */
+#bx-dev-button{display:block;width:100%;margin:0 0 15px;padding:12px 14px;
+ border:1px solid rgba(117,207,255,.35);border-radius:9px;
+ background:#214057;color:#fff;font:bold 14px Arial,sans-serif;cursor:pointer;text-align:left}
+#bx-dev-overlay{position:fixed;inset:0;top:0;left:0;right:0;bottom:0;z-index:99998;
+ display:none;align-items:center;justify-content:center;
+ background:rgba(0,0,0,.84);padding:12px;box-sizing:border-box}
+#bx-dev-overlay *{box-sizing:border-box}
+#bx-dev-overlay .bx-dev-card{width:100%;max-width:660px;max-height:94vh;overflow-y:auto;
+ background:#172332;border:1px solid #376075;color:#fff;border-radius:13px;
+ padding:20px;box-shadow:0 15px 45px rgba(0,0,0,.5);font:14px Arial,sans-serif}
+#bx-dev-overlay .bx-dev-head{display:flex;justify-content:space-between;align-items:center;gap:8px;
+ margin-bottom:12px}
+#bx-dev-overlay .bx-dev-head h2{font-size:20px;font-weight:bold;margin:0}
+#bx-dev-overlay button{border:1px solid #547c92;background:#244359;color:white;
+ border-radius:8px;padding:10px 12px;cursor:pointer}
+#bx-dev-overlay .bx-dev-warning{line-height:1.5;color:#a9c8d7;font-size:12px;margin:10px 0 14px}
+#bx-dev-overlay .bx-dev-row{display:flex;justify-content:space-between;gap:12px;
+ padding:9px 2px;border-bottom:1px solid rgba(255,255,255,.12)}
+#bx-dev-overlay .bx-dev-row span{color:#a8c0cd;max-width:55%}
+#bx-dev-overlay .bx-dev-row strong{text-align:right;max-width:47%;overflow-wrap:break-word}
+#bx-dev-overlay .bx-dev-actions{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0}
+#bx-dev-overlay #bx-dev-report{display:none;width:100%;min-height:125px;background:#0b1725;
+ color:#e9f7ff;border:1px solid #557889;padding:9px;border-radius:8px}
+@media(max-width:500px){
+ #bx-dev-overlay .bx-dev-card{padding:13px}
+ #bx-dev-overlay .bx-dev-head h2{font-size:17px}
+ #bx-dev-overlay .bx-dev-actions button{width:100%}
+}
