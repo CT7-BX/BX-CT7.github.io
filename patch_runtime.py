@@ -24,6 +24,18 @@ if not index.exists():
 
 update('index.html', '<title>WebKitty</title>', '<title>BX-CT7 PS4 HOST</title>')
 update('index.html', '<html lang="en">', '<html lang="pt-BR">')
+# Versão da edição personalizada BX-CT7; código-base continua WebKitty 2.0.
+update('index.html', '<p>Version: 2.0</p>',
+       '<p>Version: 2.2</p>')
+# Creditar a personalização sem apagar o reconhecimento aos autores upstream.
+update('index.html', '<h3 class="text-l font-bold mt-4 mb-2" id="creditsHeader">Credits</h3>',
+       '<h3 class="text-l font-bold mt-4 mb-2" id="creditsHeader">Credits</h3>'
+       '<div class="mb-3 rounded-lg border border-white/20 p-3 text-center">'
+       '<a href="https://github.com/CT7-BX" target="_blank" rel="noopener noreferrer" '
+       'class="font-bold text-white">🇧🇷 BX-CT7</a>'
+       '<p class="text-sm text-white/70">Personalização e edição BX-CT7</p>'
+       '</div>')
+
 update('index.html', '</head>', '<link rel="stylesheet" href="./includes/css/bx-ct7.css">\n</head>')
 update('index.html', '<body class="bg-gray-900 text-white">',
        '<body class="bg-gray-900 text-white"><a class="bx-brand-top" href="https://github.com/CT7-BX" target="_blank" rel="noopener noreferrer">🇧🇷 BX-CT7</a>')
