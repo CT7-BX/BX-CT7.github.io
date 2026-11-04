@@ -53,8 +53,11 @@ jobs:
               sed -i "s@^COMMONFILES.*@COMMONFILES := ../_common/graphics.cpp@" Makefile
               sed -i "s@ORBIS_SYSMODULE_FREETYPE_OL@0x009A@g" ../_common/graphics.cpp
 
-              echo "Official packaging executables:"
-              find native-store/tool-bins -maxdepth 5 -type f | head -60
+              cp ../tool-bins/fself/bin/linux/create-fself "$OO_PS4_TOOLCHAIN/bin/linux/create-fself"
+              cp ../tool-bins/gp4/bin/linux/create-gp4 "$OO_PS4_TOOLCHAIN/bin/linux/create-gp4"
+              chmod +x "$OO_PS4_TOOLCHAIN/bin/linux/create-fself" "$OO_PS4_TOOLCHAIN/bin/linux/create-gp4"
+              echo "Official OpenOrbis packaging tools installed."
+
               make -j2
             '
       - name: Check generated PS4 PKG file
