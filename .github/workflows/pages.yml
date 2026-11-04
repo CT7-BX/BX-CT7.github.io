@@ -15,6 +15,7 @@ concurrency:
   cancel-in-progress: false
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 jobs:
@@ -31,6 +32,16 @@ jobs:
           test -s dist/bx-hen/extras.js
           grep -q 'BX-HEN 0.2' dist/bx-hen/index.html
           grep -q 'Não implementado' dist/bx-hen/index.html
+      - name: Generate sanitized BX-HEN test history
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 diagnostics/generate_report.py
+      - name: Upload BX-HEN test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bx-hen-ci-report-${{ github.run_id }}
+          path: diagnostics/latest-report.json
+          retention-days: 90
       - name: Publish static artifact
         uses: actions/upload-pages-artifact@v3
         with:
