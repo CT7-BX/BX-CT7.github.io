@@ -18,6 +18,15 @@ jobs:
         run: |
           git clone --depth 1 --filter=blob:none --sparse https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain.git native-store/upstream
           git -C native-store/upstream sparse-checkout set samples
+      - name: Fetch official OpenOrbis packaging tools
+        run: |
+          set -euo pipefail
+          mkdir -p native-store/tool-bins/fself native-store/tool-bins/gp4
+          curl -fLsS --retry 3 https://github.com/OpenOrbis/create-fself/releases/download/v1.3/binaries.tar.gz -o /tmp/openorbis-fself.tar.gz
+          curl -fLsS --retry 3 https://github.com/OpenOrbis/create-gp4/releases/download/v1.0/binaries.tar.gz -o /tmp/openorbis-gp4.tar.gz
+          tar -xzf /tmp/openorbis-fself.tar.gz -C native-store/tool-bins/fself
+          tar -xzf /tmp/openorbis-gp4.tar.gz -C native-store/tool-bins/gp4
+          find native-store/tool-bins -maxdepth 5 -type f -printf '%p\n'
       - name: Build in the OpenOrbis toolchain container
         run: |
           set -euo pipefail
@@ -44,6 +53,8 @@ jobs:
               sed -i "s@^COMMONFILES.*@COMMONFILES := ../_common/graphics.cpp@" Makefile
               sed -i "s@ORBIS_SYSMODULE_FREETYPE_OL@0x009A@g" ../_common/graphics.cpp
 
+              echo "Official packaging executables:"
+              find native-store/tool-bins -maxdepth 5 -type f | head -60
               make -j2
             '
       - name: Check generated PS4 PKG file
