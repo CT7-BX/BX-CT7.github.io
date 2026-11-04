@@ -123,7 +123,9 @@ update('index.html', '<h3 class="text-l font-bold mt-4 mb-2" id="creditsHeader">
        '<p class="text-sm text-white/70">Personalização e edição BX-CT7</p>'
        '</div>')
 
-update('index.html', '</head>', '<link rel="stylesheet" href="./includes/css/bx-ct7.css">\n</head>')
+update('index.html', '</head>',
+       '<link rel="stylesheet" href="./includes/css/bx-ct7.css">\n'
+       '<link rel="stylesheet" href="./includes/css/bx-theme-bridge.css">\n</head>')
 update('index.html', '<body class="bg-gray-900 text-white">',
        '<body class="bg-gray-900 text-white"><a class="bx-brand-top" href="https://github.com/CT7-BX" target="_blank" rel="noopener noreferrer">🇧🇷 BX-CT7</a>')
 update('index.html', '<span class="text-base font-semibold text-white/90 select-none">nexHEN</span>',
@@ -379,10 +381,17 @@ if cache_page.is_file():
 </head>''')
     cache_page.write_text(cache_text, encoding='utf-8')
 
+bridge_src = source / 'bx-theme-bridge.css'
+if not bridge_src.is_file():
+    raise RuntimeError('Ponte de cores BX-CT7 ausente')
+bridge_dest = root / 'includes/css/bx-theme-bridge.css'
+shutil.copy2(bridge_src, bridge_dest)
+
 for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
     txt = manifest.read_text(encoding='utf-8')
     for asset in [
         '../../../includes/css/bx-ct7.css',
+        '../../../includes/css/bx-theme-bridge.css',
         '../../../includes/css/colors/ruby.css',
         '../../../includes/css/colors/brasil.css',
         '../../../includes/css/layouts/neon.css',
@@ -421,6 +430,7 @@ if not (root / 'LICENSE').is_file():
 out = index.read_text(encoding='utf-8')
 checks = {
     'layout Padrão original': 'value="index" onchange="setLayout(this.value);"',
+    'ponte de cores': 'bx-theme-bridge.css',
     'layout Neon': 'value="neon" onchange="setLayout(this.value);"',
     'layout Painel': 'value="painel" onchange="setLayout(this.value);"',
     'versão 2.2': 'Version: 2.2',
@@ -438,7 +448,8 @@ for old in ('value="compact" onchange="setLayout(this.value);"',):
         raise RuntimeError('Layout removido ainda aparece: ' + old)
 for asset in ('includes/css/layouts/neon.css', 'includes/css/layouts/painel.css',
               'includes/js/afterglow-router.js', 'includes/js/dev-diagnostics.js',
-              'includes/js/bx-hen-browser.js', 'bx-hen/index.html', 'cache.html'):
+              'includes/js/bx-hen-browser.js', 'includes/css/bx-theme-bridge.css',
+              'bx-hen/index.html', 'cache.html'):
     if not (root / asset).is_file():
         raise RuntimeError('Arquivo não encontrado: ' + asset)
 
