@@ -70,6 +70,7 @@ catch(e){id('status').textContent='O catálogo não pôde ser interpretado.';}
 x.onerror=function(){id('status').textContent='Falha ao carregar o catálogo.';};
 try{x.send(null);}catch(e){id('status').textContent='Não foi possível consultar o catálogo.';}
 }
+var query=location.search.match(/[?&]q=([^&]*)/);if(query){try{id('search').value=decodeURIComponent(query[1].replace(/\+/g,' '));}catch(e){}}
 id('search').oninput=show;id('refresh').onclick=load;load();
 })();
 </script>
