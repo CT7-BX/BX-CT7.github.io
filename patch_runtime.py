@@ -276,7 +276,7 @@ if not bx_site_src.is_file():
     raise RuntimeError('Página BX-HEN não encontrada')
 bx_site_dest.parent.mkdir(parents=True, exist_ok=True)
 shutil.copy2(bx_site_src, bx_site_dest)
-for extra_name in ('extras.css', 'extras.js'):
+for extra_name in ('extras.css', 'extras.js', 'test-monitor.css', 'test-monitor.js'):
     extra_src = source / 'bx-hen-site' / extra_name
     if not extra_src.is_file():
         raise RuntimeError('Arquivo de interface BX-HEN ausente: ' + extra_name)
@@ -417,7 +417,7 @@ bx_html = (root / 'bx-hen/index.html').read_text(encoding='utf-8')
 for token in ('BX-HEN 0.2', 'id="diagnostics"', 'Não implementado', 'id="run-check"'):
     if token not in bx_html:
         raise RuntimeError('Página BX-HEN incompleta: ' + token)
-for asset in ('extras.css', 'extras.js'):
+for asset in ('extras.css', 'extras.js', 'test-monitor.css', 'test-monitor.js'):
     if './' + asset not in bx_html or not (root / 'bx-hen' / asset).is_file():
         raise RuntimeError('Recurso BX-HEN ausente da publicação: ' + asset)
 print('BX-CT7: pacote personalizado e hashes confirmados.')
