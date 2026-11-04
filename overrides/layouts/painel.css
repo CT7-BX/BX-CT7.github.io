@@ -901,28 +901,116 @@ button {
     cursor: pointer;
 }
 
+/* BX-CT7 launchers: actual screen organization; no kernel/exploit changes. */
+#initial-screen{box-sizing:border-box;min-height:100vh!important;height:auto!important;overflow-y:auto!important}
+#initial-screen #PS4FW{display:none!important}
+#initial-screen #scrollDown{display:none!important}
+#initial-screen #stopAutoJb.hidden{display:none!important}
+#bx-launcher-intro h1{font-weight:900;letter-spacing:-1.7px;line-height:1.13;font-size:clamp(32px,4vw,54px);margin:10px 0}
+#bx-launcher-intro p{font-size:15px;opacity:.77;max-width:550px}
+#bx-launcher-intro .bx-overline{font-weight:800;letter-spacing:3px;font-size:12px;text-transform:uppercase}
+#bx-launcher-actions .bx-action{cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;
+ text-align:left;gap:10px;padding:23px 20px;min-height:155px;border-radius:18px;
+ border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.075);color:#fff;
+ transition:transform .18s,background .18s}
+#bx-launcher-actions .bx-action:hover,#bx-launcher-actions .bx-action:focus{transform:translateY(-3px);background:rgba(255,255,255,.14)}
+#bx-launcher-actions .bx-number{font-size:13px;font-weight:900;letter-spacing:2px;opacity:.8}
+#bx-launcher-actions strong{font-size:20px;font-weight:800}
+#bx-launcher-actions .bx-action span{font-size:13px;opacity:.76}
+#initial-screen #click-to-start-text{font-weight:700}
+#exploit-main-screen{height:auto!important;min-height:100vh!important}
+#payloadsGrid{overflow:auto!important;min-height:150px}
+#payloadsGrid .payload{transition:background .16s;cursor:pointer}
+@media(max-width:760px){#bx-launcher-actions .bx-action{min-height:110px;padding:15px}
+#bx-launcher-actions strong{font-size:15px}
+#bx-launcher-actions .bx-action span{font-size:11px}}
 
-/* BX-CT7 layout: Painel. Clear rectangular console dashboard. */
-body.bg-gray-900 {background-color:#101923;background-image:linear-gradient(130deg,#101923,#18252a);}
-#initial-screen {justify-content:flex-start!important;padding-top:11vh!important;}
-#ps-logo-container {
- border-radius:12px;padding:16px 30px;
- background:rgba(255,255,255,.045);
- border-left:5px solid #15ae87;
- box-shadow:0 8px 22px rgba(0,0,0,.22);
+
+/* PAINEL: clean console dashboard, horizontal tile launcher, command strip + library */
+html,body{background:#0c1718!important}
+body.bg-gray-900{background:linear-gradient(135deg,#071515 0%,#102222 48%,#132b28 100%)!important}
+#initial-screen{display:grid!important;grid-template-columns:minmax(260px,38%) minmax(0,1fr);
+ grid-template-rows:80px auto minmax(175px,1fr) auto;column-gap:24px;row-gap:20px;
+ padding:26px 38px 38px!important;align-items:stretch;justify-content:stretch!important}
+#initial-screen>header{grid-column:1/3;grid-row:1;top:auto!important;left:auto!important;position:relative!important;
+ padding:10px 16px!important;width:100%!important;max-width:none!important;display:flex!important;justify-content:space-between!important;
+ background:rgba(255,255,255,.065);border:1px solid rgba(205,247,231,.11);border-radius:15px}
+#initial-screen>header:before{content:"BX-CT7  /  LAUNCHER";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+ letter-spacing:3px;font-size:13px;font-weight:900;color:#a4e5c7;white-space:nowrap;pointer-events:none}
+#initial-screen>header>div button,#initial-screen #updateCache{background:rgba(255,255,255,.09)!important;border-radius:10px!important;
+ height:48px!important}
+#bx-launcher-intro{grid-column:1/3;grid-row:2;padding:14px 10px 4px}
+#bx-launcher-intro .bx-overline{color:#9cf4b6}
+#bx-launcher-intro h1{max-width:850px;color:#f4fff5}
+#pslogo{grid-column:1;grid-row:3;justify-self:stretch;align-self:stretch;display:flex!important;flex-direction:column;
+ align-items:center;justify-content:center;
+ border:1px solid rgba(120,233,171,.36);border-radius:20px;background:linear-gradient(150deg,rgba(20,82,58,.75),rgba(12,36,38,.95));
+ box-shadow:0 14px 40px rgba(0,0,0,.16);min-width:0;min-height:250px;padding:24px}
+#pslogo:after{content:"INICIAR HOST";font-weight:900;letter-spacing:2px;color:#cbffe0;font-size:14px;margin-top:7px}
+#pslogo #ps-logo-container{border-radius:20px!important;width:160px;height:160px;padding:14px!important;background:rgba(255,255,255,.07)!important;
+ border:1px solid rgba(181,255,201,.17)}
+#pslogo #ps-logo{width:105px!important;height:105px!important}
+#choosejb-initial{grid-column:2;grid-row:3;display:flex!important;flex-direction:column;justify-content:center;
+ background:rgba(9,28,31,.70)!important;border:1px solid rgba(181,255,201,.23);
+ border-radius:20px!important;box-shadow:none!important;width:100%!important;max-width:none!important;padding:24px!important}
+#choosejb-initial h3{text-align:left!important;font-size:22px!important;color:#e5fdec}
+#choosejb-initial>div{justify-content:flex-start!important;flex-wrap:wrap;gap:12px!important}
+#choosejb-initial label{flex:1 1 170px;min-height:75px;justify-content:center;background:rgba(167,255,190,.075)!important;
+ border:1px solid rgba(167,255,190,.22);border-radius:13px!important}
+#bx-launcher-actions{grid-column:1/3;grid-row:4;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+#bx-launcher-actions .bx-action{border-radius:16px;background:linear-gradient(155deg,rgba(39,83,68,.82),rgba(25,48,52,.87));
+ border:1px solid rgba(157,243,182,.22)}
+#bx-launcher-actions .bx-action:first-child{background:linear-gradient(145deg,#1b9162,#0c594a);border-color:rgba(171,255,202,.42)}
+#bx-launcher-actions .bx-action strong{font-size:18px}
+#initial-screen #click-to-start-text{grid-column:1/3;grid-row:5;margin:0!important;text-align:center;color:#96c5b2}
+#exploit-main-screen{background:#0c1b1e!important;padding:20px!important}
+#exploitContainer{display:flex!important;flex-direction:column!important;height:calc(100vh - 40px)!important;
+ width:100%!important;gap:14px!important;padding:0!important}
+#exploit-status-panel{height:190px!important;min-height:175px!important;flex:0 0 190px!important;
+ display:grid!important;grid-template-columns:190px minmax(210px,1fr) minmax(275px,390px)!important;
+ grid-template-rows:1fr!important;align-items:center;gap:13px!important;padding:18px!important;
+ background:#17302e!important;border-radius:14px!important;border:1px solid rgba(144,230,177,.30)}
+#exploit-status-panel>div:first-child{flex-direction:column!important;align-items:flex-start!important;gap:8px!important}
+#exploit-status-panel #DebugConsole{min-height:0!important;height:147px!important;margin:0!important;
+ background:#071817!important;border:1px solid rgba(141,220,169,.23);border-radius:10px!important}
+#exploit-status-panel #henSelection{display:flex!important;flex-wrap:wrap;gap:7px!important;align-content:center;justify-content:center}
+#exploit-status-panel #henSelection label{padding:9px!important}
+#exploitRun{min-width:52px!important;min-height:52px!important;width:52px!important;border-radius:11px!important}
+#payloadsSection{min-height:400px!important;flex:1 1 auto!important;background:#14282b!important;
+ border-radius:14px!important;border:1px solid rgba(151,222,178,.26);padding:18px!important;gap:9px!important}
+#payloadsSection>.tabs{background:rgba(10,29,31,.95)!important;box-shadow:none!important;border-radius:11px;padding:7px!important;position:relative!important;top:0!important}
+#payloadsSection #default-tab{display:flex!important;flex-wrap:nowrap!important;gap:8px!important;justify-content:space-around}
+#payloadsSection #default-tab li{flex:1!important;min-width:0!important}
+#payloadsSection #default-tab button{padding:12px 6px!important;font-size:13px;border-radius:9px!important;white-space:normal}
+#payloadsSection #payloadsGrid{max-height:none!important;min-height:160px!important;flex:1!important;
+ background:rgba(4,21,23,.5);border-radius:11px;padding:8px!important}
+#payloadsSection #default-tab-content{background:transparent!important}
+#payloadsSection #tools,#payloadsSection #homebrew,#payloadsSection #linux,#payloadsSection #advanced{
+ display:none}
+#payloadsSection #tools:not(.hidden),#payloadsSection #homebrew:not(.hidden),
+#payloadsSection #linux:not(.hidden),#payloadsSection #advanced:not(.hidden){display:block}
+@media(max-width:950px){
+ #initial-screen{grid-template-columns:1fr 1fr;padding:16px!important;column-gap:12px}
+ #initial-screen>header:before{display:none}
+ #bx-launcher-actions{gap:9px}
+ #bx-launcher-actions .bx-action{padding:14px;min-height:120px}
+ #bx-launcher-actions .bx-action strong{font-size:15px}
+ #exploit-status-panel{grid-template-columns:130px minmax(150px,1fr) 250px!important;gap:7px!important}
+ #exploit-status-panel #henSelection label{font-size:12px}
 }
-#click-to-start-text {letter-spacing:.07em;text-transform:uppercase;font-weight:700;}
-#choosejb-initial {width:82%;max-width:740px;border-radius:10px;
- border:1px solid rgba(94,184,159,.35);box-shadow:0 7px 25px rgba(0,0,0,.25);}
-#exploitContainer {gap:12px;}
-#theme-popup,#settings-popup,#about-popup {border-radius:9px;border:1px solid rgba(125,180,170,.26);}
-#DebugConsole {border-radius:7px;border-left:4px solid #15ae87;}
-#payloadsGrid {border-radius:7px;padding:8px!important;background:rgba(255,255,255,.025);}
-#payloadsGrid .payload {border-radius:6px!important;margin-bottom:9px;}
-#default-tab {background:rgba(0,0,0,.15);border-radius:7px;padding:8px 3px;}
-#exploitRun {border-radius:8px;box-shadow:0 5px 18px rgba(0,0,0,.2);}
-#chooseTheme #layouts {gap:9px;}
-@media(max-width:600px) {
- #initial-screen {padding-top:8vh!important;}
- #choosejb-initial {width:98%;}
+@media(max-width:760px){
+ #initial-screen{grid-template-columns:1fr!important;grid-template-rows:65px auto auto auto auto auto!important}
+ #initial-screen>header{grid-column:1;grid-row:1;padding:7px!important}
+ #initial-screen>header>div button{width:40px}
+ #bx-launcher-intro{grid-column:1;grid-row:2}
+ #pslogo{grid-column:1;grid-row:3;min-height:200px!important}
+ #choosejb-initial{grid-column:1;grid-row:4;padding:16px!important}
+ #bx-launcher-actions{grid-column:1;grid-row:5;grid-template-columns:1fr 1fr}
+ #click-to-start-text{grid-column:1;grid-row:6}
+ #exploitContainer{height:auto!important}
+ #exploit-status-panel{display:flex!important;flex-direction:column!important;flex:0 0 auto!important;
+  height:auto!important;min-height:330px!important}
+ #exploit-status-panel>div:first-child{width:100%!important;flex-direction:row!important}
+ #exploit-status-panel #DebugConsole{width:100%!important}
+ #payloadsSection{min-height:480px!important}
 }
