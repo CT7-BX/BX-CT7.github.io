@@ -1,0 +1,11 @@
+/* BX-HEN local compatibility center */
+.bx-compat{margin:16px 0}
+.bx-compat-actions{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:12px}
+.bx-compat-actions button{min-height:39px}
+.bx-compat-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.bx-compat-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px;border:1px solid #1b4c76;background:#0a203d;border-radius:9px;min-width:0}
+.bx-compat-row span{color:#a8c5df;font-size:12px}
+.bx-compat-row strong{color:#ddfaff;font-size:12px;text-align:right;overflow-wrap:anywhere}
+.bx-compat-report{display:none;width:100%;height:200px;margin-top:14px;background:#041222;color:#c5eaff;border:1px solid #276c91;padding:11px;border-radius:8px;font:12px/1.55 monospace}
+@media(max-width:840px){.bx-compat-results{grid-template-columns:1fr}}
+@media(max-width:540px){.bx-compat-actions button{width:100%}}
