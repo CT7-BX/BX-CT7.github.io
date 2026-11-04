@@ -1097,3 +1097,65 @@ body.bg-gray-900{background:linear-gradient(135deg,#071515 0%,#102222 48%,#132b2
  .bx-painel-tiles>button strong{font-size:15px}
  #initial-screen #choosejb-initial{width:calc(100% - 30px)!important;margin:0 auto 15px!important}
 }
+
+
+/* BX-CT7: final responsive corrections for the tool/library screen.
+   Keep status panel and cards full-width; no squeezed columns or off-screen controls. */
+#exploit-main-screen{display:flex!important;align-items:stretch!important;min-width:0!important;height:auto!important;min-height:100vh!important;overflow:visible!important;padding:18px!important}
+#exploit-main-screen.hidden{display:none!important}
+#exploitContainer{display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
+ align-items:stretch!important;grid-template-columns:none!important;grid-template-rows:none!important;
+ width:100%!important;max-width:none!important;min-width:0!important;height:auto!important;
+ min-height:calc(100vh - 36px)!important;gap:18px!important;padding:0!important}
+#exploit-status-panel{display:flex!important;flex-direction:column!important;flex:0 0 auto!important;
+ width:100%!important;max-width:none!important;min-width:0!important;height:auto!important;
+ min-height:260px!important;gap:12px!important;box-sizing:border-box!important;padding:20px!important}
+#exploit-status-panel>div:first-child{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;
+ align-items:center!important;justify-content:space-between!important;gap:12px!important}
+#exploit-status-panel #DebugConsole{display:block!important;flex:0 0 auto!important;width:100%!important;
+ max-width:100%!important;min-width:0!important;height:170px!important;min-height:170px!important;
+ max-height:230px!important;overflow:auto!important;margin:0!important}
+#exploit-status-panel #henSelection{display:flex!important;width:100%!important;flex-direction:row!important;
+ flex-wrap:wrap!important;justify-content:flex-start!important;align-items:center!important;gap:12px!important}
+#exploit-status-panel #henSelection label{max-width:100%!important;flex:0 1 auto!important}
+#exploit-status-panel #exploitRun{flex:0 0 54px!important;width:54px!important;height:54px!important;min-height:54px!important}
+#payloadsSection{display:flex!important;flex-direction:column!important;align-items:stretch!important;flex:1 1 auto!important;
+ grid-template-columns:none!important;grid-template-rows:none!important;width:100%!important;
+ max-width:100%!important;min-width:0!important;height:auto!important;min-height:480px!important;
+ padding:20px!important;gap:14px!important;box-sizing:border-box!important}
+#payloadsSection>div:first-child{display:flex!important;grid-column:auto!important;grid-row:auto!important;
+ width:100%!important;min-width:0!important;flex:0 0 auto!important}
+#payloadsSection>.tabs{display:block!important;grid-column:auto!important;grid-row:auto!important;
+ position:relative!important;top:auto!important;width:100%!important;min-width:0!important;
+ flex:0 0 auto!important;padding:8px!important;border-radius:12px!important}
+#payloadsSection #default-tab{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;
+ width:100%!important;gap:6px!important;justify-content:space-between!important;align-items:stretch!important}
+#payloadsSection #default-tab li{display:block!important;flex:1 1 100px!important;
+ width:auto!important;min-width:100px!important;max-width:none!important}
+#payloadsSection #default-tab li.hidden{display:none!important}
+#payloadsSection #default-tab button{display:block!important;width:100%!important;padding:13px 8px!important;
+ white-space:normal!important;font-size:13px!important;border-radius:9px!important}
+#payloadsSection #payloadsGrid{display:block!important;grid-column:auto!important;grid-row:auto!important;
+ flex:1 1 auto!important;width:100%!important;max-width:100%!important;min-width:0!important;
+ min-height:360px!important;max-height:65vh!important;overflow-y:auto!important;
+ overflow-x:hidden!important;padding:10px!important;box-sizing:border-box!important}
+#payloadsSection #default-tab-content{display:block!important;width:100%!important;min-width:0!important}
+#payloadsSection #default-tab-content>div:not(.hidden):not(#custom){display:grid!important;
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;
+ width:100%!important;min-width:0!important;align-items:stretch!important}
+#payloadsSection #default-tab-content>div.hidden{display:none!important}
+#payloadsSection .payload-card{display:block!important;min-width:0!important;width:100%!important;
+ margin:0!important;overflow-wrap:break-word!important}
+#payloadsSection .payload-card .payloadContainer{display:block!important;width:100%!important;
+ min-width:0!important;height:100%!important;white-space:normal!important}
+#payloadsSection .payload-card .payloadContainer>div{height:100%!important;min-width:0!important;
+ padding:16px!important;overflow-wrap:anywhere!important}
+#payloadsSection .payload-card h3,#payloadsSection .payload-card p{max-width:100%!important;overflow-wrap:break-word!important}
+@media(max-width:700px){
+ #exploit-main-screen{padding:10px!important}
+ #exploitContainer{gap:12px!important}
+ #exploit-status-panel,#payloadsSection{padding:14px!important}
+ #payloadsSection #default-tab li{min-width:80px!important;flex:1 1 80px!important}
+ #payloadsSection #default-tab-content>div:not(.hidden):not(#custom){grid-template-columns:1fr!important}
+ #payloadsSection #payloadsGrid{max-height:70vh!important;min-height:300px!important}
+}
