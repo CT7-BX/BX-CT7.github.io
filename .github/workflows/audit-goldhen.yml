@@ -57,8 +57,20 @@ jobs:
           print("PE magic:", data[:2]==b'MZ')
           print("Raw hexadecimal prefix:", data[:32].hex())
           PY
-      - name: Upload static report (no executable)
+      - name: Disassemble all bytes as raw x86-64 (unverified boundaries)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Raw x86-64 is a best-effort *interpretation* only. Compressed
+          # blocks and data are not executable code, even if objdump decodes them.
+          objdump -D -b binary -m i386:x86-64 -M intel \
+            audit/goldhen_v2.4b18.13.bin > audit/goldhen-disassembly-raw-x64.txt
+          wc -l audit/goldhen-disassembly-raw-x64.txt
+          sed -n '1,45p' audit/goldhen-disassembly-raw-x64.txt
+      - name: Upload analysis reports
         uses: actions/upload-artifact@v4
         with:
-          name: goldhen-static-report
-          path: audit/static-report.txt
+          name: goldhen-analysis-reports
+          path: |
+            audit/static-report.txt
+            audit/goldhen-disassembly-raw-x64.txt
