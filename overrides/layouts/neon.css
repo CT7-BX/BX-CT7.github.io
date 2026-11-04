@@ -1153,3 +1153,28 @@ body.bg-gray-900{background:#070b1a!important;background-image:radial-gradient(e
  #payloadsSection #default-tab-content>div:not(.hidden):not(#custom){grid-template-columns:1fr!important}
  #payloadsSection #payloadsGrid{max-height:70vh!important;min-height:300px!important}
 }
+
+/* PS4: selector sits immediately below compact launcher content, rather than
+   being pushed below a near full-screen hero. No controls are removed. */
+#bx-neon-launcher{min-height:0!important;height:auto!important}
+.bx-neon-stage{padding-top:16px!important;padding-bottom:12px!important}
+.bx-neon-content{margin:16px 0!important}
+.bx-neon-content h1{font-size:clamp(42px,6vw,78px)!important;margin-bottom:13px!important}
+.bx-neon-content p{margin-bottom:16px!important;font-size:16px!important;line-height:1.4!important}
+.bx-neon-kicker{margin-bottom:12px!important}
+.bx-neon-buttons button{padding:13px 16px!important}
+#initial-screen #choosejb-initial:not(.hidden){order:1!important;margin:4px auto 16px!important;
+ padding:12px 18px!important}
+#initial-screen #choosejb-initial h3{margin-bottom:8px!important;font-size:15px!important}
+#initial-screen #choosejb-initial label{min-height:40px!important}
+@media(max-width:760px){
+ .bx-neon-rail{padding:9px!important}
+ .bx-neon-stage{padding:16px 16px 10px!important}
+ .bx-neon-content{margin:12px 0!important}
+ .bx-neon-content h1{font-size:45px!important;margin-bottom:9px!important}
+ .bx-neon-content p{font-size:14px!important;margin-bottom:13px!important}
+ .bx-neon-buttons{gap:7px!important}
+ .bx-neon-buttons button{padding:11px 13px!important}
+ #initial-screen #choosejb-initial:not(.hidden){width:calc(100% - 22px)!important;
+ margin:4px auto 12px!important;padding:12px!important}
+}
