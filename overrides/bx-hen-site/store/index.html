@@ -12,9 +12,9 @@ header{padding:18px 5%;background:#0c2541;border-bottom:1px solid #208be0;displa
 h1{font-size:27px;margin:0}header p{color:#b8d0e8;margin:6px 0 0}
 main{max-width:1100px;margin:0 auto;padding:28px 18px}
 .notice{border:1px solid #246f9c;background:#0b2740;padding:14px;border-radius:11px;color:#c9e9f5;line-height:1.55;margin-bottom:18px}
-.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin:15px 0 22px}input{background:#0d2540;border:1px solid #34678d;border-radius:8px;color:white;padding:12px;flex:1;min-width:220px;font:inherit}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin:15px 0 22px;align-items:center}input{background:#0d2540;border:1px solid #34678d;border-radius:8px;color:white;padding:12px;flex:1;min-width:220px;font:inherit}
 button,.action{border:1px solid #2f95c8;border-radius:8px;background:#12618e;color:#fff;padding:11px 14px;font:bold 13px Arial;cursor:pointer;text-decoration:none;display:inline-block}
-button:hover,.action:hover{background:#1676a8}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+button:hover,.action:hover{background:#1676a8}select{background:#0d2540;border:1px solid #34678d;border-radius:8px;color:white;padding:12px;font:inherit;min-width:155px}.store-summary{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}.store-summary span{border:1px solid #2c628b;border-radius:8px;background:#0a2741;padding:9px 12px;color:#cdeefd;font-size:13px}.empty{grid-column:1/-1;padding:20px;border:1px dashed #4585ac;border-radius:9px;color:#bddff0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .card{background:linear-gradient(135deg,#0e2948,#0c1a32);border:1px solid #285b85;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:11px}
 .card h2{font-size:20px;margin:0}.card p{font-size:14px;line-height:1.6;color:#adcae0;margin:0}.meta{color:#7ee5e9;font-size:12px}.card .action{align-self:flex-start;margin-top:auto}
 .disabled{background:#21344a!important;border-color:#435d78!important;color:#bbc5cf!important;cursor:default}
@@ -27,9 +27,15 @@ code{color:#8ae9d7}footer{text-align:center;color:#83abc5;padding:22px}
 <header><div><h1>▣ BX-HEN <span style="color:#49d7ff">PKG Store</span></h1><p>Catálogo de projetos e aplicativos autorizados</p></div><div><a href="../" class="action">← BX-HEN</a> <a href="../../" class="action">Host principal</a></div></header>
 <main>
 <div class="notice"><strong>Loja em desenvolvimento:</strong> esta página organiza links para arquivos PKG disponibilizados pelo autor ou detentor dos direitos; não instala aplicativos no PS4, não contorna licenças e não depende de hospedar arquivos grandes no GitHub. A publicação de um download exige um link HTTPS real e autorização de distribuição.</div>
-<div class="toolbar"><input id="search" type="search" placeholder="Buscar aplicativos e ferramentas" aria-label="Buscar PKGs"><button id="refresh">Atualizar catálogo</button></div>
+<div class="toolbar"><input id="search" type="search" placeholder="Buscar aplicativos e ferramentas" aria-label="Buscar PKGs"><label for="filter">Exibir:</label><select id="filter" aria-label="Filtrar disponibilidade"><option value="all">Todos</option><option value="available">Disponíveis</option><option value="planned">Em preparação</option></select><button id="refresh">Atualizar catálogo</button></div>
+<div class="store-summary" id="summary" aria-live="polite"></div>
 <p id="status" role="status">Carregando catálogo...</p>
 <div id="items" class="grid"></div>
+<section class="info">
+<h2>PKG de teste da BX-HEN Store</h2>
+<p>O aplicativo nativo experimental já foi compilado com o OpenOrbis. Esta versão testa apenas a interface e a navegação pelo controle: <strong>não baixa nem instala PKGs</strong>.</p>
+<p><a href="https://github.com/CT7-BX/BX-CT7.github.io/actions/runs/41835919328/artifacts/13326825024" target="_blank" rel="noopener noreferrer">Consultar PKG de teste 0.1 no GitHub Actions (artefato temporário)</a>. O link pode exigir uma conta GitHub e deixar de funcionar após o prazo de retenção.</p>
+</section>
 <section class="info">
 <h2>Como a lojinha funciona</h2>
 <p>O BX-HEN mantém apenas um <code>catalog.json</code> no site. Os PKGs poderão ficar em hospedagem externa, como Cloudflare R2, Backblaze B2 ou GitHub Releases, de acordo com a escolha do responsável pelos arquivos.</p>
@@ -48,9 +54,9 @@ function safeUrl(u){return typeof u==='string'&&/^https:\/\/[A-Za-z0-9.-]+(?::44
 function validHash(h){return typeof h==='string'&&/^[a-fA-F0-9]{64}$/.test(h);}
 function ready(e){return e&&e.status==='available'&&safeUrl(e.download_url)&&validHash(e.sha256)&&typeof e.license==='string'&&e.license!=='A confirmar'&&e.license.length>1;}
 function show(){
-var target=id('items'),term=(id('search').value||'').toLowerCase(),count=0;
+var target=id('items'),term=(id('search').value||'').toLowerCase(),filter=id('filter').value,count=0,available=0,planned=0;
 while(target.firstChild)target.removeChild(target.firstChild);
-for(var i=0;i<entries.length;i++){var e=entries[i];if((e.title+' '+e.description+' '+e.category).toLowerCase().indexOf(term)<0)continue;
+for(var i=0;i<entries.length;i++){var e=entries[i];if(ready(e))available++;else planned++;if((filter==='available'&&!ready(e))||(filter==='planned'&&ready(e)))continue;if((e.title+' '+e.description+' '+e.category).toLowerCase().indexOf(term)<0)continue;
 count++;
 var card=node('article',target,null,'card');node('h2',card,e.title);
 node('span',card,e.category+' • '+e.version,'meta');node('p',card,e.description);
@@ -58,7 +64,12 @@ node('p',card,'Situação: '+(ready(e)?'Download disponível':'Em preparação')
 if(ready(e)){var link=node('a',card,'Abrir download autorizado','action');link.href=e.download_url;link.target='_blank';link.rel='noopener noreferrer';link.setAttribute('aria-label','Baixar '+e.title);node('small',card,'SHA-256: '+e.sha256,'meta');}
 else{var button=node('button',card,'Arquivo ainda não disponível','action disabled');button.disabled=true;}
 }
-id('status').textContent=count+' item(ns) exibido(s). O catálogo não instala PKGs automaticamente.';
+if(!count)node('p',target,'Nenhum aplicativo encontrado neste filtro.','empty');
+var summary=id('summary');while(summary.firstChild)summary.removeChild(summary.firstChild);
+node('span',summary,'No catálogo: '+entries.length);
+node('span',summary,'Disponíveis: '+available);
+node('span',summary,'Em preparação: '+planned);
+id('status').textContent=count+' item(ns) exibido(s). Links externos não instalam PKGs automaticamente.';
 }
 function load(){id('status').textContent='Consultando catálogo...';
 var x=new XMLHttpRequest();x.open('GET','./catalog.json?v='+new Date().getTime(),true);
@@ -71,7 +82,7 @@ x.onerror=function(){id('status').textContent='Falha ao carregar o catálogo.';}
 try{x.send(null);}catch(e){id('status').textContent='Não foi possível consultar o catálogo.';}
 }
 var query=location.search.match(/[?&]q=([^&]*)/);if(query){try{id('search').value=decodeURIComponent(query[1].replace(/\+/g,' '));}catch(e){}}
-id('search').oninput=show;id('refresh').onclick=load;load();
+id('search').oninput=show;id('filter').onchange=show;id('refresh').onclick=load;load();
 })();
 </script>
 </body>
