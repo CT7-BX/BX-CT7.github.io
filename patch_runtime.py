@@ -22,7 +22,7 @@ index = root / 'index.html'
 if not index.exists():
     raise RuntimeError('WebKitty não contém index.html')
 
-# Neon é agora o layout padrão. Mantemos Compacto e Painel.
+# Neon é o layout padrão. Compacto foi retirado do seletor; resta o Painel.
 # A opção antiga "Default" não é exibida no seletor.
 # Remover somente a entrada visual antiga; conservar index.css como fallback.
 update('index.html',
@@ -31,11 +31,13 @@ update('index.html',
                         <p id="defaultTheme">Default</p>
                     </label>
 ''', '')
+# Substituir a opção Compacto pelas duas opções de launcher.
 update('index.html',
-       '                        <p id="compactTheme">Compact</p>\n                    </label>',
-       '''                        <p id="compactTheme">Compact</p>
-                    </label>
-                    <label class="flex items-center text-white/80">
+       '''                    <label class="flex items-center text-white/80">
+                        <input type="radio" name="theme" value="compact" onchange="setLayout(this.value);">
+                        <p id="compactTheme">Compact</p>
+                    </label>''',
+       '''                    <label class="flex items-center text-white/80">
                         <input type="radio" name="theme" value="neon" onchange="setLayout(this.value);">
                         <p>Default BX-CT7 (Neon)</p>
                     </label>
@@ -46,7 +48,7 @@ update('index.html',
 
 # Launcher shells use the actual existing click handlers, not mock buttons.
 # Two wholly different layouts are provided by their respective CSS files.
-# Duas interfaces distintas, ocultas em Padrão/Compacto via CSS global.
+# Duas interfaces distintas, ocultas em outros layouts via CSS global.
 # Os botões chamam as funções já presentes no WebKitty.
 launcher_intro = '''<div id="bx-neon-launcher" class="bx-launcher-only">
   <nav class="bx-neon-rail" aria-label="Menu lateral Neon">
@@ -124,7 +126,7 @@ update('index.html', '<!-- Language options -->',
 update('index.html',
        "var savedTheme = localStorage.getItem('theme') || \"index\";",
        "var savedTheme = localStorage.getItem('theme') || 'neon';"
-       " if (savedTheme === 'index') { savedTheme = 'neon';"
+       " if (savedTheme === 'index' || savedTheme === 'compact') { savedTheme = 'neon';"
        " try { localStorage.setItem('theme', 'neon'); } catch(e) {} }")
 update('index.html', 'var savedColor = localStorage.getItem(\'color\') || "default";',
        'try { if (localStorage.getItem("bxCT7LanguageInitialized") !== "1") { localStorage.setItem("language","pt-br"); localStorage.setItem("bxCT7LanguageInitialized","1"); } } catch(e) {}\n        var savedColor = localStorage.getItem(\'color\') || "default";')
@@ -166,7 +168,7 @@ if base_path.exists():
 update('includes/js/design.js',
        "var savedTheme = storage.getString('theme', 'index');",
        "var savedTheme = storage.getString('theme', 'neon');"
-       " if (savedTheme === 'index') { savedTheme = 'neon'; storage.set('theme', 'neon'); }")
+       " if (savedTheme === 'index' || savedTheme === 'compact') { savedTheme = 'neon'; storage.set('theme', 'neon'); }")
 update('includes/js/design.js',
        "savedTheme = 'index';",
        "savedTheme = 'neon';")
@@ -184,7 +186,8 @@ update('includes/js/design.js', 'function setLayout(theme) {',
     if (neon) neon.style.setProperty('display', theme === 'neon' ? 'flex' : 'none', 'important');
     if (painel) painel.style.setProperty('display', theme === 'painel' ? 'flex' : 'none', 'important');
 }
-function setLayout(theme) {''')
+function setLayout(theme) {
+    if (theme === 'index' || theme === 'compact') theme = 'neon';''')
 update('includes/js/design.js', "storage.set('theme', theme);",
        "storage.set('theme', theme);\n        bxApplyLauncherVisibility(theme);")
 update('includes/js/design.js',
