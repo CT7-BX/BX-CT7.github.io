@@ -122,3 +122,16 @@
  #bx-hen-overlay .bx-hen-brand h2{font-size:23px}
  #bx-hen-overlay .bx-hen-features{grid-template-columns:1fr}
 }
+
+/* BX-CT7-owned PKG catalog cards in upstream Homebrew section. */
+#homebrew .bx-homebrew-entry{cursor:default!important}
+#homebrew .bx-homebrew-card{background:#10243d;border:1px solid #2b6996;
+  border-radius:12px;min-height:170px;padding:18px;box-sizing:border-box;
+  display:flex;flex-direction:column;gap:9px}
+#homebrew .bx-homebrew-card h3{font-size:17px;font-weight:800;margin:0;color:#e8faff}
+#homebrew .bx-homebrew-card p{font-size:12px;line-height:1.5;margin:0}
+#homebrew .bx-homebrew-status{color:#f2ce8a!important;font-weight:bold}
+#homebrew .bx-homebrew-link{display:inline-block;align-self:flex-start;padding:10px 13px;
+  border:1px solid #39a9c6;border-radius:8px;color:#e5faff;text-decoration:none;
+  background:#125177;cursor:pointer;font-size:12px;font-weight:bold;margin-top:auto}
+#homebrew .bx-homebrew-link:focus{outline:2px solid #63dcf8;outline-offset:2px}
