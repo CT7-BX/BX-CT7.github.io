@@ -255,6 +255,17 @@ if not dev_src.is_file():
     raise RuntimeError('Diagnóstico BX-CT7 ausente')
 shutil.copy2(dev_src, dev_dest)
 
+# BX-HEN 0.1: diagnóstico de firmware independente e somente leitura.
+# Não confundir com GoldHEN executável: não altera sistemas ou payloads.
+bxhen_src = source / 'bx-hen-browser.js'
+bxhen_target = root / 'includes/js/bx-hen-browser.js'
+if not bxhen_src.is_file():
+    raise RuntimeError('Módulo BX-HEN do navegador ausente')
+shutil.copy2(bxhen_src, bxhen_target)
+if not update('index.html', '</body>',
+              '<script src="./includes/js/bx-hen-browser.js"></script>\n</body>'):
+    raise RuntimeError('Não foi possível incluir BX-HEN no host')
+
 # O botão nativo continua visualmente idêntico. Só no PS4 14.00
 # redireciona para a página oficial do Afterglow, armazenada localmente.
 # A detecção ocorre no navegador, sem forçar firmware ou alterar kernel.
@@ -329,7 +340,8 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         '../../../includes/css/layouts/neon.css',
         '../../../includes/css/layouts/painel.css',
         '../../../includes/js/afterglow-router.js',
-        '../../../includes/js/dev-diagnostics.js'
+        '../../../includes/js/dev-diagnostics.js',
+        '../../../includes/js/bx-hen-browser.js'
     ]:
         if asset not in txt and 'CACHE:' in txt:
             txt = txt.replace('CACHE:', 'CACHE:\n' + asset, 1)
@@ -365,7 +377,8 @@ checks = {
     'versão 2.2': 'Version: 2.2',
     'créditos BX-CT7': 'Personalização e edição BX-CT7',
     'roteador firmware 14.00': 'afterglow-router.js',
-    'painel de diagnóstico': 'bx-dev-button'
+    'painel de diagnóstico': 'bx-dev-button',
+    'módulo BX-HEN 0.1': 'bx-hen-browser.js'
 }
 for desc, token in checks.items():
     if token not in out:
@@ -375,7 +388,8 @@ for old in ('value="compact" onchange="setLayout(this.value);"',
     if old in out:
         raise RuntimeError('Layout removido ainda aparece: ' + old)
 for asset in ('includes/css/layouts/neon.css', 'includes/css/layouts/painel.css',
-              'includes/js/afterglow-router.js', 'includes/js/dev-diagnostics.js', 'cache.html'):
+              'includes/js/afterglow-router.js', 'includes/js/dev-diagnostics.js',
+              'includes/js/bx-hen-browser.js', 'cache.html'):
     if not (root / asset).is_file():
         raise RuntimeError('Arquivo não encontrado: ' + asset)
 
