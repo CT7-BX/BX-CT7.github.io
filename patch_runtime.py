@@ -56,6 +56,7 @@ launcher_intro = '''<div id="bx-neon-launcher" class="bx-launcher-only">
     <button onclick="ui.exploitScreen.scrollIntoView({block:'start'});">▦ <span>Biblioteca</span></button>
     <button onclick="themePopup();">◈ <span>Aparência</span></button>
     <button onclick="settingsPopup();">⚙ <span>Ajustes</span></button>
+    <button onclick="window.location.href='./bx-hen/';">⚡ <span>BX-HEN</span></button>
     <button onclick="aboutPopup();">ⓘ <span>Informações</span></button>
     <button class="bx-neon-cache" onclick="document.getElementById('updateCache').click();">⟳ <span>Atualizar cache</span></button>
   </nav>
@@ -91,6 +92,7 @@ launcher_intro = '''<div id="bx-neon-launcher" class="bx-launcher-only">
     <button onclick="settingsPopup();"><span>02</span><strong>⚙ Sistema</strong><small>Configurações</small></button>
     <button onclick="themePopup();"><span>03</span><strong>◈ Temas</strong><small>Alterar visual</small></button>
     <button onclick="aboutPopup();"><span>04</span><strong>ⓘ Sobre</strong><small>Projeto e créditos</small></button>
+    <button onclick="window.location.href='./bx-hen/';"><span>05</span><strong>⚡ BX-HEN</strong><small>Painel experimental 0.2</small></button>
   </div>
   <div class="bx-painel-footer"><span>BX-CT7 • CONSOLE DASHBOARD</span>
     <button onclick="document.getElementById('updateCache').click();">⟳ CACHE</button></div>
@@ -266,6 +268,18 @@ if not update('index.html', '</body>',
               '<script src="./includes/js/bx-hen-browser.js"></script>\n</body>'):
     raise RuntimeError('Não foi possível incluir BX-HEN no host')
 
+# Publicar o painel BX-HEN em rota própria (sem interceptar jailbreak).
+# HTML independente, sem bibliotecas externas ou conteúdo executável de kernel.
+bx_site_src = source / 'bx-hen-site' / 'index.html'
+bx_site_dest = root / 'bx-hen' / 'index.html'
+if not bx_site_src.is_file():
+    raise RuntimeError('Página BX-HEN não encontrada')
+bx_site_dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copy2(bx_site_src, bx_site_dest)
+if not update('index.html', '</body>',
+              '<script>document.addEventListener("DOMContentLoaded",function(){var s=document.getElementById("settings-popup");if(!s||document.getElementById("bx-hen-dashboard-link"))return;var a=document.createElement("a");a.id="bx-hen-dashboard-link";a.href="./bx-hen/";a.textContent="⚡ Abrir painel BX-HEN completo";a.style.cssText="display:block;padding:13px;margin:8px 0 15px;background:#103b66;border:1px solid #36bfff;border-radius:8px;color:white;text-align:center;font-weight:bold;text-decoration:none";s.insertBefore(a,s.firstChild);});</script>\n</body>'):
+    raise RuntimeError('Link BX-HEN para configurações não foi injetado')
+
 # O botão nativo continua visualmente idêntico. Só no PS4 14.00
 # redireciona para a página oficial do Afterglow, armazenada localmente.
 # A detecção ocorre no navegador, sem forçar firmware ou alterar kernel.
@@ -378,7 +392,8 @@ checks = {
     'créditos BX-CT7': 'Personalização e edição BX-CT7',
     'roteador firmware 14.00': 'afterglow-router.js',
     'painel de diagnóstico': 'bx-dev-button',
-    'módulo BX-HEN 0.1': 'bx-hen-browser.js'
+    'módulo BX-HEN 0.1': 'bx-hen-browser.js',
+    'link de entrada do BX-HEN': 'bx-hen/'
 }
 for desc, token in checks.items():
     if token not in out:
@@ -389,8 +404,12 @@ for old in ('value="compact" onchange="setLayout(this.value);"',
         raise RuntimeError('Layout removido ainda aparece: ' + old)
 for asset in ('includes/css/layouts/neon.css', 'includes/css/layouts/painel.css',
               'includes/js/afterglow-router.js', 'includes/js/dev-diagnostics.js',
-              'includes/js/bx-hen-browser.js', 'cache.html'):
+              'includes/js/bx-hen-browser.js', 'bx-hen/index.html', 'cache.html'):
     if not (root / asset).is_file():
         raise RuntimeError('Arquivo não encontrado: ' + asset)
 
+bx_html = (root / 'bx-hen/index.html').read_text(encoding='utf-8')
+for token in ('BX-HEN 0.2', 'id="diagnostics"', 'Não implementado', 'id="run-check"'):
+    if token not in bx_html:
+        raise RuntimeError('Página BX-HEN incompleta: ' + token)
 print('BX-CT7: pacote personalizado e hashes confirmados.')
