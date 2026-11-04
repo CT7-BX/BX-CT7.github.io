@@ -1020,3 +1020,74 @@ body.bg-gray-900{background:#070b1a!important;background-image:radial-gradient(e
 
 /* Preserve native show/hide flow when switching between launcher and tools. */
 #initial-screen.hidden,#exploit-main-screen.hidden,#choosejb-initial.hidden{display:none!important}
+
+
+/* BX-CT7 Neon v2 — dedicated command-center screen, no inherited intro boxes. */
+#initial-screen{display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
+ align-items:stretch!important;padding:0!important;min-height:100vh!important;height:auto!important;
+ background:#070c19!important;overflow-y:auto!important}
+#initial-screen>header,#initial-screen #pslogo,#initial-screen #click-to-start-text,
+#initial-screen #scrollDown{display:none!important}
+#initial-screen #PS4FW{display:none!important}
+#initial-screen #choosejb-initial{position:relative!important;display:block;order:2!important;
+ margin:14px auto 28px!important;width:calc(100% - 52px)!important;max-width:1020px!important;
+ background:#101b32!important;border:1px solid #284e69;border-radius:12px!important;
+ box-shadow:none!important;padding:18px!important;text-align:left!important}
+#initial-screen #choosejb-initial.hidden{display:none!important}
+#initial-screen #choosejb-initial h3{color:#b7e9ff;font-size:16px!important;margin-bottom:12px!important}
+#initial-screen #choosejb-initial>div{display:flex!important;flex-wrap:wrap;gap:10px}
+#initial-screen #choosejb-initial label{min-height:46px;background:#1a304d!important}
+#bx-neon-launcher{display:flex!important;flex-direction:row!important;
+ width:100%!important;min-height:78vh;align-items:stretch;gap:0;
+ background:linear-gradient(125deg,#060b19,#111533 65%,#081b34);color:#fff;
+ font-family:Arial,sans-serif;box-sizing:border-box}
+#bx-neon-launcher *{box-sizing:border-box}
+#bx-neon-launcher button{cursor:pointer;font-family:inherit}
+.bx-neon-rail{width:210px;min-width:210px;padding:30px 15px;
+ background:#090f23;border-right:1px solid #1c4161;display:flex!important;
+ flex-direction:column!important;gap:10px}
+.bx-neon-logo{font-size:29px;color:#fff;font-weight:900;letter-spacing:2px;
+ margin:0 10px 36px;line-height:1.1}
+.bx-neon-logo>span{color:#45dcff}
+.bx-neon-logo>small{display:block;font-size:10px;color:#8aadd2;letter-spacing:2px;margin-top:7px}
+.bx-neon-rail button{display:flex!important;align-items:center;gap:12px;
+ text-align:left!important;background:transparent!important;color:#b8d0e7;
+ border:1px solid transparent;border-radius:10px;padding:16px 12px;
+ font-size:15px;font-weight:700}
+.bx-neon-rail button:first-of-type{background:#123254!important;color:#84eaff;border-color:#1b648d}
+.bx-neon-rail button:hover{background:#182e4b!important;color:#fff}
+.bx-neon-rail .bx-neon-cache{margin-top:auto;border-top:1px solid #274260;border-radius:0}
+.bx-neon-stage{flex:1;min-width:0;display:flex!important;flex-direction:column!important;justify-content:space-between!important;padding:30px 6% 28px}
+.bx-neon-header,.bx-neon-bottom{display:flex!important;justify-content:space-between;
+ align-items:center;gap:12px;color:#7d9ec4;font-size:12px;font-weight:800;letter-spacing:1.5px}
+.bx-neon-header em{font-style:normal;color:#60dbff}
+.bx-neon-dot{width:8px;height:8px;border-radius:50%;background:#42e2da;box-shadow:0 0 12px #42e2da}
+.bx-neon-content{max-width:660px;margin:40px 0;display:block}
+.bx-neon-kicker{color:#4ceaff;font-weight:900;font-size:13px;letter-spacing:3px;margin-bottom:25px}
+.bx-neon-content h1{font-size:clamp(48px,7vw,98px)!important;line-height:.99;
+ letter-spacing:-4px;font-weight:900;margin:0 0 25px;color:#fff}
+.bx-neon-content h1 b{color:#59e5ff}
+.bx-neon-content p{font-size:18px;line-height:1.6;color:#aebdd4;max-width:465px;margin:0 0 35px}
+.bx-neon-buttons{display:flex!important;flex-wrap:wrap;gap:12px}
+.bx-neon-buttons button{border-radius:9px;padding:18px 21px;font-size:13px;
+ font-weight:900;letter-spacing:1px;border:1px solid #386384;color:#bceeff}
+.bx-neon-buttons .bx-neon-primary{color:#071524;background:#65e5ff!important;
+ border-color:#65e5ff;box-shadow:0 0 30px rgba(63,214,255,.2)}
+#exploit-main-screen{background:#081328!important}
+#exploitContainer{min-height:calc(100vh - 32px)!important}
+@media(max-width:760px){
+ #bx-neon-launcher{flex-direction:column!important}
+ .bx-neon-rail{width:100%!important;min-width:0!important;padding:14px!important;
+ flex-direction:row!important;align-items:center;flex-wrap:wrap;gap:6px}
+ .bx-neon-logo{font-size:21px;margin:2px 8px}
+ .bx-neon-logo>small{font-size:8px}
+ .bx-neon-rail button{font-size:12px;padding:10px 8px}
+ .bx-neon-rail button span{display:none}
+ .bx-neon-rail .bx-neon-cache{margin-top:0}
+ .bx-neon-stage{padding:26px 20px 35px}
+ .bx-neon-content{margin:35px 0}
+ .bx-neon-content h1{font-size:58px!important;letter-spacing:-2px}
+ .bx-neon-content p{font-size:15px}
+ .bx-neon-header,.bx-neon-bottom{font-size:10px}
+ #initial-screen #choosejb-initial{width:calc(100% - 28px)!important;margin:12px auto!important}
+}
