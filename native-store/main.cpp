@@ -29,8 +29,8 @@ static const int COUNT = 3;
 
 int main() {
     setvbuf(stdout, NULL, _IONBF, 0);
-    Scene2D scene(W, H, DEPTH);
-    if (!scene.Init(0xC000000, 2)) {
+    Scene2D *scene = new Scene2D(W, H, DEPTH);
+    if (!scene->Init(0xC000000, 2)) {
         DEBUGLOG << "BX-HEN Store: video initialization failed";
         return 1;
     }
@@ -42,8 +42,8 @@ int main() {
 
     FT_Face large, small;
     const char *font = "/app0/assets/fonts/Gontserrat-Regular.ttf";
-    if (!scene.InitFont(&large, font, 66) ||
-        !scene.InitFont(&small, font, 36)) {
+    if (!scene->InitFont(&large, font, 66) ||
+        !scene->InitFont(&small, font, 36)) {
         DEBUGLOG << "BX-HEN Store: font initialization failed";
         return 3;
     }
@@ -81,41 +81,41 @@ int main() {
             }
         }
 
-        scene.FrameBufferFill(background);
-        scene.DrawRectangle(65, 66, 1790, 133, panel);
+        scene->FrameBufferFill(background);
+        scene->DrawRectangle(65, 66, 1790, 133, panel);
 
         char brand[] = "BX-HEN STORE";
         char subtitle[] = "Versao 0.1 - TESTE DE ABERTURA / INTERFACE";
-        scene.DrawText(brand, large, 102, 107, panel, cyan);
-        scene.DrawText(subtitle, small, 104, 190, background, muted);
+        scene->DrawText(brand, large, 102, 107, panel, cyan);
+        scene->DrawText(subtitle, small, 104, 190, background, muted);
 
         for (int i = 0; i < COUNT; ++i) {
             Color card = i == selected ? selectedColor : panel;
             int y = 292 + (i * 154);
-            scene.DrawRectangle(100, y, 1720, 128, card);
+            scene->DrawRectangle(100, y, 1720, 128, card);
             char title[128];
             snprintf(title, sizeof(title), "%s", titles[i]);
-            scene.DrawText(title, small, 138, y + 45, card, white);
+            scene->DrawText(title, small, 138, y + 45, card, white);
             char label[] = "PENDENTE";
-            if (i < 2) scene.DrawText(label, small, 1460, y + 45, card, cyan);
+            if (i < 2) scene->DrawText(label, small, 1460, y + 45, card, cyan);
         }
 
-        scene.DrawRectangle(100, 804, 1720, 185, panel);
+        scene->DrawRectangle(100, 804, 1720, 185, panel);
         if (details) {
             char message[150];
             snprintf(message, sizeof(message), "%s", descriptions[selected]);
-            scene.DrawText(message, small, 132, 865, panel, white);
+            scene->DrawText(message, small, 132, 865, panel, white);
             char warning[] = "Sem instalacao: este PKG testa apenas a interface.";
-            scene.DrawText(warning, small, 132, 937, panel, cyan);
+            scene->DrawText(warning, small, 132, 937, panel, cyan);
         } else {
             char help[] = "CIMA/BAIXO: navegar     X: detalhes     O: voltar";
-            scene.DrawText(help, small, 132, 880, panel, white);
+            scene->DrawText(help, small, 132, 880, panel, white);
             char warning[] = "Sem downloads, rede ou instalador nesta versao.";
-            scene.DrawText(warning, small, 132, 940, panel, muted);
+            scene->DrawText(warning, small, 132, 940, panel, muted);
         }
-        scene.SubmitFlip(frame);
-        scene.FrameWait(frame);
-        scene.FrameBufferSwap();
+        scene->SubmitFlip(frame);
+        scene->FrameWait(frame);
+        scene->FrameBufferSwap();
         ++frame;
     }
 }
