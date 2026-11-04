@@ -42,6 +42,7 @@ jobs:
               sed -i "s@sce_sys/about/right.sprx @@g" Makefile
               sed -i "s@^COMMONDIR.*@COMMONDIR   := ../_common@" Makefile
               sed -i "s@^COMMONFILES.*@COMMONFILES := ../_common/graphics.cpp@" Makefile
+              sed -i "s@ORBIS_SYSMODULE_FREETYPE_OL@((enum OrbisSysModule)0x009A)@g" ../_common/graphics.cpp
 
               make -j2
             '
