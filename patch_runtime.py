@@ -22,6 +22,24 @@ index = root / 'index.html'
 if not index.exists():
     raise RuntimeError('WebKitty não contém index.html')
 
+# Dois layouts BX-CT7, escolhidos pelo seletor nativo setLayout().
+# Permanecem disponíveis o Padrão e o Compacto do WebKitty.
+update('index.html',
+       '<input type="radio" name="theme" value="compact" onchange="setLayout(this.value);">',
+       '<input type="radio" name="theme" value="compact" onchange="setLayout(this.value);">')
+update('index.html',
+       '                        <p id="compactTheme">Compact</p>\n                    </label>',
+       '''                        <p id="compactTheme">Compact</p>
+                    </label>
+                    <label class="flex items-center text-white/80">
+                        <input type="radio" name="theme" value="neon" onchange="setLayout(this.value);">
+                        <p>Neon BX-CT7</p>
+                    </label>
+                    <label class="flex items-center text-white/80">
+                        <input type="radio" name="theme" value="painel" onchange="setLayout(this.value);">
+                        <p>Painel BX-CT7</p>
+                    </label>''')
+
 update('index.html', '<title>WebKitty</title>', '<title>BX-CT7 PS4 HOST</title>')
 update('index.html', '<html lang="en">', '<html lang="pt-BR">')
 # Versão da edição personalizada BX-CT7; código-base continua WebKitty 2.0.
@@ -131,12 +149,23 @@ for f in source.iterdir():
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(f, target)
 
+# Cada layout é um CSS integral, não depende de importações em navegadores antigos.
+for layout in ('neon', 'painel'):
+    layout_source = source / 'layouts' / (layout + '.css')
+    if not layout_source.is_file():
+        raise RuntimeError('Layout BX-CT7 ausente: ' + layout)
+    layout_target = root / 'includes/css/layouts' / (layout + '.css')
+    layout_target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(layout_source, layout_target)
+
 for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
     txt = manifest.read_text(encoding='utf-8')
     for asset in [
         '../../../includes/css/bx-ct7.css',
         '../../../includes/css/colors/ruby.css',
-        '../../../includes/css/colors/brasil.css'
+        '../../../includes/css/colors/brasil.css',
+        '../../../includes/css/layouts/neon.css',
+        '../../../includes/css/layouts/painel.css'
     ]:
         if asset not in txt and 'CACHE:' in txt:
             txt = txt.replace('CACHE:', 'CACHE:\n' + asset, 1)
