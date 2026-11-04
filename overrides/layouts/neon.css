@@ -1017,3 +1017,6 @@ body.bg-gray-900{background:#070b1a!important;background-image:radial-gradient(e
  #exploit-status-panel{min-height:340px}
  #payloadsSection{min-height:450px;grid-template-columns:100px minmax(0,1fr)}
 }
+
+/* Preserve native show/hide flow when switching between launcher and tools. */
+#initial-screen.hidden,#exploit-main-screen.hidden,#choosejb-initial.hidden{display:none!important}
