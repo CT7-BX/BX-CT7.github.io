@@ -40,6 +40,39 @@ update('index.html',
                         <p>Painel BX-CT7</p>
                     </label>''')
 
+# Launcher shells use the actual existing click handlers, not mock buttons.
+# Two wholly different layouts are provided by their respective CSS files.
+launcher_intro = '''<div id="bx-launcher-intro">
+    <div class="bx-overline">🇧🇷 BX-CT7 • EDIÇÃO 2.2</div>
+    <h1>Seu console.<br>Seu launcher.</h1>
+    <p>Central do PS4 com ferramentas, biblioteca de payloads e personalização.
+       Escolha uma opção para navegar.</p>
+</div>
+<div id="bx-launcher-actions" aria-label="Navegação do BX-CT7">
+    <button type="button" class="bx-action"
+        onclick="ui.exploitScreen.scrollIntoView({block:'start'});">
+        <span class="bx-number">01 / BIBLIOTECA</span>
+        <strong>Ferramentas</strong><span>Abrir biblioteca do host</span>
+    </button>
+    <button type="button" class="bx-action" onclick="themePopup();">
+        <span class="bx-number">02 / VISUAL</span>
+        <strong>Personalizar</strong><span>Layouts e temas</span>
+    </button>
+    <button type="button" class="bx-action" onclick="settingsPopup();">
+        <span class="bx-number">03 / SISTEMA</span>
+        <strong>Configurações</strong><span>Preferências do host</span>
+    </button>
+    <button type="button" class="bx-action" onclick="aboutPopup();">
+        <span class="bx-number">04 / INFORMAÇÕES</span>
+        <strong>Sobre</strong><span>Versão e créditos</span>
+    </button>
+</div>'''
+update('index.html', '            <!-- Header Buttons -->',
+       '            ' + launcher_intro + '\n            <!-- Header Buttons -->')
+# The upstream placeholder '-' has no meaning; CheckFW supplies real status on a PS4.
+update('index.html', '<p id="PS4FW" class="text-white/70 text-lg mt-4 mb-6">-</p>',
+       '<p id="PS4FW" class="text-white/70 text-lg mt-4 mb-6"></p>')
+
 update('index.html', '<title>WebKitty</title>', '<title>BX-CT7 PS4 HOST</title>')
 update('index.html', '<html lang="en">', '<html lang="pt-BR">')
 # Versão da edição personalizada BX-CT7; código-base continua WebKitty 2.0.
