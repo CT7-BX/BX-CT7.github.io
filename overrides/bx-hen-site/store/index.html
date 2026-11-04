@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07182c">
+<title>Loja de PKGs — BX-HEN</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#061123;color:#eef8ff;font:15px Arial,sans-serif}
+a{color:#65dfff}a:focus,button:focus,input:focus{outline:2px solid #55dfff;outline-offset:3px}
+header{padding:18px 5%;background:#0c2541;border-bottom:1px solid #208be0;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+h1{font-size:27px;margin:0}header p{color:#b8d0e8;margin:6px 0 0}
+main{max-width:1100px;margin:0 auto;padding:28px 18px}
+.notice{border:1px solid #246f9c;background:#0b2740;padding:14px;border-radius:11px;color:#c9e9f5;line-height:1.55;margin-bottom:18px}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin:15px 0 22px}input{background:#0d2540;border:1px solid #34678d;border-radius:8px;color:white;padding:12px;flex:1;min-width:220px;font:inherit}
+button,.action{border:1px solid #2f95c8;border-radius:8px;background:#12618e;color:#fff;padding:11px 14px;font:bold 13px Arial;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.action:hover{background:#1676a8}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{background:linear-gradient(135deg,#0e2948,#0c1a32);border:1px solid #285b85;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:11px}
+.card h2{font-size:20px;margin:0}.card p{font-size:14px;line-height:1.6;color:#adcae0;margin:0}.meta{color:#7ee5e9;font-size:12px}.card .action{align-self:flex-start;margin-top:auto}
+.disabled{background:#21344a!important;border-color:#435d78!important;color:#bbc5cf!important;cursor:default}
+#status{color:#aad4ec;margin:12px 0}.info{margin:26px 0;background:#0c2037;padding:20px;border:1px solid #264b70;border-radius:10px;line-height:1.65}
+code{color:#8ae9d7}footer{text-align:center;color:#83abc5;padding:22px}
+@media(max-width:680px){.grid{grid-template-columns:1fr}header{padding:15px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<header><div><h1>▣ BX-HEN <span style="color:#49d7ff">PKG Store</span></h1><p>Catálogo de projetos e aplicativos autorizados</p></div><div><a href="../" class="action">← BX-HEN</a> <a href="../../" class="action">Host principal</a></div></header>
+<main>
+<div class="notice"><strong>Loja em desenvolvimento:</strong> esta página organiza links para arquivos PKG disponibilizados pelo autor ou detentor dos direitos; não instala aplicativos no PS4, não contorna licenças e não depende de hospedar arquivos grandes no GitHub. A publicação de um download exige um link HTTPS real e autorização de distribuição.</div>
+<div class="toolbar"><input id="search" type="search" placeholder="Buscar aplicativos e ferramentas" aria-label="Buscar PKGs"><button id="refresh">Atualizar catálogo</button></div>
+<p id="status" role="status">Carregando catálogo...</p>
+<div id="items" class="grid"></div>
+<section class="info">
+<h2>Como a lojinha funciona</h2>
+<p>O BX-HEN mantém apenas um <code>catalog.json</code> no site. Os PKGs poderão ficar em hospedagem externa, como Cloudflare R2, Backblaze B2 ou GitHub Releases, de acordo com a escolha do responsável pelos arquivos.</p>
+<p>O botão de download só aparecerá quando houver URL HTTPS válida, versão, hash SHA-256 e licença de distribuição confirmada. A transferência abrirá um link externo: <strong>isso não significa instalação direta no PS4</strong>.</p>
+<p>Seus projetos Java e Minecraft Online Manager estão cadastrados como <strong>em preparação</strong>, sem arquivos ou URLs inventados.</p>
+</section>
+</main>
+<footer>BX-CT7 • BX-HEN PKG Store • Catálogo experimental</footer>
+<script>
+(function(){
+'use strict';
+var entries=[];
+function id(x){return document.getElementById(x);}
+function node(tag,parent,value,cls){var x=document.createElement(tag);if(typeof value==='string')x.textContent=value;if(cls)x.className=cls;parent.appendChild(x);return x;}
+function safeUrl(u){return typeof u==='string'&&/^https:\/\/[A-Za-z0-9.-]+(?::443)?(?:\/|$)/.test(u)&&u.indexOf('@')===-1;}
+function validHash(h){return typeof h==='string'&&/^[a-fA-F0-9]{64}$/.test(h);}
+function ready(e){return e&&e.status==='available'&&safeUrl(e.download_url)&&validHash(e.sha256)&&typeof e.license==='string'&&e.license!=='A confirmar'&&e.license.length>1;}
+function show(){
+var target=id('items'),term=(id('search').value||'').toLowerCase(),count=0;
+while(target.firstChild)target.removeChild(target.firstChild);
+for(var i=0;i<entries.length;i++){var e=entries[i];if((e.title+' '+e.description+' '+e.category).toLowerCase().indexOf(term)<0)continue;
+count++;
+var card=node('article',target,null,'card');node('h2',card,e.title);
+node('span',card,e.category+' • '+e.version,'meta');node('p',card,e.description);
+node('p',card,'Situação: '+(ready(e)?'Download disponível':'Em preparação'));
+if(ready(e)){var link=node('a',card,'Abrir download autorizado','action');link.href=e.download_url;link.target='_blank';link.rel='noopener noreferrer';link.setAttribute('aria-label','Baixar '+e.title);node('small',card,'SHA-256: '+e.sha256,'meta');}
+else{var button=node('button',card,'Arquivo ainda não disponível','action disabled');button.disabled=true;}
+}
+id('status').textContent=count+' item(ns) exibido(s). O catálogo não instala PKGs automaticamente.';
+}
+function load(){id('status').textContent='Consultando catálogo...';
+var x=new XMLHttpRequest();x.open('GET','./catalog.json?v='+new Date().getTime(),true);
+x.onreadystatechange=function(){if(x.readyState!==4)return;
+if(x.status<200||x.status>=300){id('status').textContent='Catálogo indisponível (HTTP '+x.status+').';return;}
+try{var data=JSON.parse(x.responseText);if(data.schema_version!==1||!data.items||!data.items.length)throw Error('formato inválido');entries=data.items;show();}
+catch(e){id('status').textContent='O catálogo não pôde ser interpretado.';}
+};
+x.onerror=function(){id('status').textContent='Falha ao carregar o catálogo.';};
+try{x.send(null);}catch(e){id('status').textContent='Não foi possível consultar o catálogo.';}
+}
+id('search').oninput=show;id('refresh').onclick=load;load();
+})();
+</script>
+</body>
+</html>
