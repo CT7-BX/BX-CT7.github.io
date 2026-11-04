@@ -326,6 +326,22 @@ if not update('index.html', '</body>',
               '<script>document.addEventListener("DOMContentLoaded",function(){var s=document.getElementById("settings-popup");if(!s||document.getElementById("bx-hen-dashboard-link"))return;var a=document.createElement("a");a.id="bx-hen-dashboard-link";a.href="./bx-hen/";a.textContent="⚡ Abrir painel BX-HEN completo";a.style.cssText="display:block;padding:13px;margin:8px 0 15px;background:#103b66;border:1px solid #36bfff;border-radius:8px;color:white;text-align:center;font-weight:bold;text-decoration:none";s.insertBefore(a,s.firstChild);});</script>\n</body>'):
     raise RuntimeError('Link BX-HEN para configurações não foi injetado')
 
+# Homebrew exibe projetos cadastrados, mas nunca os trata como payloads .bin.
+homebrew_js_src = source / 'homebrew-catalog.js'
+homebrew_js_dest = root / 'includes/js/homebrew-catalog.js'
+if not homebrew_js_src.is_file():
+    raise RuntimeError('Catálogo Homebrew BX-CT7 ausente')
+shutil.copy2(homebrew_js_src, homebrew_js_dest)
+if not update('includes/js/payloadsHandler.js',
+              '\n}\n\nfunction loadAdvancedPayloads() {',
+              '\n    if (firstCategory === "homebrew" && typeof window.bxRenderHomebrewCards === "function") {\n'
+              '        window.bxRenderHomebrewCards(ui.homebrewSection);\n'
+              '    }\n}\n\nfunction loadAdvancedPayloads() {'):
+    raise RuntimeError('Não foi possível integrar a aba Homebrew')
+if not update('index.html', '</body>',
+              '<script src="./includes/js/homebrew-catalog.js"></script>\n</body>'):
+    raise RuntimeError('Não foi possível carregar catálogo Homebrew')
+
 # O botão nativo continua visualmente idêntico. Só no PS4 14.00
 # redireciona para a página oficial do Afterglow, armazenada localmente.
 # A detecção ocorre no navegador, sem forçar firmware ou alterar kernel.
@@ -408,7 +424,8 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         '../../../includes/css/layouts/painel.css',
         '../../../includes/js/afterglow-router.js',
         '../../../includes/js/dev-diagnostics.js',
-        '../../../includes/js/bx-hen-browser.js'
+        '../../../includes/js/bx-hen-browser.js',
+        '../../../includes/js/homebrew-catalog.js'
     ]:
         if asset not in txt and 'CACHE:' in txt:
             txt = txt.replace('CACHE:', 'CACHE:\n' + asset, 1)
@@ -448,7 +465,8 @@ checks = {
     'roteador firmware 14.00': 'afterglow-router.js',
     'painel de diagnóstico': 'bx-dev-button',
     'módulo BX-HEN 0.1': 'bx-hen-browser.js',
-    'link de entrada do BX-HEN': 'bx-hen/'
+    'link de entrada do BX-HEN': 'bx-hen/',
+    'Homebrew BX-CT7': 'homebrew-catalog.js'
 }
 for desc, token in checks.items():
     if token not in out:
@@ -458,7 +476,8 @@ for old in ('value="compact" onchange="setLayout(this.value);"',):
         raise RuntimeError('Layout removido ainda aparece: ' + old)
 for asset in ('includes/css/layouts/neon.css', 'includes/css/layouts/painel.css',
               'includes/js/afterglow-router.js', 'includes/js/dev-diagnostics.js',
-              'includes/js/bx-hen-browser.js', 'includes/css/bx-theme-bridge.css',
+              'includes/js/bx-hen-browser.js', 'includes/js/homebrew-catalog.js',
+              'includes/css/bx-theme-bridge.css',
               'bx-hen/index.html', 'cache.html'):
     if not (root / asset).is_file():
         raise RuntimeError('Arquivo não encontrado: ' + asset)
@@ -473,4 +492,7 @@ for asset in ('extras.css', 'extras.js', 'test-monitor.css', 'test-monitor.js', 
 for store_file in ('bx-hen/store/index.html', 'bx-hen/store/catalog.json'):
     if not (root / store_file).is_file():
         raise RuntimeError('Loja não publicada: ' + store_file)
+handler_text = (root / 'includes/js/payloadsHandler.js').read_text(encoding='utf-8')
+if 'window.bxRenderHomebrewCards(ui.homebrewSection)' not in handler_text:
+    raise RuntimeError('Homebrew sem cartões BX-CT7')
 print('BX-CT7: pacote personalizado e hashes confirmados.')
