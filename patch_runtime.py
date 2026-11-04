@@ -22,18 +22,22 @@ index = root / 'index.html'
 if not index.exists():
     raise RuntimeError('WebKitty não contém index.html')
 
-# Dois layouts BX-CT7, escolhidos pelo seletor nativo setLayout().
-# Permanecem disponíveis o Padrão e o Compacto do WebKitty.
+# Neon é agora o layout padrão. Mantemos Compacto e Painel.
+# A opção antiga "Default" não é exibida no seletor.
+# Remover somente a entrada visual antiga; conservar index.css como fallback.
 update('index.html',
-       '<input type="radio" name="theme" value="compact" onchange="setLayout(this.value);">',
-       '<input type="radio" name="theme" value="compact" onchange="setLayout(this.value);">')
+       '''                    <label class="flex items-center text-white/80">
+                        <input type="radio" name="theme" value="index" onchange="setLayout(this.value);">
+                        <p id="defaultTheme">Default</p>
+                    </label>
+''', '')
 update('index.html',
        '                        <p id="compactTheme">Compact</p>\n                    </label>',
        '''                        <p id="compactTheme">Compact</p>
                     </label>
                     <label class="flex items-center text-white/80">
                         <input type="radio" name="theme" value="neon" onchange="setLayout(this.value);">
-                        <p>Neon BX-CT7</p>
+                        <p>Default BX-CT7 (Neon)</p>
                     </label>
                     <label class="flex items-center text-white/80">
                         <input type="radio" name="theme" value="painel" onchange="setLayout(this.value);">
@@ -116,8 +120,14 @@ update('index.html', '<span class="text-base font-semibold text-white/90 select-
        '<span class="text-base font-semibold text-white/90 select-none" title="Revisão upstream de 01/11/2026; compatibilidade do firmware 13.53 não confirmada">nexHEN (experimental · 01/11)</span>')
 update('index.html', '<!-- Language options -->',
        '<!-- Language options --><label class="flex items-center text-white/80"><input type="radio" name="language" value="pt-br" class="ml-2" onchange="saveLanguage(this.value);"><p>🇧🇷 Português (Brasil)</p></label>')
-update('index.html', 'var savedTheme = localStorage.getItem(\'theme\') || "index";',
-       'try { if (localStorage.getItem(\'bxCT7LanguageInitialized\') !== "1") { localStorage.setItem("language","pt-br"); localStorage.setItem("bxCT7LanguageInitialized","1"); } } catch(e) {} var savedTheme = localStorage.getItem(\'theme\') || "index";')
+# Migração: quem utilizava o Default antigo passa ao Neon; outras escolhas são preservadas.
+update('index.html',
+       "var savedTheme = localStorage.getItem('theme') || \"index\";",
+       "var savedTheme = localStorage.getItem('theme') || 'neon';"
+       " if (savedTheme === 'index') { savedTheme = 'neon';"
+       " try { localStorage.setItem('theme', 'neon'); } catch(e) {} }")
+update('index.html', 'var savedColor = localStorage.getItem(\'color\') || "default";',
+       'try { if (localStorage.getItem("bxCT7LanguageInitialized") !== "1") { localStorage.setItem("language","pt-br"); localStorage.setItem("bxCT7LanguageInitialized","1"); } } catch(e) {}\n        var savedColor = localStorage.getItem(\'color\') || "default";')
 update('includes/js/initial.js', 'var projectName = "WebKitty";',
        'var projectName = "BX-CT7 PS4 HOST";')
 update('includes/js/initial.js', "currentLanguage: storage.getString('language', 'en'),",
@@ -153,6 +163,19 @@ if base_path.exists():
 
 # A troca entre layouts deve controlar os dois launchers também em caches
 # ou navegadores legados. Não depender exclusivamente da ordem dos CSS.
+update('includes/js/design.js',
+       "var savedTheme = storage.getString('theme', 'index');",
+       "var savedTheme = storage.getString('theme', 'neon');"
+       " if (savedTheme === 'index') { savedTheme = 'neon'; storage.set('theme', 'neon'); }")
+update('includes/js/design.js',
+       "savedTheme = 'index';",
+       "savedTheme = 'neon';")
+update('includes/js/design.js',
+       'radioElement = document.querySelector(\'input[name="theme"][value="index"]\');',
+       'radioElement = document.querySelector(\'input[name="theme"][value="neon"]\');')
+update('includes/js/design.js',
+       "storage.set('theme', 'index');",
+       "storage.set('theme', 'neon');")
 update('includes/js/design.js', 'function setLayout(theme) {',
        '''function bxApplyLauncherVisibility(theme) {
     var neon = document.getElementById('bx-neon-launcher');
