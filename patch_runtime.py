@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Conservative BX-CT7 branding/translation patch; never changes exploit internals."""
 from pathlib import Path
-import sys, re, shutil, hashlib
+import sys, re, shutil, hashlib, os
 
 root = Path(sys.argv[1]).resolve()
 source = Path(__file__).resolve().parent / 'overrides'
@@ -267,6 +267,44 @@ for layout in ('neon', 'painel'):
     layout_target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(layout_source, layout_target)
 
+# Tela de atualização: usar o tema selecionado, sem trocar o layout
+# nem modificar os scripts dos exploits.
+cache_page = root / 'cache.html'
+if cache_page.is_file():
+    cache_text = cache_page.read_text(encoding='utf-8')
+    cache_text = cache_text.replace('<html lang="en">', '<html lang="pt-BR">')
+    cache_text = cache_text.replace('<title>WebKitty - Caching</title>',
+                                    '<title>BX-CT7 — Atualizando cache</title>')
+    cache_text = cache_text.replace('Caching WebKitty', 'Atualizando BX-CT7 PS4 Host')
+    cache_text = cache_text.replace('Firmware-Based Caching System', 'Cache offline do PS4')
+    cache_text = cache_text.replace('Preparing...', 'Preparando...')
+    cache_text = cache_text.replace("Downloading... ", "Baixando... ")
+    cache_text = cache_text.replace("Downloading... (", "Baixando... (")
+    cache_text = cache_text.replace("' of '", "' de '")
+    cache_text = cache_text.replace('Already cached! Redirecting...', 'Cache atualizado! Redirecionando...')
+    cache_text = cache_text.replace('Done! Redirecting...', 'Concluído! Redirecionando...')
+    cache_text = cache_text.replace('Checking cache...', 'Verificando cache...')
+    cache_text = cache_text.replace('Caching files...', 'Salvando arquivos...')
+    cache_text = cache_text.replace('Cache error: ', 'Erro no cache: ')
+    cache_text = cache_text.replace('Unknown error', 'Erro desconhecido')
+    cache_text = cache_text.replace('Starting cache for firmware ', 'Iniciando cache para firmware ')
+    cache_text = cache_text.replace('<link rel="stylesheet" href="./includes/css/colors/default.css">',
+                                    '<link id="bx-cache-color" rel="stylesheet" href="./includes/css/colors/default.css">')
+    cache_text = cache_text.replace('<link rel="stylesheet" href="./includes/css/layouts/index.css">',
+                                    '<link id="bx-cache-layout" rel="stylesheet" href="./includes/css/layouts/index.css">')
+    cache_text = cache_text.replace('</head>', '''<script>
+        (function(){
+            try {
+                var color = localStorage.getItem('color') || 'default';
+                if (!/^(default|vibrant|catppuccino|ruby|brasil)$/.test(color)) color='default';
+                var el = document.getElementById('bx-cache-color');
+                if (el) el.href='./includes/css/colors/'+color+'.css';
+            } catch(e) {}
+        })();
+    </script>
+</head>''')
+    cache_page.write_text(cache_text, encoding='utf-8')
+
 for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
     txt = manifest.read_text(encoding='utf-8')
     for asset in [
@@ -274,10 +312,17 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         '../../../includes/css/colors/ruby.css',
         '../../../includes/css/colors/brasil.css',
         '../../../includes/css/layouts/neon.css',
-        '../../../includes/css/layouts/painel.css'
+        '../../../includes/css/layouts/painel.css',
+        '../../../includes/js/afterglow-router.js'
     ]:
         if asset not in txt and 'CACHE:' in txt:
             txt = txt.replace('CACHE:', 'CACHE:\n' + asset, 1)
+    # AppCache will not refetch an unchanged manifest. Each Pages build gets
+    # a revision marker so updated layout/JS assets reach the PS4.
+    revision = os.environ.get('GITHUB_SHA', 'local-build')
+    if not re.fullmatch(r'[0-9A-Za-z._-]{1,80}', revision):
+        revision = 'local-build'
+    txt += '\n# BX-CT7 release: ' + revision + '\n'
     manifest.write_text(txt, encoding='utf-8')
 
 def gitblob(data):
@@ -295,4 +340,26 @@ for path, sha in {
 
 if not (root / 'LICENSE').is_file():
     raise RuntimeError('Licença upstream ausente')
+# Validate what is actually shipped, rather than treating a successful archive
+# download as proof that customizations survived upstream changes.
+out = index.read_text(encoding='utf-8')
+checks = {
+    'layout Neon': 'value="neon" onchange="setLayout(this.value);"',
+    'layout Painel': 'value="painel" onchange="setLayout(this.value);"',
+    'versão 2.2': 'Version: 2.2',
+    'créditos BX-CT7': 'Personalização e edição BX-CT7',
+    'roteador firmware 14.00': 'afterglow-router.js'
+}
+for desc, token in checks.items():
+    if token not in out:
+        raise RuntimeError('Verificação falhou: ' + desc)
+for old in ('value="compact" onchange="setLayout(this.value);"',
+            'value="index" onchange="setLayout(this.value);"'):
+    if old in out:
+        raise RuntimeError('Layout removido ainda aparece: ' + old)
+for asset in ('includes/css/layouts/neon.css', 'includes/css/layouts/painel.css',
+              'includes/js/afterglow-router.js', 'cache.html'):
+    if not (root / asset).is_file():
+        raise RuntimeError('Arquivo não encontrado: ' + asset)
+
 print('BX-CT7: pacote personalizado e hashes confirmados.')
