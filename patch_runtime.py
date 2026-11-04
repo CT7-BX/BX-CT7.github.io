@@ -198,22 +198,31 @@ function setLayout(theme) {
     if (theme === 'compact') theme = 'neon';''')
 update('includes/js/design.js', "storage.set('theme', theme);",
        "storage.set('theme', theme);\n        bxApplyLauncherVisibility(theme);")
-# Sincronização de cores independentemente do layout (inclusive no PS4).
-# Não alterar o CSS original dos temas do WebKitty.
+# Sincronização de cor com CSS específico dos novos layouts.
 update('includes/js/design.js', "storage.set('color', color);",
-       "storage.set('color', color);\\n        bxApplyColorTheme(color);")
+       "storage.set('color', color);\n        bxApplyColorTheme(color);")
 update('includes/js/design.js', 'function setTheme(color) {',
        '''function bxApplyColorTheme(color) {
     if (document.body) document.body.setAttribute('data-bx-color', color);
 }
 function setTheme(color) {''')
-update('includes/js/design.js',
-       "    if (radioElement) {\\n        radioElement.checked = true;\\n    }\\n}\\n",
-       "    if (radioElement) {\\n        radioElement.checked = true;\\n    }\\n    bxApplyColorTheme(savedColor);\\n}\\n") 
 
 update('includes/js/design.js',
        "    if (radioElement) {\n        radioElement.checked = true;\n    }\n}\n\nfunction loadTheme()",
        "    if (radioElement) {\n        radioElement.checked = true;\n    }\n    bxApplyLauncherVisibility(savedTheme);\n}\n\nfunction loadTheme()")
+
+# A cor salva também precisa ser aplicada no carregamento inicial.
+design_path = root / 'includes/js/design.js'
+design_text = design_path.read_text(encoding='utf-8')
+color_section = design_text.find('function loadTheme()')
+if color_section < 0:
+    raise RuntimeError('Função de tema original não encontrada')
+head, tail = design_text[:color_section], design_text[color_section:]
+old_tail = "    if (radioElement) {\\n        radioElement.checked = true;\\n    }\\n}"
+if old_tail not in tail:
+    raise RuntimeError('Marcador loadTheme não encontrado')
+tail = tail.replace(old_tail, "    if (radioElement) {\\n        radioElement.checked = true;\\n    }\\n    bxApplyColorTheme(savedColor);\\n}", 1)
+design_path.write_text(head + tail, encoding='utf-8')
 
 # Opções experimentais: mostrar controles em firmwares reconhecidos.
 # Não ampliar a lista de firmwares nem alterar payloads ou exploit chains.
