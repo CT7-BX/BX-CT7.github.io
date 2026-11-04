@@ -1,0 +1,20 @@
+name: BX-HEN diagnostics CI
+on:
+  workflow_dispatch:
+  push:
+    branches: [bx-hen-01353]
+    paths:
+      - 'bx-hen/**'
+      - '.github/workflows/bx-hen-checks.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run tests
+        run: make -C bx-hen test all
+      - name: Check report for firmware 13.53
+        run: |
+          ./bx-hen/build/bx-hen-diag 'Mozilla/5.0 (PlayStation 4 13.53) AppleWebKit' | grep 'Alvo 13.53: corresponde'
