@@ -40,6 +40,9 @@ jobs:
               sed -i "s/VERSION     := 1.01/VERSION     := 0.01/g" Makefile
               sed -i "s/-lSceFreeType/-lSceFreeType -lScePad -lSceUserService/g" Makefile
               sed -i "s@sce_sys/about/right.sprx @@g" Makefile
+              sed -i 's@COMMONDIR   := $(TOOLCHAIN)/samples/_common@COMMONDIR   := $(CURDIR)/../_common@' Makefile
+              sed -i 's@COMMONFILES := $(wildcard $(COMMONDIR)/\*.cpp)@COMMONFILES := $(COMMONDIR)/graphics.cpp@' Makefile
+
               make -j2
             '
       - name: Check generated PS4 PKG file
