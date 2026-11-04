@@ -27,31 +27,32 @@ jobs:
             bash -ec '
               echo "Toolchain: $OO_PS4_TOOLCHAIN"
               test -d native-store/upstream/samples/font
-              mkdir -p native-store/build
-              cp -a native-store/upstream/samples/font/. native-store/build/
+              mkdir -p native-store/font
+              cp -a native-store/upstream/samples/font/. native-store/font/
               cp -a native-store/upstream/samples/_common native-store/_common
-              cp native-store/main.cpp native-store/build/font/main.cpp
-              cp native-store/upstream/samples/input/input/controller.h native-store/build/font/controller.h
-              cp native-store/upstream/samples/input/input/controller.cpp native-store/build/font/controller.cpp
-              cd native-store/build
+              cp native-store/main.cpp native-store/font/font/main.cpp
+              cp native-store/upstream/samples/input/input/controller.h native-store/font/font/controller.h
+              cp native-store/upstream/samples/input/input/controller.cpp native-store/font/font/controller.cpp
+              cd native-store/font
               sed -i "s/OpenOrbis Font Sample/BX-HEN Store Test/g" Makefile
               sed -i "s/BREW00081/BXST00001/g" Makefile
               sed -i "s/FONTDRAWEX000000/BXHENSTORETEST01/g" Makefile
               sed -i "s/VERSION     := 1.01/VERSION     := 0.01/g" Makefile
               sed -i "s/-lSceFreeType/-lSceFreeType -lScePad -lSceUserService/g" Makefile
+              sed -i "s@sce_sys/about/right.sprx @@g" Makefile
               make -j2
             '
       - name: Check generated PS4 PKG file
         run: |
           set -euo pipefail
-          test -s native-store/build/IV0000-BXST00001_00-BXHENSTORETEST01.pkg
-          file native-store/build/IV0000-BXST00001_00-BXHENSTORETEST01.pkg
-          sha256sum native-store/build/*.pkg | tee native-store/build/SHA256SUMS.txt
+          test -s native-store/font/IV0000-BXST00001_00-BXHENSTORETEST01.pkg
+          file native-store/font/IV0000-BXST00001_00-BXHENSTORETEST01.pkg
+          sha256sum native-store/font/*.pkg | tee native-store/font/SHA256SUMS.txt
       - name: Publish experimental test package as artifact
         uses: actions/upload-artifact@v4
         with:
           name: BX-HEN-Store-0.1-test-PKG
           path: |
-            native-store/build/IV0000-BXST00001_00-BXHENSTORETEST01.pkg
-            native-store/build/SHA256SUMS.txt
+            native-store/font/IV0000-BXST00001_00-BXHENSTORETEST01.pkg
+            native-store/font/SHA256SUMS.txt
           retention-days: 14
