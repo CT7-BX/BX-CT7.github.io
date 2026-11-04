@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "project": "BX-HEN PKG Store",
+  "notice": "Somente aplicativos próprios, autorizados ou com licença de distribuição. O site disponibiliza links; não instala PKGs no PS4.",
+  "items": [
+    {
+      "id": "minecraft-online-manager",
+      "title": "Minecraft Online Manager",
+      "category": "Ferramentas",
+      "version": "Em preparação",
+      "description": "Projeto auxiliar do BX-CT7. Link de download ainda não configurado.",
+      "status": "planned",
+      "download_url": null,
+      "sha256": null,
+      "size_bytes": null,
+      "license": "A confirmar"
+    },
+    {
+      "id": "java",
+      "title": "Java — projeto BX-CT7",
+      "category": "Utilitários",
+      "version": "Em preparação",
+      "description": "Espaço reservado para seu PKG. É necessário confirmar o arquivo e a licença antes da publicação.",
+      "status": "planned",
+      "download_url": null,
+      "sha256": null,
+      "size_bytes": null,
+      "license": "A confirmar"
+    }
+  ]
+}
