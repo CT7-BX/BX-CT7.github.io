@@ -1,0 +1,64 @@
+name: Audit GoldHEN binary (read-only)
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/audit-goldhen.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download pinned GoldHEN binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit
+          curl --fail --location --retry 3 --silent --show-error \
+            'https://raw.githubusercontent.com/ArabPixel/WebKitty/6bdb9f764ba428978cb657a718296c3d6752e9b0/includes/payloads/HEN/goldhen_v2.4b18.13.bin' \
+            --output audit/goldhen_v2.4b18.13.bin
+          test "$(wc -c < audit/goldhen_v2.4b18.13.bin)" -eq 297496
+      - name: Static binary analysis
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd audit
+          {
+            echo "BX-CT7: GoldHEN v2.4b18.13 static metadata report"
+            echo "Source: ArabPixel/WebKitty pinned commit 6bdb9f764ba428978cb657a718296c3d6752e9b0"
+            echo "No code execution; read-only analysis"
+            echo
+            wc -c goldhen_v2.4b18.13.bin
+            sha256sum goldhen_v2.4b18.13.bin
+            file goldhen_v2.4b18.13.bin
+            echo "=== ELF header if present ==="
+            readelf -h goldhen_v2.4b18.13.bin 2>&1 || true
+            echo "=== magic and file layout ==="
+            od -An -tx1 -N128 goldhen_v2.4b18.13.bin
+            echo "=== ASCII strings (first 180) ==="
+            strings -a -n 6 goldhen_v2.4b18.13.bin | head -n 180 || true
+            echo "=== interesting strings ==="
+            strings -a -n 5 goldhen_v2.4b18.13.bin | grep -Ei 'goldhen|debug|ftp|binload|plugin|klog|pkg|fps|cheat|patch|syscall|version|firmware|error|socket' | head -n 150 || true
+          } | tee static-report.txt
+          python3 - <<'PY' | tee -a static-report.txt
+          import collections,math
+          data=open('goldhen_v2.4b18.13.bin','rb').read()
+          freq=collections.Counter(data)
+          entropy=-sum((n/len(data))*math.log2(n/len(data)) for n in freq.values())
+          print("=== Entropy ===")
+          print("Shannon entropy: %.4f bits/byte" % entropy)
+          for off in range(0,len(data),65536):
+              b=data[off:off+65536]
+              c=collections.Counter(b)
+              ent=-sum((n/len(b))*math.log2(n/len(b)) for n in c.values())
+              print("Block 0x%X..0x%X: %.4f" % (off, off+len(b), ent))
+          print("ELF magic:", data[:4]==b'\\x7fELF')
+          print("PE magic:", data[:2]==b'MZ')
+          print("Raw hexadecimal prefix:", data[:32].hex())
+          PY
+      - name: Upload static report (no executable)
+        uses: actions/upload-artifact@v4
+        with:
+          name: goldhen-static-report
+          path: audit/static-report.txt
