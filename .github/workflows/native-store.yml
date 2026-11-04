@@ -1,0 +1,53 @@
+name: BX-HEN Store — Native PS4 Test PKG
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'native-store/**'
+      - '.github/workflows/native-store.yml'
+permissions:
+  contents: read
+jobs:
+  build-test-pkg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build in the OpenOrbis toolchain container
+        run: |
+          set -euo pipefail
+          docker run --rm --user 0 \
+            -v "$PWD:/workspace" -w /workspace \
+            openorbisofficial/toolchain:latest \
+            bash -ec '
+              echo "Toolchain: $OO_PS4_TOOLCHAIN"
+              test -d "$OO_PS4_TOOLCHAIN/samples/font"
+              mkdir -p native-store/build
+              cp -a "$OO_PS4_TOOLCHAIN/samples/font/." native-store/build/
+              cp -a "$OO_PS4_TOOLCHAIN/samples/_common" native-store/_common
+              cp native-store/main.cpp native-store/build/font/main.cpp
+              cp "$OO_PS4_TOOLCHAIN/samples/input/input/controller.h" native-store/build/font/controller.h
+              cp "$OO_PS4_TOOLCHAIN/samples/input/input/controller.cpp" native-store/build/font/controller.cpp
+              cd native-store/build
+              sed -i "s/OpenOrbis Font Sample/BX-HEN Store Test/g" Makefile
+              sed -i "s/BREW00081/BXST00001/g" Makefile
+              sed -i "s/FONTDRAWEX000000/BXHENSTORETEST01/g" Makefile
+              sed -i "s/VERSION     := 1.01/VERSION     := 0.01/g" Makefile
+              sed -i "s/-lSceFreeType/-lSceFreeType -lScePad -lSceUserService/g" Makefile
+              make -j2
+            '
+      - name: Check generated PS4 PKG file
+        run: |
+          set -euo pipefail
+          test -s native-store/build/IV0000-BXST00001_00-BXHENSTORETEST01.pkg
+          file native-store/build/IV0000-BXST00001_00-BXHENSTORETEST01.pkg
+          sha256sum native-store/build/*.pkg | tee native-store/build/SHA256SUMS.txt
+      - name: Publish experimental test package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BX-HEN-Store-0.1-test-PKG
+          path: |
+            native-store/build/IV0000-BXST00001_00-BXHENSTORETEST01.pkg
+            native-store/build/SHA256SUMS.txt
+          retention-days: 14
