@@ -23,6 +23,7 @@ body:before{content:"";position:fixed;pointer-events:none;inset:0;background:rad
 @media(max-width:760px){.topbar{padding:10px 13px;min-height:72px}.brand h1{font-size:17px}.brand p{font-size:10px}.controller{width:44px;height:40px;font-size:22px}.topright{gap:8px}.smalllink{font-size:11px;padding:9px}.detected{font-size:11px}.shell{display:block}.sidebar{width:100%;min-width:0;display:flex;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid #14528e;padding:8px;gap:5px}.side-link{white-space:nowrap;padding:9px;font-size:12px}.side-link span{width:auto;margin-right:5px}.side-bottom{display:none}.hero{grid-template-columns:1fr}.emblem-area{min-height:180px}.emblem-area svg{max-width:195px}.intro h2{font-size:27px}.action-column{display:flex}.featuregrid{grid-template-columns:1fr}.box-title{font-size:15px}.main{padding:15px 10px}.progress{margin-top:15px}.milestone strong{font-size:10px}.milestone span{font-size:10px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
+<link rel="stylesheet" href="./extras.css">
 </head>
 <body>
 <header class="topbar"><div class="brand"><div class="controller" aria-hidden="true">✣</div><div><h1>BX-CT7 PS4 Host <em>v2.2</em></h1><p>HEN • Ferramentas • PS4 • Painel experimental</p></div></div><div class="topright"><div class="detected"><span class="dot" id="device-dot"></span><span id="device-name">Verificando navegador...</span><strong id="header-fw">Firmware não identificado</strong></div><a class="smalllink" href="../" title="Voltar ao host">⌂ Host</a></div></header>
@@ -84,5 +85,6 @@ byId('run-check').onclick=function(){showDiag();byId('diagnostics').scrollIntoVi
 byId('open-logs').onclick=function(){showDiag();};
 })();
 </script>
+<script src="./extras.js"></script>
 </body>
 </html>
