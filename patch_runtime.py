@@ -326,6 +326,19 @@ if not update('index.html', '</body>',
               '<script>document.addEventListener("DOMContentLoaded",function(){var s=document.getElementById("settings-popup");if(!s||document.getElementById("bx-hen-dashboard-link"))return;var a=document.createElement("a");a.id="bx-hen-dashboard-link";a.href="./bx-hen/";a.textContent="⚡ Abrir painel BX-HEN completo";a.style.cssText="display:block;padding:13px;margin:8px 0 15px;background:#103b66;border:1px solid #36bfff;border-radius:8px;color:white;text-align:center;font-weight:bold;text-decoration:none";s.insertBefore(a,s.firstChild);});</script>\n</body>'):
     raise RuntimeError('Link BX-HEN para configurações não foi injetado')
 
+# Acesso rápido à loja web pelo menu de configurações do host.
+if not update('index.html', '</body>',
+              '<script>document.addEventListener("DOMContentLoaded",function(){'
+              'var p=document.getElementById("settings-popup");'
+              'if(!p||document.getElementById("bx-ct7-store-link"))return;'
+              'var a=document.createElement("a");a.id="bx-ct7-store-link";'
+              'a.href="./bx-hen/store/";a.textContent="Loja BX-HEN - catálogo de PKGs";'
+              'a.style.cssText="display:block;padding:12px;margin:8px 0 15px;background:#112c46;'
+              'border:1px solid #2ea7c9;border-radius:8px;color:#fff;text-align:center;'
+              'font-weight:bold;text-decoration:none";p.insertBefore(a,p.firstChild);'
+              '});</script>\\n</body>'):
+    raise RuntimeError('Link da loja não foi adicionado ao host')
+
 # Homebrew exibe projetos cadastrados, mas nunca os trata como payloads .bin.
 homebrew_js_src = source / 'homebrew-catalog.js'
 homebrew_js_dest = root / 'includes/js/homebrew-catalog.js'
@@ -466,7 +479,8 @@ checks = {
     'painel de diagnóstico': 'bx-dev-button',
     'módulo BX-HEN 0.1': 'bx-hen-browser.js',
     'link de entrada do BX-HEN': 'bx-hen/',
-    'Homebrew BX-CT7': 'homebrew-catalog.js'
+    'Homebrew BX-CT7': 'homebrew-catalog.js',
+    'atalho loja no host': 'bx-ct7-store-link'
 }
 for desc, token in checks.items():
     if token not in out:
