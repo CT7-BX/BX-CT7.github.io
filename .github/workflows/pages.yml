@@ -32,6 +32,8 @@ jobs:
           test -s dist/bx-hen/extras.js
           grep -q 'BX-HEN 0.2' dist/bx-hen/index.html
           grep -q 'Não implementado' dist/bx-hen/index.html
+      - name: Verify source integrity, line endings, links and PKG catalog
+        run: python3 diagnostics/verify_site.py
       - name: Generate sanitized BX-HEN test history
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
