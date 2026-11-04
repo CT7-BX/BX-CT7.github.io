@@ -901,31 +901,119 @@ button {
     cursor: pointer;
 }
 
+/* BX-CT7 launcher shell; styling is isolated to two opt-in layouts. */
+#initial-screen,#exploit-main-screen{box-sizing:border-box}
+#initial-screen{overflow-y:auto!important;min-height:100vh!important;height:auto!important}
+#initial-screen header{z-index:4}
+#initial-screen #PS4FW{display:none!important}
+#bx-launcher-intro,#bx-launcher-actions{color:#fff}
+#bx-launcher-intro .bx-overline{font-size:12px;text-transform:uppercase;letter-spacing:3px;font-weight:800;opacity:.7}
+#bx-launcher-intro h1{font-size:clamp(30px,5vw,58px);font-weight:900;line-height:1.07;letter-spacing:-2px;margin:14px 0}
+#bx-launcher-intro p{font-size:15px;line-height:1.5;max-width:490px;opacity:.72}
+.bx-action{cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;
+ text-align:left;gap:10px;border-radius:18px;padding:20px;border:1px solid rgba(255,255,255,.12);
+ background:rgba(255,255,255,.065);min-height:145px;color:#fff;transition:background .18s,transform .18s}
+.bx-action:hover,.bx-action:focus{transform:translateY(-3px);background:rgba(255,255,255,.13)}
+.bx-action strong{font-size:19px;font-weight:800}
+.bx-action span{font-size:13px;opacity:.74}
+.bx-action .bx-number{font-size:12px;font-weight:800;letter-spacing:2px;opacity:.65}
+#initial-screen #stopAutoJb.hidden{display:none!important}
+#initial-screen #scrollDown{display:none!important}
+#initial-screen #choosejb-initial{z-index:2;box-sizing:border-box}
+#initial-screen #choosejb-initial label{min-width:120px}
+#initial-screen #click-to-start-text{font-size:14px;font-weight:700}
+#initial-screen #ps-logo-container{transition:transform .18s}
+#initial-screen #ps-logo-container:hover{transform:scale(1.02)}
+#exploit-main-screen{min-height:100vh!important;height:auto!important}
+#exploitContainer{box-sizing:border-box}
+#payloadsGrid{overflow:auto!important;min-height:120px}
+#payloadsGrid .payload{transition:background .18s}
+#payloadsGrid .payload:hover{background:rgba(255,255,255,.10)}
+#default-tab li{min-width:0!important}
+#default-tab li button{white-space:normal;overflow-wrap:break-word}
+@media(max-width:760px){
+ #bx-launcher-intro h1{font-size:34px}
+ .bx-action{min-height:112px;padding:15px}
+ .bx-action strong{font-size:16px}
+ #initial-screen header{max-width:100%}
+ #exploit-main-screen{height:auto!important}
+}
 
-/* BX-CT7 layout: Neon. Visual styling only; payload logic unchanged. */
-body.bg-gray-900 {
-    background-color:#0a0e1b;
-    background-image:radial-gradient(circle at 18% 8%,rgba(12,184,245,.16),transparent 42%),
-                     radial-gradient(circle at 86% 85%,rgba(222,40,134,.14),transparent 46%);
+
+/* NEON: sci-fi command center, side rail + control console + vertical payload library */
+html,body{background:#070b1a!important}
+body.bg-gray-900{background:#070b1a!important;background-image:radial-gradient(ellipse at 74% 20%,rgba(92,49,214,.22),transparent 44%),radial-gradient(ellipse at 26% 84%,rgba(0,197,249,.13),transparent 48%)!important}
+#initial-screen{display:grid!important;grid-template-columns:170px minmax(260px,1fr) minmax(280px,350px);
+ grid-template-rows:auto minmax(300px,1fr) auto;column-gap:30px;row-gap:16px;padding:32px 34px!important;align-items:center;justify-content:stretch!important}
+#initial-screen>header{grid-column:1;grid-row:1/4;position:relative!important;top:auto!important;left:auto!important;
+ height:100%;align-self:stretch;display:flex!important;flex-direction:column!important;justify-content:space-between!important;
+ width:100%!important;padding:26px 15px!important;background:linear-gradient(180deg,rgba(22,29,61,.95),rgba(9,14,36,.92));
+ border:1px solid rgba(91,108,255,.30);border-radius:24px}
+#initial-screen>header:before{content:"BX-CT7 / OS";font-weight:900;color:#9eeaff;letter-spacing:1px;text-align:center;font-size:15px;order:-1}
+#initial-screen>header>div{display:flex!important;flex-direction:column!important;gap:13px!important;align-items:stretch}
+#initial-screen>header>div button{width:100%;height:55px!important;display:flex;align-items:center;justify-content:center;
+ border-radius:14px;background:#1b264a!important;border:1px solid rgba(90,125,255,.20)}
+#initial-screen #updateCache{width:100%;font-size:12px!important;padding:15px 7px!important;white-space:normal}
+#bx-launcher-intro{grid-column:2/4;grid-row:1;padding:12px 6px 0;align-self:end}
+#bx-launcher-intro .bx-overline{color:#00d9f6}
+#bx-launcher-intro h1{background:linear-gradient(90deg,#fff,#95dcff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#pslogo{grid-column:2;grid-row:2;align-self:center;justify-self:center;border-radius:28px;
+ padding:25px;width:min(88%,470px);min-height:250px;background:linear-gradient(145deg,rgba(26,40,88,.88),rgba(20,12,52,.78));
+ border:1px solid rgba(0,220,255,.35);box-shadow:0 15px 55px rgba(5,5,35,.45),0 0 26px rgba(0,184,244,.09)}
+#pslogo:before{content:"01   /   INICIAR";display:block;text-align:left;color:#48dafa;letter-spacing:2px;font-size:12px;font-weight:900}
+#initial-screen #ps-logo-container{background:transparent!important;padding:15px!important}
+#initial-screen #ps-logo{width:120px!important;height:120px!important;filter:drop-shadow(0 0 18px rgba(17,209,255,.26))}
+#click-to-start-text{grid-column:2;grid-row:3;justify-self:center;margin:0!important;color:#b5ddfb}
+#choosejb-initial{grid-column:3;grid-row:2;align-self:stretch;width:100%!important;max-width:none!important;
+ background:rgba(14,20,49,.91)!important;border:1px solid rgba(131,89,244,.40);
+ border-radius:24px!important;box-shadow:none!important;padding:28px 18px!important}
+#choosejb-initial h3{text-align:left!important;color:#d5c8ff;font-size:18px}
+#choosejb-initial>div{flex-direction:column!important;gap:10px!important;align-items:stretch}
+#choosejb-initial label{width:100%!important;min-height:64px;border-radius:12px!important;background:#1b254c!important}
+#bx-launcher-actions{grid-column:3;grid-row:3;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#bx-launcher-actions .bx-action{min-height:110px;padding:14px;border-color:rgba(96,143,255,.38);background:rgba(25,39,81,.74)}
+#bx-launcher-actions .bx-action strong{font-size:16px}
+#bx-launcher-actions .bx-action span{font-size:11px}
+#exploit-main-screen{background:linear-gradient(135deg,#080f22,#110c28)!important;padding:16px!important}
+#exploitContainer{display:grid!important;grid-template-columns:minmax(300px,36%) minmax(0,64%);
+ grid-template-rows:minmax(0,1fr);gap:16px!important;width:100%!important;height:calc(100vh - 32px)!important;padding:0!important}
+#exploit-status-panel{border-radius:23px!important;background:#111c3b!important;
+ border:1px solid rgba(52,197,255,.34);box-shadow:0 15px 40px rgba(0,0,0,.20);min-width:0}
+#exploit-status-panel #DebugConsole{border-radius:16px!important;border:1px solid rgba(52,197,255,.20);background:#080e22!important}
+#payloadsSection{display:grid!important;grid-template-columns:138px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);
+ gap:10px!important;border:1px solid rgba(108,83,251,.42);border-radius:23px!important;background:#11172f!important;min-width:0}
+#payloadsSection>div:first-child{grid-column:1/3;grid-row:1}
+#payloadsSection>.tabs{grid-column:1;grid-row:2;position:relative!important;top:auto!important;box-shadow:none!important;
+ background:#151e3f!important;border-radius:15px;padding:8px!important}
+#payloadsSection #default-tab{display:flex!important;flex-direction:column!important;gap:5px!important}
+#payloadsSection #default-tab li{width:100%!important;flex:0 0 auto!important}
+#payloadsSection #default-tab button{border:0!important;border-radius:10px!important;padding:14px 7px!important;font-size:12px}
+#payloadsSection #payloadsGrid{grid-column:2;grid-row:2;max-height:none!important;background:#0d1531;border-radius:15px}
+#payloadsSection #default-tab-content{background:transparent}
+@media(max-width:1000px){
+ #initial-screen{grid-template-columns:90px 1fr 280px;column-gap:14px;padding:14px!important}
+ #initial-screen>header{padding:15px 8px!important}
+ #initial-screen>header:before{font-size:10px}
+ #initial-screen #updateCache{font-size:10px!important}
+ #bx-launcher-intro h1{font-size:38px}
+ #exploitContainer{grid-template-columns:40% 60%!important}
+ #payloadsSection{grid-template-columns:110px minmax(0,1fr)}
 }
-#initial-screen { background:radial-gradient(circle at 50% 43%,rgba(21,184,240,.13),transparent 48%); }
-#ps-logo-container {
-    border-radius:50%; padding:24px;
-    box-shadow:0 0 0 2px rgba(40,221,255,.42),0 0 38px rgba(16,192,240,.22);
-}
-#ps-logo {filter:drop-shadow(0 0 10px rgba(40,221,255,.34));}
-#choosejb-initial,#theme-popup,#settings-popup,#about-popup {
-    border:1px solid rgba(65,224,250,.38);
-    box-shadow:0 12px 42px rgba(2,9,25,.48),0 0 15px rgba(19,185,242,.12);
-    border-radius:18px;
-}
-#exploitContainer { gap:20px; }
-#DebugConsole,#payloadsGrid {border-radius:14px;border:1px solid rgba(65,224,250,.23);}
-#default-tab {border-bottom:1px solid rgba(65,224,250,.32); }
-#exploitRun {border-radius:16px;box-shadow:0 0 18px rgba(28,191,242,.22);}
-#payloadsGrid .payload {border-radius:13px;border:1px solid rgba(65,224,250,.18);}
-#chooseTheme #layouts {gap:7px;}
-@media(max-width:600px) {
- #ps-logo-container {padding:13px;}
- #exploitContainer {gap:9px;}
+@media(max-width:760px){
+ #initial-screen{grid-template-columns:1fr 1fr!important;grid-template-rows:auto auto auto auto auto!important;gap:14px!important}
+ #initial-screen>header{grid-column:1/3;grid-row:1;flex-direction:row!important;height:auto;padding:8px!important;align-items:center}
+ #initial-screen>header:before{display:none}
+ #initial-screen>header>div{flex-direction:row!important;gap:6px!important}
+ #initial-screen>header>div button{width:46px!important;height:42px!important}
+ #initial-screen #updateCache{width:110px!important}
+ #bx-launcher-intro{grid-column:1/3;grid-row:2}
+ #pslogo{grid-column:1/3;grid-row:3;min-height:190px!important;width:100%}
+ #choosejb-initial{grid-column:1/3;grid-row:4}
+ #choosejb-initial>div{flex-direction:row!important;flex-wrap:wrap}
+ #choosejb-initial label{width:auto!important;flex:1 1 38%}
+ #bx-launcher-actions{grid-column:1/3;grid-row:5}
+ #click-to-start-text{grid-column:1/3;grid-row:6}
+ #exploitContainer{display:flex!important;flex-direction:column!important;height:auto!important}
+ #exploit-status-panel{min-height:340px}
+ #payloadsSection{min-height:450px;grid-template-columns:100px minmax(0,1fr)}
 }
