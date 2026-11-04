@@ -214,6 +214,17 @@ update('includes/js/HENs.js',
     }
     storage.set('jailbreakFlavor', value);""")
 
+# O botão nativo continua visualmente idêntico. Só no PS4 14.00
+# redireciona para a página oficial do Afterglow, armazenada localmente.
+# A detecção ocorre no navegador, sem forçar firmware ou alterar kernel.
+update('index.html', '</body>',
+       '<script src="./includes/js/afterglow-router.js"></script>\n</body>')
+router_src = source / 'afterglow-router.js'
+router_dest = root / 'includes/js/afterglow-router.js'
+if not router_src.is_file():
+    raise RuntimeError('Afterglow router ausente')
+shutil.copy2(router_src, router_dest)
+
 # Existing compatibility checks are preserved.
 for f in source.iterdir():
     if f.is_file():
