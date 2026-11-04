@@ -240,6 +240,21 @@ update('includes/js/HENs.js',
     }
     storage.set('jailbreakFlavor', value);""")
 
+# Painel de diagnóstico: observa funções do host sem habilitar funções
+# internas não documentadas do GoldHEN e sem contornar firmware.
+update('index.html',
+       '<h2 class="text-2xl font-bold mb-4">WebKitty settings</h2>',
+       '<h2 class="text-2xl font-bold mb-4">WebKitty settings</h2>'
+       '<button type="button" id="bx-dev-button" onclick="bxOpenDiagnostics()">'
+       '⚙ Diagnóstico do Host / Desenvolvedor</button>')
+update('index.html', '</body>',
+       '<script src="./includes/js/dev-diagnostics.js"></script>\n</body>')
+dev_src = source / 'dev-diagnostics.js'
+dev_dest = root / 'includes/js/dev-diagnostics.js'
+if not dev_src.is_file():
+    raise RuntimeError('Diagnóstico BX-CT7 ausente')
+shutil.copy2(dev_src, dev_dest)
+
 # O botão nativo continua visualmente idêntico. Só no PS4 14.00
 # redireciona para a página oficial do Afterglow, armazenada localmente.
 # A detecção ocorre no navegador, sem forçar firmware ou alterar kernel.
@@ -313,7 +328,8 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         '../../../includes/css/colors/brasil.css',
         '../../../includes/css/layouts/neon.css',
         '../../../includes/css/layouts/painel.css',
-        '../../../includes/js/afterglow-router.js'
+        '../../../includes/js/afterglow-router.js',
+        '../../../includes/js/dev-diagnostics.js'
     ]:
         if asset not in txt and 'CACHE:' in txt:
             txt = txt.replace('CACHE:', 'CACHE:\n' + asset, 1)
@@ -348,7 +364,8 @@ checks = {
     'layout Painel': 'value="painel" onchange="setLayout(this.value);"',
     'versão 2.2': 'Version: 2.2',
     'créditos BX-CT7': 'Personalização e edição BX-CT7',
-    'roteador firmware 14.00': 'afterglow-router.js'
+    'roteador firmware 14.00': 'afterglow-router.js',
+    'painel de diagnóstico': 'bx-dev-button'
 }
 for desc, token in checks.items():
     if token not in out:
@@ -358,7 +375,7 @@ for old in ('value="compact" onchange="setLayout(this.value);"',
     if old in out:
         raise RuntimeError('Layout removido ainda aparece: ' + old)
 for asset in ('includes/css/layouts/neon.css', 'includes/css/layouts/painel.css',
-              'includes/js/afterglow-router.js', 'cache.html'):
+              'includes/js/afterglow-router.js', 'includes/js/dev-diagnostics.js', 'cache.html'):
     if not (root / asset).is_file():
         raise RuntimeError('Arquivo não encontrado: ' + asset)
 
