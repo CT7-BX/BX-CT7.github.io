@@ -1018,3 +1018,82 @@ body.bg-gray-900{background:linear-gradient(135deg,#071515 0%,#102222 48%,#132b2
 
 /* Preserve native show/hide flow when switching between launcher and tools. */
 #initial-screen.hidden,#exploit-main-screen.hidden,#choosejb-initial.hidden{display:none!important}
+
+
+/* BX-CT7 Painel v2 — modern console home with feature art and card shelf. */
+#initial-screen{display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
+ align-items:stretch!important;padding:0!important;min-height:100vh!important;height:auto!important;
+ background:#0b1517!important;overflow-y:auto!important}
+#initial-screen>header,#initial-screen #pslogo,#initial-screen #click-to-start-text,
+#initial-screen #scrollDown,#initial-screen #PS4FW{display:none!important}
+#initial-screen #choosejb-initial{display:block!important;order:2!important;width:calc(100% - 58px)!important;
+ max-width:1120px!important;margin:0 auto 30px!important;padding:16px 20px!important;
+ background:#192c2e!important;border:1px solid #335450!important;
+ border-radius:14px!important;text-align:left!important;box-shadow:none!important}
+#initial-screen #choosejb-initial.hidden{display:none!important}
+#initial-screen #choosejb-initial h3{font-size:15px!important;font-weight:800;color:#bee1d1}
+#initial-screen #choosejb-initial>div{display:flex!important;flex-wrap:wrap;gap:10px}
+#initial-screen #choosejb-initial label{background:#29403e!important;border-radius:10px!important;min-height:46px}
+#bx-painel-launcher{display:flex!important;flex-direction:column!important;
+ width:100%;min-height:75vh;padding:26px 4.5% 30px;gap:23px;
+ background:linear-gradient(155deg,#0c1b1b,#102628 58%,#0d1922);color:#fff;
+ font-family:Arial,sans-serif;box-sizing:border-box}
+#bx-painel-launcher *{box-sizing:border-box}
+#bx-painel-launcher button{cursor:pointer;font-family:inherit}
+.bx-painel-top{display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:12px;min-height:48px;padding-bottom:15px;border-bottom:1px solid #2a4945}
+.bx-painel-top>strong{font-size:22px;letter-spacing:1px;color:#a0ffd6}
+.bx-painel-top>span{font-size:12px;letter-spacing:2px;color:#93bdb0}
+.bx-painel-top>span b{color:#fff}
+.bx-painel-top>button{font-size:12px;font-weight:900;letter-spacing:1px;color:#d0f7e6;
+ border:1px solid #467468;border-radius:10px;padding:12px 14px;background:#213c37!important}
+.bx-painel-feature{display:flex!important;align-items:stretch!important;justify-content:space-between!important;
+ min-height:270px;gap:30px;padding:30px 5%;border-radius:24px;overflow:hidden;
+ background:linear-gradient(115deg,#137b59 0%,#114d42 58%,#12393d 100%);
+ border:1px solid #2b906e}
+.bx-painel-feature-copy{display:flex!important;flex-direction:column!important;
+ align-items:flex-start!important;justify-content:center!important;min-width:0;z-index:1}
+.bx-painel-kicker{font-size:12px;font-weight:900;letter-spacing:3px;color:#b2f8d5}
+.bx-painel-feature-copy h1{font-size:clamp(38px,5vw,66px)!important;font-weight:900;
+ letter-spacing:-2px;line-height:1.04;margin:13px 0 11px;color:#fff}
+.bx-painel-feature-copy p{font-size:15px;color:#d0eddf;margin:0 0 23px}
+.bx-painel-feature-copy button{padding:14px 32px;background:#edfff4!important;color:#0b6045;
+ border-radius:10px;font-weight:900;font-size:14px}
+.bx-painel-symbol{display:flex!important;align-items:center!important;justify-content:center!important;
+ align-self:center;font-size:110px;font-weight:900;letter-spacing:-9px;
+ color:rgba(182,255,218,.17);border:5px solid rgba(204,255,225,.12);
+ border-radius:50%;width:240px;min-width:240px;height:240px;
+ transform:rotate(-12deg)}
+.bx-painel-sectiontitle{display:flex!important;justify-content:space-between!important;align-items:center!important;
+ font-size:16px;font-weight:900;color:#f0fff6;letter-spacing:1px}
+.bx-painel-sectiontitle span{font-size:11px;color:#83aa9c;letter-spacing:2px}
+.bx-painel-tiles{display:flex!important;flex-direction:row!important;flex-wrap:wrap;gap:14px}
+.bx-painel-tiles>button{flex:1 1 175px;display:flex!important;flex-direction:column!important;
+ justify-content:space-between!important;align-items:flex-start!important;
+ text-align:left!important;min-height:145px;padding:20px;border-radius:16px;
+ border:1px solid #315853;background:#1d3737!important;color:#fff}
+.bx-painel-tiles>button:nth-child(2){background:#213349!important;border-color:#384c69}
+.bx-painel-tiles>button:nth-child(3){background:#38304a!important;border-color:#554467}
+.bx-painel-tiles>button:nth-child(4){background:#3b3230!important;border-color:#61504c}
+.bx-painel-tiles>button:hover{filter:brightness(1.2)}
+.bx-painel-tiles>button>span{font-size:12px;letter-spacing:2px;color:#9dcbc0}
+.bx-painel-tiles>button>strong{font-size:18px;font-weight:900}
+.bx-painel-tiles>button>small{font-size:12px;color:#b3c9c5}
+.bx-painel-footer{display:flex!important;justify-content:space-between!important;align-items:center!important;
+ font-size:11px;font-weight:900;letter-spacing:1.4px;color:#7fa69c}
+.bx-painel-footer>button{color:#a7e9c9;background:transparent!important;
+ border:1px solid #41645f;border-radius:8px;padding:9px 14px}
+#exploit-main-screen{background:#0d2021!important}
+@media(max-width:760px){
+ #bx-painel-launcher{padding:15px;gap:16px}
+ .bx-painel-top>strong{font-size:16px}
+ .bx-painel-top>span{display:none}
+ .bx-painel-feature{min-height:245px;padding:23px 20px;gap:0}
+ .bx-painel-feature-copy h1{font-size:42px!important}
+ .bx-painel-symbol{width:110px;min-width:110px;height:110px;
+ font-size:53px;letter-spacing:-5px;border-width:3px}
+ .bx-painel-tiles{gap:9px}
+ .bx-painel-tiles>button{flex:1 1 40%;min-height:118px;padding:13px}
+ .bx-painel-tiles>button strong{font-size:15px}
+ #initial-screen #choosejb-initial{width:calc(100% - 30px)!important;margin:0 auto 15px!important}
+}
