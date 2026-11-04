@@ -218,10 +218,11 @@ color_section = design_text.find('function loadTheme()')
 if color_section < 0:
     raise RuntimeError('Função de tema original não encontrada')
 head, tail = design_text[:color_section], design_text[color_section:]
-old_tail = "    if (radioElement) {\\n        radioElement.checked = true;\\n    }\\n}"
+old_tail = "    if (radioElement) {" + chr(10) + "        radioElement.checked = true;" + chr(10) + "    }" + chr(10) + "}"
 if old_tail not in tail:
     raise RuntimeError('Marcador loadTheme não encontrado')
-tail = tail.replace(old_tail, "    if (radioElement) {\\n        radioElement.checked = true;\\n    }\\n    bxApplyColorTheme(savedColor);\\n}", 1)
+new_tail = "    if (radioElement) {" + chr(10) + "        radioElement.checked = true;" + chr(10) + "    }" + chr(10) + "    bxApplyColorTheme(savedColor);" + chr(10) + "}"
+tail = tail.replace(old_tail, new_tail, 1)
 design_path.write_text(head + tail, encoding='utf-8')
 
 # Opções experimentais: mostrar controles em firmwares reconhecidos.
