@@ -1,0 +1,16 @@
+/* GitHub Actions test history, isolated from the PS4 exploit UI. */
+.bx-monitor{margin-top:16px}
+.bx-monitor-intro{font-size:12px;color:#a6c9df;line-height:1.6;margin:0 0 12px}
+.bx-monitor-summary{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.bx-monitor-summary strong{font-size:13px;color:#dcf8ff}
+.bx-monitor-summary small{font-size:11px;color:#80a7c3}
+.bx-monitor-summary button{margin-left:auto}
+.bx-monitor-list{max-height:320px;overflow-y:auto}
+.bx-monitor-row{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px 6px;border-bottom:1px solid #1c4563}
+.bx-monitor-description{flex:1;min-width:0}
+.bx-monitor-description strong{display:block;font-size:13px}
+.bx-monitor-description small{display:block;margin-top:5px;font-size:11px;color:#94aec9;overflow-wrap:break-word}
+.bx-monitor-state{background:#27354c;border-radius:12px;padding:5px 9px;color:#d4e2ec;font-size:11px;white-space:nowrap}
+.bx-monitor-state.pass{background:#104b35;color:#7dffc6}
+.bx-monitor-row a{font-size:11px;color:#6edfff;white-space:nowrap;text-decoration:underline}
+@media(max-width:550px){.bx-monitor-row{flex-wrap:wrap}.bx-monitor-description{flex:1 1 100%}.bx-monitor-summary button{margin-left:0}}
