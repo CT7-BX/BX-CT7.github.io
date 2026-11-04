@@ -60,7 +60,7 @@ launcher_intro = '''<div id="bx-neon-launcher" class="bx-launcher-only">
       <h1>CONTROLE<br><b>TOTAL.</b></h1>
       <p>Ferramentas, ajustes e biblioteca numa central construída para o seu console.</p>
       <div class="bx-neon-buttons">
-        <button class="bx-neon-primary" onclick="document.getElementById('pslogo').click();">▶ INICIAR HOST</button>
+        <button class="bx-neon-primary" onclick="document.getElementById('ps-logo-container').click();">▶ INICIAR HOST</button>
         <button onclick="ui.exploitScreen.scrollIntoView({block:'start'});">ABRIR BIBLIOTECA ↗</button>
       </div>
     </div>
@@ -75,13 +75,13 @@ launcher_intro = '''<div id="bx-neon-launcher" class="bx-launcher-only">
       <div class="bx-painel-kicker">ÁREA PRINCIPAL / HOST</div>
       <h1>PRONTO<br>PARA JOGAR.</h1>
       <p>Seu espaço de ferramentas para PlayStation 4.</p>
-      <button onclick="document.getElementById('pslogo').click();">▶ INICIAR</button>
+      <button onclick="document.getElementById('ps-logo-container').click();">▶ INICIAR</button>
     </div>
     <div class="bx-painel-symbol" aria-hidden="true">PS4</div>
   </div>
   <div class="bx-painel-sectiontitle">ACESSO RÁPIDO <span>ESCOLHA UMA ÁREA</span></div>
   <div class="bx-painel-tiles">
-    <button onclick="ui.exploitScreen.scrollIntoView({block:'start'});"><span>01</span><strong>▦ Biblioteca</strong><small>Ferramentas e homebrew</small></button>
+    <button onclick="ui.exploitScreen.scrollIntoView({block:'start'});"><span>01</span><strong>▦ Ferramentas</strong><small>Ferramentas e homebrew</small></button>
     <button onclick="settingsPopup();"><span>02</span><strong>⚙ Sistema</strong><small>Configurações</small></button>
     <button onclick="themePopup();"><span>03</span><strong>◈ Temas</strong><small>Alterar visual</small></button>
     <button onclick="aboutPopup();"><span>04</span><strong>ⓘ Sobre</strong><small>Projeto e créditos</small></button>
@@ -150,6 +150,23 @@ if base_path.exists():
             for name, label in [('ruby', 'Rubi BX-CT7'), ('brasil', 'Brasil')])
         html = html[:anchor.end()] + options + html[anchor.end():]
         index.write_text(html, encoding='utf-8')
+
+# A troca entre layouts deve controlar os dois launchers também em caches
+# ou navegadores legados. Não depender exclusivamente da ordem dos CSS.
+update('includes/js/design.js', 'function setLayout(theme) {',
+       '''function bxApplyLauncherVisibility(theme) {
+    var neon = document.getElementById('bx-neon-launcher');
+    var painel = document.getElementById('bx-painel-launcher');
+    if (document.body) document.body.setAttribute('data-bx-layout', theme);
+    if (neon) neon.style.setProperty('display', theme === 'neon' ? 'flex' : 'none', 'important');
+    if (painel) painel.style.setProperty('display', theme === 'painel' ? 'flex' : 'none', 'important');
+}
+function setLayout(theme) {''')
+update('includes/js/design.js', "storage.set('theme', theme);",
+       "storage.set('theme', theme);\n        bxApplyLauncherVisibility(theme);")
+update('includes/js/design.js',
+       "    if (radioElement) {\n        radioElement.checked = true;\n    }\n}\n\nfunction loadTheme()",
+       "    if (radioElement) {\n        radioElement.checked = true;\n    }\n    bxApplyLauncherVisibility(savedTheme);\n}\n\nfunction loadTheme()")
 
 # Opções experimentais: mostrar controles em firmwares reconhecidos.
 # Não ampliar a lista de firmwares nem alterar payloads ou exploit chains.
