@@ -70,7 +70,7 @@ body:before{content:"";position:fixed;pointer-events:none;inset:0;background:rad
 <section class="panel"><div class="box-title"><span>ⓘ</span> Informações importantes</div><div class="inner info">O <strong>BX-HEN 0.2 é uma interface experimental</strong>, não um HEN de kernel: detectar o firmware não significa poder desbloquear o console. O GoldHEN e os demais carregadores permanecem separados no <a href="../">host principal</a>. Consulte o <a href="https://github.com/CT7-BX/BX-CT7.github.io/tree/bx-hen-01353/bx-hen" target="_blank" rel="noopener noreferrer">código-fonte</a> e evite interpretar este painel como prova de compatibilidade de jailbreak.</div></section></div>
 <section class="panel" id="cloudflare-version"><div class="box-title"><span>☁</span> Versão Cloudflare</div><div class="inner"><p class="info">A interface clássica do BX-HEN continua aqui. A versão publicada no Cloudflare permanece disponível separadamente, com recursos que dependem do Worker.</p><div class="tools"><a class="action" href="https://bx-hen.4rt949zpj8.workers.dev/" target="_blank" rel="noopener noreferrer">Abrir versão Cloudflare</a></div></div></section>
 <section id="bx-startup" class="panel"><div class="box-title"><span>◉</span> Inicialização BX-HEN</div><div class="inner"><p class="info">Inicialização local e diagnóstico do navegador. Este módulo não executa desbloqueio nem modifica o sistema do console.</p><div class="spec"><label>Estado do núcleo</label><strong id="bx-startup-state" aria-live="polite">Aguardando</strong></div><div class="spec"><label>Compatibilidade do navegador</label><strong id="bx-startup-support">A verificar</strong></div><div class="tools"><button class="action" id="bx-startup-run" type="button">Verificar inicialização</button></div></div></section>
-<section id="bx-experimental-builds" class="panel"><div class="box-title"><span>▣</span> BX-HEN — Arquivos experimentais</div><div class="inner"><p class="info">Registro local de dois arquivos BIN recebidos para análise. Estes dados não comprovam compatibilidade com firmware nem desbloqueio funcional. Nenhum binário é executado ou distribuído por esta página.</p><div class="spec"><label>GoldHEN de referência</label><strong>2.4b18.13 (nome dos arquivos)</strong></div><div class="spec"><label>EXPERIMENTAL</label><strong>297.496 bytes</strong></div><p class="info" style="overflow-wrap:anywhere">SHA-256: <code>30361f8f04d9bd9c49d936e4eba776d04b56dab7036c2cb26f79dd78c3f2d4b0</code></p><div class="spec"><label>EXPERIMENTAL-v2</label><strong>297.496 bytes</strong></div><p class="info" style="overflow-wrap:anywhere">SHA-256: <code>c06559ca371f58514de86d8a519946ed94b922ef2491c311143f9ddb6720328d</code></p><div class="spec"><label>Estado de validação no PS4</label><strong>Não testado / não confirmado</strong></div></div></section>
+<section id="bx-experimental-builds" class="panel"><div class="box-title"><span>▣</span> BX-HEN — Arquivos experimentais</div><div class="inner"><p class="info">Registro local de dois arquivos BIN recebidos para análise. Estes dados não comprovam compatibilidade com firmware nem desbloqueio funcional. Nenhum binário é executado ou distribuído por esta página.</p><div class="spec"><label>GoldHEN de referência</label><strong>2.4b18.13 (nome dos arquivos)</strong></div><div class="spec"><label>EXPERIMENTAL</label><strong>297.496 bytes</strong></div><p class="info" style="overflow-wrap:anywhere">SHA-256: <code>30361f8f04d9bd9c49d936e4eba776d04b56dab7036c2cb26f79dd78c3f2d4b0</code></p><div class="spec"><label>EXPERIMENTAL-v2</label><strong>297.496 bytes</strong></div><p class="info" style="overflow-wrap:anywhere">SHA-256: <code>c06559ca371f58514de86d8a519946ed94b922ef2491c311143f9ddb6720328d</code></p><div class="tools"><label for="bx-bin-file">Selecionar BIN para verificar localmente</label><input type="file" id="bx-bin-file" accept=".bin,application/octet-stream" aria-label="Selecionar arquivo BIN para verificar"></div><div class="spec"><label>Integridade do arquivo selecionado</label><strong id="bx-bin-result" aria-live="polite">Aguardando arquivo</strong></div><p class="info">A verificação é local: o arquivo não é enviado ao site nem executado. Requer navegador com Web Crypto (SHA-256).</p><div class="spec"><label>Estado de validação no PS4</label><strong>Não testado / não confirmado</strong></div></div></section>
 <section id="store-status" class="panel"><div class="box-title"><span>▤ BX-HEN Store — atualização do projeto</span></div><div class="inner"><p class="info"><strong>PKG de teste 0.1:</strong> compilação nativa concluída com OpenOrbis. Testes de instalação e abertura no PS4 ainda são necessários. Esta versão possui navegação local e não instala nem baixa PKGs.</p><div class="featuregrid"><div class="feature"><strong>Minecraft Online Manager</strong><p>Cadastro disponível. Download ainda não publicado.</p></div><div class="feature"><strong>Java Launcher BX-CT7</strong><p>Cadastro disponível. Download ainda não publicado.</p></div></div><div class="tools"><a class="action" href="./store/">Abrir loja e consultar disponibilidade</a><a class="action" href="https://github.com/CT7-BX/BX-CT7.github.io/actions/runs/41835919328/artifacts/13326825024" target="_blank" rel="noopener noreferrer">Consultar PKG experimental no GitHub</a></div></div></section>
 <section id="diagnostics" class="panel"><div class="box-title diag-head"><span>▣ Logs e diagnóstico do navegador</span><button id="toggle-diag" class="action" style="width:auto">Mostrar diagnóstico</button></div><div id="diag-body" class="diag-body"><div id="diag-rows"></div><div class="tools"><button class="action" id="refresh-diag" style="width:auto">↻ Atualizar</button><button class="action" id="copy-diag" style="width:auto">Copiar relatório</button></div><textarea id="report-text" class="report" readonly aria-label="Relatório BX-HEN"></textarea><p class="info" id="diag-note">A coleta é local e não altera arquivos do console.</p></div></section>
 <p class="foot">BX-CT7 • BX-HEN 0.2 • Diagnóstico e interface experimental • Sem acesso ao kernel</p>
@@ -132,6 +132,37 @@ function run(){
   }catch(error){setStatus('Erro ao iniciar diagnóstico');running=false;button.disabled=false;}
 }
 button.onclick=run;
+})();
+</script>
+<script>
+(function(){
+'use strict';
+var input=document.getElementById('bx-bin-file'),result=document.getElementById('bx-bin-result');
+if(!input||!result)return;
+var hashes={
+'30361f8f04d9bd9c49d936e4eba776d04b56dab7036c2cb26f79dd78c3f2d4b0':'EXPERIMENTAL',
+'c06559ca371f58514de86d8a519946ed94b922ef2491c311143f9ddb6720328d':'EXPERIMENTAL-v2'
+};
+input.onchange=function(){
+var f=input.files&&input.files[0];
+if(!f){result.textContent='Aguardando arquivo';return;}
+if(f.size!==297496){result.textContent='Tamanho divergente: '+f.size+' bytes';return;}
+if(!window.crypto||!window.crypto.subtle||!window.FileReader){
+result.textContent='SHA-256 indisponível neste navegador';return;
+}
+result.textContent='Verificando integridade...';
+var reader=new FileReader();
+reader.onerror=function(){result.textContent='Erro ao ler arquivo';};
+reader.onload=function(){
+try{window.crypto.subtle.digest('SHA-256',reader.result).then(function(bytes){
+var a=new Uint8Array(bytes),hex='',i;
+for(i=0;i<a.length;i++)hex+=('0'+a[i].toString(16)).slice(-2);
+result.textContent=hashes[hex]?'Integridade confirmada: '+hashes[hex]:'SHA-256 não corresponde aos arquivos registrados';
+},function(){result.textContent='Erro no cálculo SHA-256';});}
+catch(e){result.textContent='Verificação não suportada';}
+};
+reader.readAsArrayBuffer(f);
+};
 })();
 </script>
 </body>
