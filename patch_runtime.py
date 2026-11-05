@@ -307,6 +307,17 @@ if not bx_site_src.is_file():
     raise RuntimeError('Página BX-HEN não encontrada')
 bx_site_dest.parent.mkdir(parents=True, exist_ok=True)
 shutil.copy2(bx_site_src, bx_site_dest)
+# BX-HEN Core: browser-side lifecycle, loaded before dashboard enhancements.
+core_source = source / 'bx-hen-site' / 'core.js'
+if not core_source.is_file():
+    raise RuntimeError('BX-HEN Core ausente')
+shutil.copy2(core_source, bx_site_dest.parent / 'core.js')
+bx_page = bx_site_dest.read_text(encoding='utf-8')
+if '</head>' not in bx_page:
+    raise RuntimeError('BX-HEN HTML sem head')
+bx_page = bx_page.replace('</head>', '<script src="./core.js"></script>\\n</head>', 1)
+bx_site_dest.write_text(bx_page, encoding='utf-8')
+
 # Loja de PKGs: catálogo estático para URLs HTTPS autorizadas, sem instalador.
 store_source = source / 'bx-hen-site' / 'store'
 store_dest = bx_site_dest.parent / 'store'
