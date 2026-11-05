@@ -350,6 +350,18 @@ if not update('index.html', '</body>',
               '});</script>\\n</body>'):
     raise RuntimeError('Link da loja não foi adicionado ao host')
 
+# Atalho externo para a área experimental, no rodapé do BX-Host principal.
+# Não incorporar conteúdo protegido nem alterar os payloads.
+if not update('index.html', '</body>',
+              '<div id="bx-host-test-link" style="position:relative;z-index:10;'
+              'margin:22px auto;padding:12px;text-align:center;max-width:650px;'
+              'border:1px solid #286b98;border-radius:8px;background:#10283d;">'
+              '<a href="https://bx-hen.4rt949zpj8.workers.dev/teste/" '
+              'target="_blank" rel="noopener noreferrer" '
+              'style="color:#b5eaff;text-decoration:underline;">'
+              'BX-HEN — Área de testes experimental</a></div>\\n</body>'):
+    raise RuntimeError('Link da área de testes não foi adicionado ao BX-Host')
+
 # Homebrew exibe projetos cadastrados, mas nunca os trata como payloads .bin.
 homebrew_js_src = source / 'homebrew-catalog.js'
 homebrew_js_dest = root / 'includes/js/homebrew-catalog.js'
@@ -491,7 +503,8 @@ checks = {
     'módulo BX-HEN 0.1': 'bx-hen-browser.js',
     'link de entrada do BX-HEN': 'bx-hen/',
     'Homebrew BX-CT7': 'homebrew-catalog.js',
-    'atalho loja no host': 'bx-ct7-store-link'
+    'atalho loja no host': 'bx-ct7-store-link',
+    'link de testes no rodapé do host': 'bx-host-test-link'
 }
 for desc, token in checks.items():
     if token not in out:
