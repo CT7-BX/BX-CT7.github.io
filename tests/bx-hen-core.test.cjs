@@ -1,4 +1,4 @@
-// BX-HEN Core 0.1 smoke tests. Run: node --test tests/bx-hen-core.test.cjs
+// BX-HEN Core 0.2 smoke tests. Run: node --test tests/bx-hen-core.test.cjs
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -15,7 +15,7 @@ function freshCore() {
 
 test('core starts inactive with correct version', () => {
   const core = freshCore();
-  assert.equal(core.version, '0.1.0');
+  assert.equal(core.version, '0.2.0');
   assert.equal(core.diagnostics().started, false);
 });
 
