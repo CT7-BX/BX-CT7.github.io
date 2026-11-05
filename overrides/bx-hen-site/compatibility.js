@@ -35,6 +35,9 @@
      ['Cache offline',typeof window.applicationCache!=='undefined'?'API presente':'indisponível'],
      ['WebAssembly',typeof window.WebAssembly!=='undefined'?'API presente':'indisponível'],
      ['HTTPS',location.protocol==='https:'?'sim':'não'],
+     ['Viewport (CSS px)',(document.documentElement.clientWidth||0)+' x '+(document.documentElement.clientHeight||0)],
+     ['Tela (CSS px)',(window.screen&&screen.width||0)+' x '+(window.screen&&screen.height||0)],
+     ['Escala de pixels',typeof window.devicePixelRatio==='number'?String(window.devicePixelRatio):'não informada'],
      ['Desbloqueio BX-HEN','não implementado'],
      ['GoldHEN ativo','não verificável pela página']
    ];
