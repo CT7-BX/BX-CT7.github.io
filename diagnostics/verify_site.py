@@ -19,6 +19,8 @@ CHECK_FILES = [
     "patch_runtime.py",
     "overrides/bx-hen-site/index.html",
     "overrides/bx-hen-site/extras.js",
+    "overrides/bx-hen-site/core.js",
+    "dist/bx-hen/core.js",
     "overrides/bx-hen-site/test-monitor.js",
     "overrides/bx-hen-site/compatibility.js",
     "overrides/bx-hen-site/store/index.html",
@@ -33,6 +35,7 @@ CHECK_FILES = [
 ]
 JS_ASSETS = [
     "dist/bx-hen/extras.js",
+    "dist/bx-hen/core.js",
     "dist/bx-hen/test-monitor.js",
     "dist/bx-hen/compatibility.js",
 ]
