@@ -24,6 +24,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Test BX-HEN Core 0.1
+        run: node --test tests/bx-hen-core.test.cjs
       - name: Rebuild pinned upstream
         run: python3 build.py
       - name: Verify BX-HEN dashboard assets
