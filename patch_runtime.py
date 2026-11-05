@@ -315,7 +315,7 @@ shutil.copy2(core_source, bx_site_dest.parent / 'core.js')
 bx_page = bx_site_dest.read_text(encoding='utf-8')
 if '</head>' not in bx_page:
     raise RuntimeError('BX-HEN HTML sem head')
-bx_page = bx_page.replace('</head>', '<script src="./core.js"></script>\\n</head>', 1)
+bx_page = bx_page.replace('</head>', '<script src="./core.js"></script>\n</head>', 1)
 bx_site_dest.write_text(bx_page, encoding='utf-8')
 
 # Loja de PKGs: catálogo estático para URLs HTTPS autorizadas, sem instalador.
