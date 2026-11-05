@@ -47,15 +47,6 @@ jobs:
           name: bx-hen-ci-report-${{ github.run_id }}
           path: diagnostics/latest-report.json
           retention-days: 90
-      - name: Sync public Cloudflare BX-HEN site (fallback to existing dashboard)
-        run: python3 diagnostics/sync_cloudflare_public.py
-      - name: Verify public BX-HEN after sync
-        run: |
-          test -s dist/bx-hen/index.html
-          test -s dist/bx-hen/core.js
-          if grep -q '0.5.4-private-tests' dist/bx-hen/index.html; then
-            ! grep -q 'href="/teste/"' dist/bx-hen/index.html
-          fi
       - name: Publish static artifact
         uses: actions/upload-pages-artifact@v3
         with:
