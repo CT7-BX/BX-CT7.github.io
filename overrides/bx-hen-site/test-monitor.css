@@ -14,3 +14,6 @@
 .bx-monitor-state.pass{background:#104b35;color:#7dffc6}
 .bx-monitor-row a{font-size:11px;color:#6edfff;white-space:nowrap;text-decoration:underline}
 @media(max-width:550px){.bx-monitor-row{flex-wrap:wrap}.bx-monitor-description{flex:1 1 100%}.bx-monitor-summary button{margin-left:0}}
+/* Larger touch targets and visible keyboard focus for PS4 controller and phones. */
+.bx-monitor-summary button,.bx-monitor-row a{min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:8px 12px}
+.bx-monitor-row a:focus,.bx-monitor-summary button:focus{outline:2px solid #4af0ff;outline-offset:2px}
