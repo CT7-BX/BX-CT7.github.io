@@ -2,7 +2,7 @@
  * This is NOT a kernel HEN, jailbreak, or payload executor. */
 (function (global) {
   'use strict';
-  var VERSION = '0.2.0', modules = [], listeners = {}, history = [], settings = {};
+  var VERSION = '0.2.0', modules = [], listeners = Object.create(null), history = [], settings = Object.create(null);
   var started = false, busy = false, MAX_HISTORY = 100;
   function own(o,k){return Object.prototype.hasOwnProperty.call(o,k);}
   function record(type, detail) {
@@ -27,7 +27,10 @@
     for(i=0;i<modules.length;i++)if(modules[i].name===name)throw new Error('Invalid or duplicate module');
     modules.push({name:name,instance:module,state:'registered'});
   }
-  function promiseResolve(value){return Promise.resolve(value);}
+  function promiseResolve(value){
+    if(typeof Promise==='undefined')throw new Error('BX-HEN Core requires Promise support');
+    return Promise.resolve(value);
+  }
   function start(){
     if(started||busy)return promiseResolve();
     started=true;busy=true;
