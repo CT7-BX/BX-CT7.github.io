@@ -347,7 +347,7 @@ if not update('index.html', '</body>',
               'a.style.cssText="display:block;padding:12px;margin:8px 0 15px;background:#112c46;'
               'border:1px solid #2ea7c9;border-radius:8px;color:#fff;text-align:center;'
               'font-weight:bold;text-decoration:none";p.insertBefore(a,p.firstChild);'
-              '});</script>\\n</body>'):
+              '});</script>\n</body>'):
     raise RuntimeError('Link da loja não foi adicionado ao host')
 
 # Atalho externo para a área experimental, no rodapé do BX-Host principal.
@@ -359,7 +359,7 @@ if not update('index.html', '</body>',
               '<a href="https://bx-hen.4rt949zpj8.workers.dev/teste/" '
               'target="_blank" rel="noopener noreferrer" '
               'style="color:#b5eaff;text-decoration:underline;">'
-              'BX-HEN — Área de testes experimental</a></div>\\n</body>'):
+              'BX-HEN — Área de testes experimental</a></div>\n</body>'):
     raise RuntimeError('Link da área de testes não foi adicionado ao BX-Host')
 
 # Homebrew exibe projetos cadastrados, mas nunca os trata como payloads .bin.
