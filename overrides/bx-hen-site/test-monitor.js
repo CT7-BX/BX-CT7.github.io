@@ -46,8 +46,8 @@ function init(){
  var summary=add(inner,'div',null,'bx-monitor-summary');
  var count=add(summary,'strong','Aguardando relatório...');count.id='bx-monitor-count';
  var date=add(summary,'small','');date.id='bx-monitor-date';
- var update=add(summary,'button','Atualizar histórico','bx-mini');update.onclick=load;
- var state=add(inner,'p','Consultando histórico...','bx-monitor-intro');state.id='bx-monitor-status';
+ var update=add(summary,'button','Atualizar histórico','bx-mini');update.type='button';update.onclick=load;
+ var state=add(inner,'p','Consultando histórico...','bx-monitor-intro');state.id='bx-monitor-status';state.setAttribute('role','status');state.setAttribute('aria-live','polite');state.setAttribute('aria-atomic','true');
  var list=add(inner,'div',null,'bx-monitor-list');list.id='bx-monitor-runs';
  var info=add(inner,'p','Relatório automático às 08h, 14h e 20h de Mato Grosso, sujeito à fila do GitHub. A execução atual aparece apenas após finalizar e ser coletada em uma publicação posterior.','bx-monitor-intro');
  var ref=find('diagnostics');if(ref&&ref.parentNode===main)main.insertBefore(box,ref);
