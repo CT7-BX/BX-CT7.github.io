@@ -4,17 +4,20 @@
 'use strict';
 function find(id){return document.getElementById(id);}
 function add(parent,tag,text,cls){var n=document.createElement(tag);if(cls)n.className=cls;if(typeof text==='string')n.textContent=text;parent.appendChild(n);return n;}
+var requestId=0;
 function load(){
+ var current=++requestId;
+ status('Consultando histórico...');
  var x=new XMLHttpRequest(),url='./test-history.json?v='+new Date().getTime();
  x.open('GET',url,true);
  x.timeout=12000;
  x.onreadystatechange=function(){
-  if(x.readyState!==4)return;
+  if(x.readyState!==4||current!==requestId)return;
   if(x.status<200||x.status>=300){status('Histórico indisponível (HTTP '+x.status+').');return;}
   try{render(JSON.parse(x.responseText));}catch(e){status('Não foi possível ler o histórico.');}
  };
- x.onerror=function(){status('Falha de conexão ao consultar os relatórios.');};
- x.ontimeout=function(){status('Tempo de consulta esgotado.');};
+ x.onerror=function(){if(current!==requestId)return;status('Falha de conexão ao consultar os relatórios.');};
+ x.ontimeout=function(){if(current!==requestId)return;status('Tempo de consulta esgotado.');};
  try{x.send(null);}catch(e){status('A consulta não é suportada neste navegador.');}
 }
 function status(message){var n=find('bx-monitor-status');if(n)n.textContent=message;}
