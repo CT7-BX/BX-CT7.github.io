@@ -4,11 +4,14 @@
 'use strict';
 function find(id){return document.getElementById(id);}
 function add(parent,tag,text,cls){var n=document.createElement(tag);if(cls)n.className=cls;if(typeof text==='string')n.textContent=text;parent.appendChild(n);return n;}
-var requestId=0;
+var requestId=0,activeRequest=null;
 function load(){
  var current=++requestId;
+ if(activeRequest){try{activeRequest.abort();}catch(ignore){}}
+ activeRequest=null;
  status('Consultando histórico...');
  var x=new XMLHttpRequest(),url='./test-history.json?v='+new Date().getTime();
+ activeRequest=x;
  x.open('GET',url,true);
  x.timeout=12000;
  x.onreadystatechange=function(){
