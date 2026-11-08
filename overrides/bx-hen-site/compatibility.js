@@ -41,6 +41,7 @@
      ['Tela (CSS px)',(window.screen&&screen.width||0)+' x '+(window.screen&&screen.height||0)],
      ['Escala de pixels',typeof window.devicePixelRatio==='number'?String(window.devicePixelRatio):'não informada'],
      ['Entrada por toque',('ontouchstart' in window)?'API detectada':'API não detectada'],
+     ['Visibilidade da página',typeof document.visibilityState==='string'?(document.visibilityState==='visible'?'visível':document.visibilityState==='hidden'?'em segundo plano':'estado: '+document.visibilityState):'API indisponível'],
      ['Preferência por movimento reduzido',(typeof window.matchMedia==='function')?(window.matchMedia('(prefers-reduced-motion: reduce)').matches?'ativada':'não ativada ou não suportada'):'API indisponível'],
      ['Desbloqueio BX-HEN','não implementado'],
      ['GoldHEN ativo','não verificável pela página']
