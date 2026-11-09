@@ -37,7 +37,7 @@ function render(data){
   add(details,'small',(r.created_at||'Sem data').replace('T',' ').replace('Z',' UTC')+' • '+(r.event||'')+' • '+(r.commit||''));
   var conclusion=r.conclusion==='success'?'Aprovada':r.conclusion==='failure'?'Falhou':r.conclusion==='cancelled'?'Cancelada':r.conclusion||'Outra';
   add(row,'span',conclusion,'bx-monitor-state '+(r.conclusion==='success'?'pass':'other'));
-  var link=add(row,'a','Ver logs');link.href=r.url;link.target='_blank';link.rel='noopener noreferrer';
+  var link=add(row,'a','Ver logs');link.setAttribute('aria-label','Ver logs da execução '+String(r.id));link.href=r.url;link.target='_blank';link.rel='noopener noreferrer';
  }
  status('Últimas '+data.runs.length+' execuções concluídas: '+ok+' com sucesso, '+fail+' com outros resultados.');
  var count=find('bx-monitor-count');if(count)count.textContent=data.runs.length+' registros';
