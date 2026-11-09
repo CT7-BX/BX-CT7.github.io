@@ -25,9 +25,13 @@ function load(){
 }
 function status(message){var n=find('bx-monitor-status');if(n)n.textContent=message;}
 function render(data){
- if(!data||!data.runs||!data.runs.length){status('Nenhuma execução concluída registrada.');return;}
  var target=find('bx-monitor-runs');if(!target)return;
  while(target.firstChild)target.removeChild(target.firstChild);
+ if(!data||!data.runs||!data.runs.length){
+  var count=find('bx-monitor-count');if(count)count.textContent='0 registros';
+  var date=find('bx-monitor-date');if(date)date.textContent=(data&&data.generated_at_utc||'').replace('T',' ').replace('+00:00',' UTC');
+  status('Nenhuma execução concluída registrada.');return;
+ }
  var ok=0,fail=0;
  for(var i=0;i<data.runs.length;i++){
   var r=data.runs[i];if(r.conclusion==='success')ok++;else fail++;
