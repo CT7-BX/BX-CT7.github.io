@@ -4,7 +4,7 @@ html,body{background:#111317!important;color:#f1f1f1!important;font-family:Arial
 body{background-image:none!important}
 .bx-brand-top{position:static!important;display:block!important;width:max-content;margin:18px auto 0!important;padding:4px 10px!important;background:none!important;color:#aaa!important;border:0!important;box-shadow:none!important;font-size:12px!important}
 #bx-neon-launcher,#bx-painel-launcher{display:none!important}
-#initial-screen{background:#111317!important;min-height:100vh!important;padding:76px 20px 48px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important}
+#initial-screen{background:#111317!important;min-height:100vh!important;padding:76px 20px 48px!important;flex-direction:column!important;justify-content:center!important;align-items:center!important}
 #initial-screen:before{content:"BX-CT7  /  PS4 HOST";display:block;color:#aeb2ba;font:600 12px Arial,Helvetica,sans-serif;letter-spacing:2px;margin-bottom:28px}
 #initial-screen header{top:15px!important;left:15px!important;right:15px!important;display:flex!important;justify-content:flex-end!important;gap:8px!important}
 #initial-screen header>div{display:flex!important;gap:7px!important}
