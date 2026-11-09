@@ -549,7 +549,7 @@ if '</head>' not in main_html:
     raise RuntimeError('Host sem head para interface minimalista')
 main_html = main_html.replace(
     '</head>',
-    '<link rel="stylesheet" href="./includes/css/minimal.css">\\n</head>', 1)
+    '<link rel="stylesheet" href="./includes/css/minimal.css">\n</head>', 1)
 # Existing browsers using Neon/Painel are migrated once to the same page.
 minimal_boot = """<script>
 (function(){
@@ -564,8 +564,8 @@ minimal_boot = """<script>
 </script>
 """
 main_html = main_html.replace(
-    '<script>\\n        // Prevent "Theme Flash"',
-    minimal_boot + '<script>\\n        // Prevent "Theme Flash"', 1)
+    '<script>\n        // Prevent "Theme Flash"',
+    minimal_boot + '<script>\n        // Prevent "Theme Flash"', 1)
 # The original settings, HEN selection and primary PS4 control remain intact.
 # Remove redundant links to separate dashboard and experimental site.
 main_html = main_html.replace('window.location.href=\'./bx-hen/\';',
@@ -580,14 +580,14 @@ if legacy_dashboard.is_file():
     legacy_html = legacy_dashboard.read_text(encoding='utf-8')
     legacy_html = legacy_html.replace(
         '</head>',
-        '<script>window.location.replace("../");</script>\\n</head>', 1)
+        '<script>window.location.replace("../");</script>\n</head>', 1)
     legacy_dashboard.write_text(legacy_html, encoding='utf-8')
 # Cache manifest includes presentation CSS for offline PS4 use.
 for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
     txt = manifest.read_text(encoding='utf-8')
     item = '../../../includes/css/minimal.css'
     if item not in txt and 'CACHE:' in txt:
-        txt = txt.replace('CACHE:', 'CACHE:\\n' + item, 1)
+        txt = txt.replace('CACHE:', 'CACHE:\n' + item, 1)
         manifest.write_text(txt, encoding='utf-8')
 if 'includes/css/minimal.css' not in index.read_text(encoding='utf-8'):
     raise RuntimeError('Interface minimalista não integrada ao host')
