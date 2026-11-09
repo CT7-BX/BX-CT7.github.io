@@ -90,3 +90,27 @@ test('reports invalid JSON and HTTP failures without inserting rows', () => {
   assert.match(env.get('bx-monitor-status').textContent, /HTTP 503/);
   assert.equal(env.get('bx-monitor-runs').children.length, 0);
 });
+
+
+test('network errors and timeouts show clear status without creating rows', () => {
+  const env = environment();
+  env.requests[0].onerror();
+  assert.match(env.get('bx-monitor-status').textContent, /Falha de conexão/);
+  assert.equal(env.get('bx-monitor-runs').children.length, 0);
+  env.refresh();
+  env.requests[1].ontimeout();
+  assert.match(env.get('bx-monitor-status').textContent, /Tempo de consulta esgotado/);
+  assert.equal(env.get('bx-monitor-runs').children.length, 0);
+});
+
+test('stale network failures do not overwrite a newer successful report', () => {
+  const env = environment();
+  const old = env.requests[0];
+  env.refresh();
+  env.requests[1].respond(200, report([run(789)]));
+  const status = env.get('bx-monitor-status').textContent;
+  old.onerror();
+  old.ontimeout();
+  assert.equal(env.get('bx-monitor-status').textContent, status);
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+});
