@@ -17,6 +17,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 SITE = ROOT / "dist"
 CHECK_FILES = [
     "patch_runtime.py",
+    "overrides/minimal.css",
+    "dist/index.html",
+    "dist/includes/css/minimal.css",
     "overrides/bx-hen-site/index.html",
     "overrides/bx-hen-site/extras.js",
     "overrides/bx-hen-site/core.js",
@@ -126,6 +129,28 @@ def check_catalog():
             check(item.get("download_url") is None, "Planned files must not show download URLs")
 
 
+
+def check_minimal_host():
+    """Guard the single-page presentation and offline cache against regressions."""
+    html = (SITE / "index.html").read_text(encoding="utf-8")
+    css = (SITE / "includes/css/minimal.css").read_text(encoding="utf-8")
+    legacy_html = (SITE / "bx-hen/index.html").read_text(encoding="utf-8")
+    check(html.count('href="./includes/css/minimal.css"') == 1,
+          "Minimal stylesheet missing or duplicated in main host")
+    check("bx-minimal-v1" in html and "localStorage.setItem('theme','index')" in html,
+          "Minimal theme migration not injected before page startup")
+    check('window.location.replace("../")' in legacy_html,
+          "Legacy dashboard does not redirect to the single main page")
+    check("width:max-content" not in css, "Unsupported legacy width remains in minimal CSS")
+    check("flex-direction:row!important" in css,
+          "HEN option layout may inherit a conflicting mobile flex direction")
+    manifests = list((SITE / "includes/caches/manifest").glob("*.manifest"))
+    check(bool(manifests), "No offline cache manifests generated")
+    for manifest in manifests:
+        check("../../../includes/css/minimal.css" in manifest.read_text(encoding="utf-8"),
+              "Minimal CSS missing in cache manifest: " + manifest.name)
+
+
 def main():
     for rel in CHECK_FILES + JS_ASSETS:
         path = ROOT / rel
@@ -134,6 +159,7 @@ def main():
         check(b"\r" not in raw, "Unexpected CR/CRLF line breaks: " + rel)
         raw.decode("utf-8")
         check(raw.endswith(b"\n"), "Missing final newline: " + rel)
+    check_minimal_host()
     check_html("bx-hen/index.html")
     check_html("bx-hen/store/index.html")
     for rel in JS_ASSETS:

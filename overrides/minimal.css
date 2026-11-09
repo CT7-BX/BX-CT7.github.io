@@ -2,7 +2,7 @@
 /* CSS simples, compatível com o WebKit legado do PS4. */
 html,body{background:#111317!important;color:#f1f1f1!important;font-family:Arial,Helvetica,sans-serif!important}
 body{background-image:none!important}
-.bx-brand-top{position:static!important;display:block!important;width:max-content;margin:18px auto 0!important;padding:4px 10px!important;background:none!important;color:#aaa!important;border:0!important;box-shadow:none!important;font-size:12px!important}
+.bx-brand-top{position:static!important;display:table!important;width:auto!important;margin:18px auto 0!important;padding:4px 10px!important;background:none!important;color:#aaa!important;border:0!important;box-shadow:none!important;font-size:12px!important}
 #bx-neon-launcher,#bx-painel-launcher{display:none!important}
 #initial-screen{background:#111317!important;min-height:100vh!important;padding:76px 20px 48px!important;flex-direction:column!important;justify-content:center!important;align-items:center!important}
 #initial-screen:before{content:"BX-CT7  /  PS4 HOST";display:block;color:#aeb2ba;font:600 12px Arial,Helvetica,sans-serif;letter-spacing:2px;margin-bottom:28px}
@@ -16,8 +16,8 @@ body{background-image:none!important}
 #PS4FW{color:#a6aab2!important;font-size:13px!important;text-align:center!important;margin:14px 0 20px!important}
 #choosejb-initial{width:100%!important;max-width:480px!important;background:#1a1c21!important;border:1px solid #34363e!important;border-radius:12px!important;box-shadow:none!important;padding:18px!important}
 #choosejb-initial h3{font-size:15px!important;font-weight:600!important;color:#e1e2e6!important;margin-bottom:15px!important}
-#choosejb-initial>div{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
-#choosejb-initial label{flex:1 1 125px!important;min-width:125px!important;background:#262930!important;border:1px solid #41434b!important;border-radius:8px!important;box-shadow:none!important;margin:0!important;padding:11px!important}
+#choosejb-initial>div{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;gap:0!important}
+#choosejb-initial label{flex:1 1 125px!important;min-width:125px!important;margin:4px!important;box-sizing:border-box!important;background:#262930!important;border:1px solid #41434b!important;border-radius:8px!important;box-shadow:none!important;margin:0!important;padding:11px!important}
 #choosejb-initial label:focus-within{outline:2px solid #c3c5cd!important}
 #choosejb-initial label span{font-size:14px!important;font-weight:500!important;line-height:1.4!important}
 #choosejb-initial input{accent-color:#c5c7cf!important}
@@ -30,4 +30,4 @@ body{background-image:none!important}
 #bx-dev-button{background:#24272d!important;border-color:#474b53!important;color:#ddd!important;box-shadow:none!important}
 #bx-hen-overlay .bx-hen-panel,#bx-dev-overlay .bx-dev-card{background:#1a1c21!important;border:1px solid #3c4048!important;box-shadow:none!important}
 button{transition:none!important}
-@media(max-width:520px){#initial-screen{padding:70px 12px 35px!important}#choosejb-initial{padding:12px!important}#choosejb-initial label{min-width:100%!important}#initial-screen header{right:9px!important;top:9px!important}}
+@media(max-width:520px){#initial-screen{padding:70px 12px 35px!important}#choosejb-initial{padding:12px!important}#choosejb-initial label{flex:1 1 100%!important;min-width:0!important}#initial-screen header{right:9px!important;top:9px!important}}
