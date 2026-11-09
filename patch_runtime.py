@@ -534,3 +534,61 @@ handler_text = (root / 'includes/js/payloadsHandler.js').read_text(encoding='utf
 if 'window.bxRenderHomebrewCards(ui.homebrewSection)' not in handler_text:
     raise RuntimeError('Homebrew sem cartões BX-CT7')
 print('BX-CT7: pacote personalizado e hashes confirmados.')
+
+
+# Minimal single-page presentation: preserve original loader implementation.
+# Keep former diagnostic route for old bookmarks, but forward visitors to the
+# single main host page. No firmware or payload logic is modified.
+minimal_source = source / 'minimal.css'
+if not minimal_source.is_file():
+    raise RuntimeError('Interface minimalista não encontrada')
+minimal_target = root / 'includes/css/minimal.css'
+shutil.copy2(minimal_source, minimal_target)
+main_html = index.read_text(encoding='utf-8')
+if '</head>' not in main_html:
+    raise RuntimeError('Host sem head para interface minimalista')
+main_html = main_html.replace(
+    '</head>',
+    '<link rel="stylesheet" href="./includes/css/minimal.css">\\n</head>', 1)
+# Existing browsers using Neon/Painel are migrated once to the same page.
+minimal_boot = """<script>
+(function(){
+ try {
+  if (localStorage.getItem('bx-minimal-v1') !== '1') {
+   localStorage.setItem('theme','index');
+   localStorage.setItem('color','default');
+   localStorage.setItem('bx-minimal-v1','1');
+  }
+ } catch(e) {}
+})();
+</script>
+"""
+main_html = main_html.replace(
+    '<script>\\n        // Prevent "Theme Flash"',
+    minimal_boot + '<script>\\n        // Prevent "Theme Flash"', 1)
+# The original settings, HEN selection and primary PS4 control remain intact.
+# Remove redundant links to separate dashboard and experimental site.
+main_html = main_html.replace('window.location.href=\'./bx-hen/\';',
+                              'document.getElementById(\'ps-logo-container\').click();')
+main_html = main_html.replace(
+    '<script src="./includes/js/dev-diagnostics.js"></script>',
+    '<script src="./includes/js/dev-diagnostics.js"></script>', 1)
+index.write_text(main_html, encoding='utf-8')
+# Legacy BX-HEN URL now leads to the one supported main interface.
+legacy_dashboard = root / 'bx-hen/index.html'
+if legacy_dashboard.is_file():
+    legacy_html = legacy_dashboard.read_text(encoding='utf-8')
+    legacy_html = legacy_html.replace(
+        '</head>',
+        '<script>window.location.replace("../");</script>\\n</head>', 1)
+    legacy_dashboard.write_text(legacy_html, encoding='utf-8')
+# Cache manifest includes presentation CSS for offline PS4 use.
+for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
+    txt = manifest.read_text(encoding='utf-8')
+    item = '../../../includes/css/minimal.css'
+    if item not in txt and 'CACHE:' in txt:
+        txt = txt.replace('CACHE:', 'CACHE:\\n' + item, 1)
+        manifest.write_text(txt, encoding='utf-8')
+if 'includes/css/minimal.css' not in index.read_text(encoding='utf-8'):
+    raise RuntimeError('Interface minimalista não integrada ao host')
+print('BX-CT7 Minimal: uma página principal, arquivos do HEN preservados.')
