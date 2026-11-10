@@ -95,14 +95,6 @@
     formerFocus = null;
   }
 
-  function isOriginalGoldHen() {
-    // The page owns HEN selection. Never turn another selection into GoldHEN.
-    if (typeof user !== 'undefined' && user && user.currentJbFlavor) {
-      return user.currentJbFlavor === 'GoldHEN';
-    }
-    return false;
-  }
-
   function launchTarget(node) {
     while (node && node !== document) {
       if (node.id === 'exploitRun' || node.id === 'ps-logo-container') return true;
@@ -115,7 +107,6 @@
     if (!launchTarget(event.target)) return;
     if (window.abortLoading) return;
     if (typeof user === 'undefined' || !user || user.blockJailbreak) return;
-    if (!isOriginalGoldHen()) return;
     // This is presentation only: event propagation and native execution are untouched.
     // The unmodified upstream click listener performs the actual launch.
     openPanel();
