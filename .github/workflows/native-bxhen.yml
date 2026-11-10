@@ -32,6 +32,8 @@ jobs:
           curl -fLsS --retry 3 https://github.com/OpenOrbis/create-gp4/releases/download/v1.0/binaries.tar.gz -o /tmp/bx-neon-gp4.tar.gz
           tar -xzf /tmp/bx-neon-fself.tar.gz -C native-bxhen/tool-bins/fself
           tar -xzf /tmp/bx-neon-gp4.tar.gz -C native-bxhen/tool-bins/gp4
+      - name: Generate 24-bit PS4 icon on GitHub runner
+        run: python3 native-bxhen/make_icon.py native-bxhen/neon-icon.png
       - name: Build independent PS4 homebrew UI
         run: |
           set -euo pipefail
@@ -45,7 +47,7 @@ jobs:
               cp -a native-bxhen/upstream/samples/font/. native-bxhen/font/
               cp -a native-bxhen/upstream/samples/_common native-bxhen/_common
               cp native-bxhen/main.cpp native-bxhen/font/font/main.cpp
-              python3 native-bxhen/make_icon.py native-bxhen/font/sce_sys/icon0.png
+              cp native-bxhen/neon-icon.png native-bxhen/font/sce_sys/icon0.png
               cp native-bxhen/upstream/samples/input/input/controller.h native-bxhen/font/font/controller.h
               cp native-bxhen/upstream/samples/input/input/controller.cpp native-bxhen/font/font/controller.cpp
               cd native-bxhen/font
