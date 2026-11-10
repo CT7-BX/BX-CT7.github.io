@@ -22,15 +22,6 @@ index = root / 'index.html'
 if not index.exists():
     raise RuntimeError('WebKitty não contém index.html')
 
-# Keep visitors on the user's own HTTPS host. Upstream redirects PlayStation
-# browsers to an external HTTP website after a confirmation prompt. That
-# bypasses the BX-HEN visual entirely and is not appropriate for our host.
-# This only disables that optional navigation prompt, not the exploit loader.
-if not update('index.html',
-              'var goToHttps = localStorage.getItem("dontHTTPS") != "1";',
-              'var goToHttps = false; // BX-HEN: stay on this site'):
-    raise RuntimeError('A regra de redirecionamento HTTPS do upstream mudou')
-
 # Neon é o layout padrão. Compacto foi retirado do seletor; resta o Painel.
 # A opção antiga "Default" não é exibida no seletor.
 # Restaurar o layout nativo do WebKitty como opção independente.
@@ -601,53 +592,3 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
 if 'includes/css/minimal.css' not in index.read_text(encoding='utf-8'):
     raise RuntimeError('Interface minimalista não integrada ao host')
 print('BX-CT7 Minimal: uma página principal, arquivos do HEN preservados.')
-
-# BX-HEN Neon v2.2 is a visual-only screen activated on native host launch.
-# Keep main host appearance unchanged before activation; no payload or exploit
-# source is changed. Both original click listeners keep full control.
-for asset, destination in (
-    ('bx-hen-launch.css', 'includes/css/bx-hen-launch.css'),
-    ('bx-hen-launch.js', 'includes/js/bx-hen-launch.js'),
-):
-    src_file = source / asset
-    if not src_file.is_file():
-        raise RuntimeError('Visual BX-HEN ausente: ' + asset)
-    target_file = root / destination
-    target_file.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src_file, target_file)
-
-index_html = index.read_text(encoding='utf-8')
-if 'href="./includes/css/minimal.css"' not in index_html:
-    raise RuntimeError('A pagina principal mudou; conferir a integracao do Neon')
-if '</head>' not in index_html or '</body>' not in index_html:
-    raise RuntimeError('Host sem marcadores HTML de integracao Neon')
-index_html = index_html.replace(
-    '</head>',
-    '<link rel="stylesheet" href="./includes/css/bx-hen-launch.css">\n</head>', 1)
-index_html = index_html.replace(
-    '</body>',
-    '<script src="./includes/js/bx-hen-launch.js"></script>\n</body>', 1)
-index.write_text(index_html, encoding='utf-8')
-
-for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
-    txt = manifest.read_text(encoding='utf-8')
-    for asset in (
-        '../../../includes/css/bx-hen-launch.css',
-        '../../../includes/js/bx-hen-launch.js',
-    ):
-        if asset not in txt and 'CACHE:' in txt:
-            txt = txt.replace('CACHE:', 'CACHE:\n' + asset, 1)
-    manifest.write_text(txt, encoding='utf-8')
-
-if 'includes/js/bx-hen-launch.js' not in index.read_text(encoding='utf-8'):
-    raise RuntimeError('Visual BX-HEN nao integrado ao fluxo original')
-print('BX-HEN v2.2 Neon / RUOK999: apresentacao vinculada ao botao original; payloads intactos.')
-
-# A never-before-cached entry URL for PS4 browsers still using a stale offline
-# application cache. Same document and same native click listeners, at root.
-# This HTML does not have a manifest attribute and loads local resources.
-neon_entry = root / 'neon.html'
-shutil.copy2(index, neon_entry)
-if 'bx-hen-launch.js' not in neon_entry.read_text(encoding='utf-8'):
-    raise RuntimeError('Entrada Neon sem script da personalizacao')
-print('BX-HEN Neon: entrada independente de cache em /neon.html')
