@@ -78,11 +78,13 @@ test('secondary original run button works and close restores original host', () 
   assert.equal(app.panel.className, '');
 });
 
-test('non-GoldHEN selection or blocked native start is never reclassified', () => {
+test('any native HEN launch gets visual without changing underlying selection', () => {
   const app = environment();
   app.user.currentJbFlavor = 'PS4HEN';
   app.click('ps-logo-container');
-  assert.equal(app.panel.className, '');
+  assert.equal(app.panel.className, 'bx-open');
+  assert.equal(app.user.currentJbFlavor, 'PS4HEN');
+  app.key(27);
   app.user.currentJbFlavor = 'GoldHEN';
   app.user.blockJailbreak = true;
   app.click('ps-logo-container');
