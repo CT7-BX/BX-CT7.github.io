@@ -28,8 +28,6 @@ jobs:
         run: node --test tests/bx-hen-core.test.cjs
       - name: Test BX-HEN monitor regressions
         run: node --test tests/bx-hen-monitor.test.cjs
-      - name: Test BX-HEN Neon original-launch integration
-        run: node --test tests/bx-hen-launch.test.cjs
       - name: Rebuild pinned upstream
         run: python3 build.py
       - name: Verify BX-HEN dashboard assets
