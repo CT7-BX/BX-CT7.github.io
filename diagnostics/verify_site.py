@@ -17,9 +17,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 SITE = ROOT / "dist"
 CHECK_FILES = [
     "patch_runtime.py",
-    "overrides/minimal.css",
+    "overrides/layouts/neon.css",
     "dist/index.html",
-    "dist/includes/css/minimal.css",
+    "dist/includes/css/layouts/neon.css",
     "overrides/bx-hen-site/index.html",
     "overrides/bx-hen-site/extras.js",
     "overrides/bx-hen-site/core.js",
@@ -130,25 +130,36 @@ def check_catalog():
 
 
 
-def check_minimal_host():
-    """Guard the single-page presentation and offline cache against regressions."""
+def check_goldhen_visual_host():
+    """Guard visual-only GoldHEN presentation and the original BX-HEN route."""
     html = (SITE / "index.html").read_text(encoding="utf-8")
-    css = (SITE / "includes/css/minimal.css").read_text(encoding="utf-8")
     legacy_html = (SITE / "bx-hen/index.html").read_text(encoding="utf-8")
-    check(html.count('href="./includes/css/minimal.css"') == 1,
-          "Minimal stylesheet missing or duplicated in main host")
-    check("bx-minimal-v1" in html and "localStorage.setItem('theme','index')" in html,
-          "Minimal theme migration not injected before page startup")
-    check('window.location.replace("../")' in legacy_html,
-          "Legacy dashboard does not redirect to the single main page")
-    check("width:max-content" not in css, "Unsupported legacy width remains in minimal CSS")
-    check("flex-direction:row!important" in css,
-          "HEN option layout may inherit a conflicting mobile flex direction")
+    neon_css = (SITE / "includes/css/layouts/neon.css").read_text(encoding="utf-8")
+    check("GOLDHEN ORIGINAL" in html and "GOLDHEN 2.4b18.13 / APRESENTAÇÃO BX-CT7" in html,
+          "Visual GoldHEN/BX-HEN not present on main host")
+    check("bx-goldhen-visual-v1" in html and "bx-minimal-v1" in html,
+          "Former minimal-layout visitors are not migrated")
+    check('href="./includes/css/minimal.css"' not in html,
+          "Obsolete minimal style is overriding GoldHEN presentation")
+    check("bx-theme-bridge.css" in html and 'id="bx-neon-launcher"' in html,
+          "Original BX-CT7 visual host shell missing")
+    check("bx-neon" in neon_css, "Neon launcher CSS absent")
+    check('window.location.replace("../")' not in legacy_html,
+          "BX-HEN diagnostic page is still being redirected")
+    check('id="run-check"' in legacy_html, "BX-HEN diagnostic page missing")
+    goldhen = SITE / "includes/payloads/HEN/goldhen_v2.4b18.13.bin"
+    check(goldhen.is_file() and goldhen.stat().st_size == 297496,
+          "Unchanged upstream GoldHEN payload missing or unexpected size")
     manifests = list((SITE / "includes/caches/manifest").glob("*.manifest"))
     check(bool(manifests), "No offline cache manifests generated")
     for manifest in manifests:
-        check("../../../includes/css/minimal.css" in manifest.read_text(encoding="utf-8"),
-              "Minimal CSS missing in cache manifest: " + manifest.name)
+        content = manifest.read_text(encoding="utf-8")
+        check("../../../includes/css/layouts/neon.css" in content,
+              "Neon visual CSS not cached: " + manifest.name)
+        check("../../../includes/css/bx-theme-bridge.css" in content,
+              "BX theme CSS not cached: " + manifest.name)
+        check("../../../includes/css/minimal.css" not in content,
+              "Stale minimal CSS in generated manifest: " + manifest.name)
 
 
 def main():
@@ -159,7 +170,7 @@ def main():
         check(b"\r" not in raw, "Unexpected CR/CRLF line breaks: " + rel)
         raw.decode("utf-8")
         check(raw.endswith(b"\n"), "Missing final newline: " + rel)
-    check_minimal_host()
+    check_goldhen_visual_host()
     check_html("bx-hen/index.html")
     check_html("bx-hen/store/index.html")
     for rel in JS_ASSETS:
