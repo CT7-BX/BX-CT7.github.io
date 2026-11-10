@@ -1,0 +1,35 @@
+/* BX-HEN v2.2 / RUOK999 — visual overlay for the existing browser host.
+ * No changes to firmware selection, exploit execution, payloads or HEN internals.
+ * PS4 WebKit-friendly CSS: no external fonts, libraries or images. */
+#bx-hen-neon{display:none;position:fixed;z-index:6000;top:0;right:0;bottom:0;left:0;overflow:auto;background:#040819;color:#ecfaff;font-family:Arial,Helvetica,sans-serif}
+#bx-hen-neon.bx-open{display:block}
+#bx-hen-neon *{box-sizing:border-box}
+#bx-hen-neon .bx-border{border:1px solid #17ddff;box-shadow:0 0 18px rgba(0,196,255,.18),inset 0 0 20px rgba(91,28,196,.17)}
+#bx-hen-neon .bx-wrap{max-width:1300px;min-height:100%;margin:0 auto;padding:26px 28px 30px;position:relative}
+#bx-hen-neon .bx-wrap:before{content:"";pointer-events:none;position:fixed;z-index:-1;top:0;right:0;bottom:0;left:0;background:radial-gradient(ellipse at 20% 35%,rgba(67,23,157,.25),transparent 48%),radial-gradient(ellipse at 80% 85%,rgba(0,174,237,.13),transparent 50%)}
+#bx-hen-neon .bx-head{display:-webkit-box;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:15px 20px;background:#0a1230;border:1px solid #3a51a1;border-top:3px solid #20edff;border-radius:12px}
+#bx-hen-neon .bx-mark{font-size:25px;font-weight:900;letter-spacing:2px;color:#f7faff;text-shadow:0 0 14px rgba(0,202,255,.7)}
+#bx-hen-neon .bx-mark b{color:#28e3ff}
+#bx-hen-neon .bx-ver{display:block;font-size:12px;color:#bca8ff;letter-spacing:1.5px;margin-top:4px}
+#bx-hen-neon .bx-author{font-size:12px;color:#92dfff;letter-spacing:1.2px;text-align:right}
+#bx-hen-neon .bx-close,#bx-hen-neon .bx-console{cursor:pointer;min-height:44px;min-width:44px;background:#11284e;border:1px solid #1ed7ff;border-radius:8px;color:#fff;font-size:14px;font-weight:bold;padding:10px 15px}
+#bx-hen-neon button:focus{outline:3px solid #d178ff;outline-offset:2px}
+#bx-hen-neon .bx-stage{display:-webkit-box;display:flex;gap:24px;align-items:stretch;margin-top:22px;flex-wrap:wrap}
+#bx-hen-neon .bx-art{flex:1 1 280px;min-height:330px;padding:28px 25px;border-radius:14px;border:1px solid #6438b5;background:linear-gradient(150deg,#101439,#0a102b 55%,#220d3a);text-align:center}
+#bx-hen-neon .bx-emblem{width:155px;height:155px;margin:8px auto 27px;border-radius:35px;border:5px solid #25e7ff;box-shadow:0 0 24px rgba(15,214,246,.45);background:#07112b;position:relative;transform:rotate(-5deg)}
+#bx-hen-neon .bx-emblem:before{content:"BX";display:block;font-size:77px;line-height:150px;font-weight:900;font-style:italic;letter-spacing:-13px;padding-right:13px;color:#e5faff;text-shadow:7px 5px 0 #a437e2}
+#bx-hen-neon .bx-art h2{font-size:39px;line-height:1.1;margin:6px 0 10px;font-weight:900;color:#fff;letter-spacing:2px}
+#bx-hen-neon .bx-art p{color:#82dfff;font-size:13px;letter-spacing:1.4px;line-height:1.55}
+#bx-hen-neon .bx-progress{flex:1.35 1 360px;border-radius:14px;background:linear-gradient(135deg,#0e1537,#090d23);padding:20px 23px}
+#bx-hen-neon .bx-kicker{color:#cf86ff;letter-spacing:2px;font-size:11px;margin:0 0 8px;font-weight:bold}
+#bx-hen-neon .bx-progress h2{font-size:26px;font-weight:800;margin:0 0 12px;color:#f5f9ff}
+#bx-hen-neon .bx-status{border-left:4px solid #2ce9ff;background:#0f2544;padding:14px 16px;margin:18px 0;border-radius:4px;color:#fff;min-height:70px;word-wrap:break-word}
+#bx-hen-neon .bx-status-label{display:block;color:#8eebff;text-transform:uppercase;font-size:11px;letter-spacing:1.3px;margin-bottom:8px}
+#bx-hen-neon #bx-hen-host-state{display:block;font-size:17px;line-height:1.45}
+#bx-hen-neon .bx-log{background:#070e24;border:1px solid #344c85;border-radius:8px;padding:13px 15px;min-height:75px;color:#b7cce8;font:12px/1.5 monospace;white-space:pre-wrap;word-wrap:break-word}
+#bx-hen-neon .bx-info{font-size:12px;color:#a1b4d7;line-height:1.55;margin:14px 0}
+#bx-hen-neon .bx-console{display:inline-block;margin-top:9px;text-align:center}
+#bx-hen-neon .bx-footer{margin-top:20px;border-top:1px solid #385394;padding:15px 4px;color:#8fb8e9;font-size:11px;display:-webkit-box;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#bx-hen-neon .bx-footer strong{color:#c77afd}
+@media(max-width:680px){#bx-hen-neon .bx-wrap{padding:10px}#bx-hen-neon .bx-head{padding:13px}#bx-hen-neon .bx-mark{font-size:21px}#bx-hen-neon .bx-art{min-height:230px;padding:18px}#bx-hen-neon .bx-emblem{width:105px;height:105px;margin:4px auto 14px;border-radius:25px}#bx-hen-neon .bx-emblem:before{font-size:49px;line-height:100px;letter-spacing:-10px}#bx-hen-neon .bx-art h2{font-size:29px}#bx-hen-neon .bx-progress{padding:15px}#bx-hen-neon .bx-progress h2{font-size:22px}}
+@media(prefers-reduced-motion:reduce){#bx-hen-neon *{animation:none!important;transition:none!important}}
