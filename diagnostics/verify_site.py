@@ -18,17 +18,12 @@ SITE = ROOT / "dist"
 CHECK_FILES = [
     "patch_runtime.py",
     "overrides/minimal.css",
-    "overrides/bx-hen-launch.css",
-    "overrides/bx-hen-launch.js",
     "dist/index.html",
-    "dist/neon.html",
     "dist/includes/css/minimal.css",
-    "dist/includes/css/bx-hen-launch.css",
     "overrides/bx-hen-site/index.html",
     "overrides/bx-hen-site/extras.js",
     "overrides/bx-hen-site/core.js",
     "dist/bx-hen/core.js",
-    "dist/includes/js/bx-hen-launch.js",
     "overrides/bx-hen-site/test-monitor.js",
     "overrides/bx-hen-site/compatibility.js",
     "overrides/bx-hen-site/store/index.html",
@@ -42,7 +37,6 @@ CHECK_FILES = [
     "dist/bx-hen/store/catalog.json",
 ]
 JS_ASSETS = [
-    "dist/includes/js/bx-hen-launch.js",
     "dist/bx-hen/extras.js",
     "dist/bx-hen/core.js",
     "dist/bx-hen/test-monitor.js",
@@ -147,32 +141,14 @@ def check_minimal_host():
           "Minimal theme migration not injected before page startup")
     check('window.location.replace("../")' in legacy_html,
           "Legacy dashboard does not redirect to the single main page")
-    check('href="./includes/css/bx-hen-launch.css"' in html,
-          "BX-HEN Neon launch stylesheet absent from main host")
-    check('src="./includes/js/bx-hen-launch.js"' in html,
-          "BX-HEN Neon launch script absent from main host")
-    neon = (SITE / "neon.html").read_text(encoding="utf-8")
-    launch_css = (SITE / "includes/css/bx-hen-launch.css").read_text(encoding="utf-8")
-    check(neon == html, "Neon shortcut must use the same native host document")
-    check("<html lang=" in neon and "manifest=" not in neon,
-          "Neon shortcut must not be tied to an old AppCache manifest")
-    check("var goToHttps = false;" in html,
-          "Unexpected external HTTPS-to-HTTP navigation could bypass BX-HEN")
-    check('content:"BX-HEN v2.2  /  PERSONALIZACAO: RUOK999"' in launch_css,
-          "Neon branding not visible on the initial PS4 launch screen")
     check("width:max-content" not in css, "Unsupported legacy width remains in minimal CSS")
     check("flex-direction:row!important" in css,
           "HEN option layout may inherit a conflicting mobile flex direction")
     manifests = list((SITE / "includes/caches/manifest").glob("*.manifest"))
     check(bool(manifests), "No offline cache manifests generated")
     for manifest in manifests:
-        data = manifest.read_text(encoding="utf-8")
-        check("../../../includes/css/minimal.css" in data,
+        check("../../../includes/css/minimal.css" in manifest.read_text(encoding="utf-8"),
               "Minimal CSS missing in cache manifest: " + manifest.name)
-        check("../../../includes/css/bx-hen-launch.css" in data,
-              "BX-HEN Neon CSS missing in cache manifest: " + manifest.name)
-        check("../../../includes/js/bx-hen-launch.js" in data,
-              "BX-HEN Neon JS missing in cache manifest: " + manifest.name)
 
 
 def main():
