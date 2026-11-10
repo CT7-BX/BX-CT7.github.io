@@ -114,3 +114,17 @@ test('stale network failures do not overwrite a newer successful report', () => 
   assert.equal(env.get('bx-monitor-status').textContent, status);
   assert.equal(env.get('bx-monitor-runs').children.length, 1);
 });
+
+test('status announcements and refresh control remain accessible', () => {
+  const env = environment();
+  const status = env.get('bx-monitor-status');
+  const button = env.get('bx-monitor').children[1].children[1].children[2];
+  assert.equal(status.attributes.role, 'status');
+  assert.equal(status.attributes['aria-live'], 'polite');
+  assert.equal(status.attributes['aria-atomic'], 'true');
+  assert.equal(button.type, 'button');
+  env.requests[0].respond(200, report([]));
+  assert.match(status.textContent, /Nenhuma execução/);
+  env.refresh();
+  assert.match(status.textContent, /Consultando histórico/);
+});
