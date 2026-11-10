@@ -10,6 +10,7 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Download pinned GoldHEN binary
         shell: bash
         run: |
@@ -57,6 +58,8 @@ jobs:
           print("PE magic:", data[:2]==b'MZ')
           print("Raw hexadecimal prefix:", data[:32].hex())
           PY
+      - name: Analyze menu labels and embedded UI resources (read-only)
+        run: python3 diagnostics/audit_goldhen_menu.py audit/goldhen_v2.4b18.13.bin audit/menu-resource-report.json
       - name: Disassemble all bytes as raw x86-64 (unverified boundaries)
         shell: bash
         run: |
@@ -74,3 +77,4 @@ jobs:
           path: |
             audit/static-report.txt
             audit/goldhen-disassembly-raw-x64.txt
+            audit/menu-resource-report.json
