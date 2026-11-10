@@ -22,6 +22,15 @@ index = root / 'index.html'
 if not index.exists():
     raise RuntimeError('WebKitty não contém index.html')
 
+# Keep visitors on the user's own HTTPS host. Upstream redirects PlayStation
+# browsers to an external HTTP website after a confirmation prompt. That
+# bypasses the BX-HEN visual entirely and is not appropriate for our host.
+# This only disables that optional navigation prompt, not the exploit loader.
+if not update('index.html',
+              'var goToHttps = localStorage.getItem("dontHTTPS") != "1";',
+              'var goToHttps = false; // BX-HEN: stay on this site'):
+    raise RuntimeError('A regra de redirecionamento HTTPS do upstream mudou')
+
 # Neon é o layout padrão. Compacto foi retirado do seletor; resta o Painel.
 # A opção antiga "Default" não é exibida no seletor.
 # Restaurar o layout nativo do WebKitty como opção independente.
@@ -633,3 +642,12 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
 if 'includes/js/bx-hen-launch.js' not in index.read_text(encoding='utf-8'):
     raise RuntimeError('Visual BX-HEN nao integrado ao fluxo original')
 print('BX-HEN v2.2 Neon / RUOK999: apresentacao vinculada ao botao original; payloads intactos.')
+
+# A never-before-cached entry URL for PS4 browsers still using a stale offline
+# application cache. Same document and same native click listeners, at root.
+# This HTML does not have a manifest attribute and loads local resources.
+neon_entry = root / 'neon.html'
+shutil.copy2(index, neon_entry)
+if 'bx-hen-launch.js' not in neon_entry.read_text(encoding='utf-8'):
+    raise RuntimeError('Entrada Neon sem script da personalizacao')
+print('BX-HEN Neon: entrada independente de cache em /neon.html')
