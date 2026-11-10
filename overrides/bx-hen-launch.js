@@ -116,8 +116,8 @@
     if (window.abortLoading) return;
     if (typeof user === 'undefined' || !user || user.blockJailbreak) return;
     if (!isOriginalGoldHen()) return;
-    // No preventDefault, stopPropagation, jailbreak(), chooseHEN() or dispatchEvent:
-    // the unmodified upstream click listener performs the actual launch.
+    // This is presentation only: event propagation and native execution are untouched.
+    // The unmodified upstream click listener performs the actual launch.
     openPanel();
   }
 
