@@ -118,8 +118,10 @@ static void render(Scene2D *scene, FT_Face big, FT_Face normal, FT_Face small,
 }
 int main() {
     setvbuf(stdout, NULL, _IONBF, 0);
-    Scene2D scene(SCREEN_W, SCREEN_H, SCREEN_DEPTH);
-    if (!scene.Init(0xC000000, 2)) {
+    // The upstream OpenOrbis sample exposes no Scene2D destructor definition.
+    // Keep the scene heap-allocated for the application's process lifetime.
+    Scene2D *scene = new Scene2D(SCREEN_W, SCREEN_H, SCREEN_DEPTH);
+    if (!scene->Init(0xC000000, 2)) {
         DEBUGLOG << "BX-HEN Neon: video init failed";
         return 1;
     }
@@ -130,9 +132,9 @@ int main() {
     }
     FT_Face big, normal, small;
     const char *font = "/app0/assets/fonts/Gontserrat-Regular.ttf";
-    if (!scene.InitFont(&big, font, 68) ||
-        !scene.InitFont(&normal, font, 43) ||
-        !scene.InitFont(&small, font, 29)) {
+    if (!scene->InitFont(&big, font, 68) ||
+        !scene->InitFont(&normal, font, 43) ||
+        !scene->InitFont(&small, font, 29)) {
         DEBUGLOG << "BX-HEN Neon: font init failed";
         return 3;
     }
@@ -161,10 +163,10 @@ int main() {
             }
         }
 
-        render(&scene, big, normal, small, selected, details, frame);
-        scene.SubmitFlip(frame);
-        scene.FrameWait(frame);
-        scene.FrameBufferSwap();
+        render(scene, big, normal, small, selected, details, frame);
+        scene->SubmitFlip(frame);
+        scene->FrameWait(frame);
+        scene->FrameBufferSwap();
         ++frame;
     }
     DEBUGLOG << "BX-HEN Neon UI exited normally";
