@@ -67,11 +67,11 @@ launcher_intro = '''<div id="bx-neon-launcher" class="bx-launcher-only">
     <button class="bx-neon-cache" onclick="document.getElementById('updateCache').click();">⟳ <span>Atualizar cache</span></button>
   </nav>
   <div class="bx-neon-stage">
-    <div class="bx-neon-header"><span class="bx-neon-dot"></span> PS4 HOST SYSTEM <em>EDIÇÃO 2.2</em></div>
+    <div class="bx-neon-header"><span class="bx-neon-dot"></span> GOLDHEN ORIGINAL <em>VISUAL BX-HEN</em></div>
     <div class="bx-neon-content">
-      <div class="bx-neon-kicker">CENTRO DE COMANDO / BX-CT7</div>
-      <h1>CONTROLE<br><b>TOTAL.</b></h1>
-      <p>Ferramentas, ajustes e biblioteca numa central construída para o seu console.</p>
+      <div class="bx-neon-kicker">GOLDHEN 2.4b18.13 / APRESENTAÇÃO BX-CT7</div>
+      <h1>GOLDHEN<br><b>BX-HEN.</b></h1>
+      <p>Interface BX-HEN sobre o GoldHEN original. O host WebKitty mantém o controle de firmware, carregamento e seleção do HEN.</p>
       <div class="bx-neon-buttons">
         <button class="bx-neon-primary" onclick="document.getElementById('ps-logo-container').click();">▶ INICIAR HOST</button>
         <button onclick="ui.exploitScreen.scrollIntoView({block:'start'});">ABRIR BIBLIOTECA ↗</button>
@@ -85,8 +85,8 @@ launcher_intro = '''<div id="bx-neon-launcher" class="bx-launcher-only">
     <button onclick="themePopup();">PERSONALIZAR ⚙</button></div>
   <div class="bx-painel-feature">
     <div class="bx-painel-feature-copy">
-      <div class="bx-painel-kicker">ÁREA PRINCIPAL / HOST</div>
-      <h1>PRONTO<br>PARA JOGAR.</h1>
+      <div class="bx-painel-kicker">GOLDHEN 2.4b18.13 / HOST PERSONALIZADO</div>
+      <h1>GOLDHEN<br>BX-CT7.</h1>
       <p>Seu espaço de ferramentas para PlayStation 4.</p>
       <button onclick="document.getElementById('ps-logo-container').click();">▶ INICIAR</button>
     </div>
@@ -536,59 +536,45 @@ if 'window.bxRenderHomebrewCards(ui.homebrewSection)' not in handler_text:
 print('BX-CT7: pacote personalizado e hashes confirmados.')
 
 
-# Minimal single-page presentation: preserve original loader implementation.
-# Keep former diagnostic route for old bookmarks, but forward visitors to the
-# single main host page. No firmware or payload logic is modified.
-minimal_source = source / 'minimal.css'
-if not minimal_source.is_file():
-    raise RuntimeError('Interface minimalista não encontrada')
-minimal_target = root / 'includes/css/minimal.css'
-shutil.copy2(minimal_source, minimal_target)
+# GoldHEN/BX-HEN visual edition: restore the original branded host interface.
+# This is a UI layer on WebKitty; no GoldHEN payload, loader or firmware gate is
+# patched. The classic diagnostic dashboard remains available at /bx-hen/.
 main_html = index.read_text(encoding='utf-8')
-if '</head>' not in main_html:
-    raise RuntimeError('Host sem head para interface minimalista')
-main_html = main_html.replace(
-    '</head>',
-    '<link rel="stylesheet" href="./includes/css/minimal.css">\n</head>', 1)
-# Existing browsers using Neon/Painel are migrated once to the same page.
-minimal_boot = """<script>
+if 'GOLDHEN 2.4b18.13 / APRESENTAÇÃO BX-CT7' not in main_html:
+    raise RuntimeError('Identidade GoldHEN visual não integrada ao host')
+if 'bx-theme-bridge.css' not in main_html:
+    raise RuntimeError('Tema BX-CT7 sobre o host original não encontrado')
+
+# Visitors affected by the previous minimal-only release have theme=index
+# stored in localStorage. Migrate only that release's default back to Neon.
+# Explicitly chosen Painel/Neon layouts are not overwritten.
+visual_boot = """<script>
 (function(){
- try {
-  if (localStorage.getItem('bx-minimal-v1') !== '1') {
-   localStorage.setItem('theme','index');
-   localStorage.setItem('color','default');
-   localStorage.setItem('bx-minimal-v1','1');
-  }
- } catch(e) {}
+  try {
+    if (localStorage.getItem('bx-goldhen-visual-v1') !== '1') {
+      if (localStorage.getItem('bx-minimal-v1') === '1' &&
+          localStorage.getItem('theme') === 'index') {
+        localStorage.setItem('theme', 'neon');
+      }
+      localStorage.setItem('bx-goldhen-visual-v1', '1');
+    }
+  } catch(e) {}
 })();
 </script>
 """
-main_html = main_html.replace(
-    '<script>\n        // Prevent "Theme Flash"',
-    minimal_boot + '<script>\n        // Prevent "Theme Flash"', 1)
-# The original settings, HEN selection and primary PS4 control remain intact.
-# Remove redundant links to separate dashboard and experimental site.
-main_html = main_html.replace('window.location.href=\'./bx-hen/\';',
-                              'document.getElementById(\'ps-logo-container\').click();')
-main_html = main_html.replace(
-    '<script src="./includes/js/dev-diagnostics.js"></script>',
-    '<script src="./includes/js/dev-diagnostics.js"></script>', 1)
+flash_marker = '<script>\n        // Prevent "Theme Flash"'
+if flash_marker not in main_html:
+    raise RuntimeError('Inicialização do tema WebKitty mudou')
+main_html = main_html.replace(flash_marker, visual_boot + flash_marker, 1)
 index.write_text(main_html, encoding='utf-8')
-# Legacy BX-HEN URL now leads to the one supported main interface.
-legacy_dashboard = root / 'bx-hen/index.html'
-if legacy_dashboard.is_file():
-    legacy_html = legacy_dashboard.read_text(encoding='utf-8')
-    legacy_html = legacy_html.replace(
-        '</head>',
-        '<script>window.location.replace("../");</script>\n</head>', 1)
-    legacy_dashboard.write_text(legacy_html, encoding='utf-8')
-# Cache manifest includes presentation CSS for offline PS4 use.
-for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
-    txt = manifest.read_text(encoding='utf-8')
-    item = '../../../includes/css/minimal.css'
-    if item not in txt and 'CACHE:' in txt:
-        txt = txt.replace('CACHE:', 'CACHE:\n' + item, 1)
-        manifest.write_text(txt, encoding='utf-8')
-if 'includes/css/minimal.css' not in index.read_text(encoding='utf-8'):
-    raise RuntimeError('Interface minimalista não integrada ao host')
-print('BX-CT7 Minimal: uma página principal, arquivos do HEN preservados.')
+
+# Validate upstream GoldHEN is actually present. This is the unchanged
+# pinned WebKitty payload, NOT the old local experimental BX-HEN .bin.
+goldhen = root / 'includes/payloads/HEN/goldhen_v2.4b18.13.bin'
+if not goldhen.is_file() or goldhen.stat().st_size != 297496:
+    raise RuntimeError('GoldHEN v2.4b18.13 original ausente ou tamanho inesperado')
+if '<script>window.location.replace("../");</script>' in (root / 'bx-hen/index.html').read_text(encoding='utf-8'):
+    raise RuntimeError('Painel BX-HEN continua redirecionado ao host principal')
+if 'includes/css/minimal.css' in main_html:
+    raise RuntimeError('CSS minimalista ainda intercepta o visual GoldHEN')
+print('BX-HEN visual: host GoldHEN original + skin BX-CT7; painel e seletores preservados.')
