@@ -33,3 +33,66 @@
 #bx-hen-neon .bx-footer strong{color:#c77afd}
 @media(max-width:680px){#bx-hen-neon .bx-wrap{padding:10px}#bx-hen-neon .bx-head{padding:13px}#bx-hen-neon .bx-mark{font-size:21px}#bx-hen-neon .bx-art{min-height:230px;padding:18px}#bx-hen-neon .bx-emblem{width:105px;height:105px;margin:4px auto 14px;border-radius:25px}#bx-hen-neon .bx-emblem:before{font-size:49px;line-height:100px;letter-spacing:-10px}#bx-hen-neon .bx-art h2{font-size:29px}#bx-hen-neon .bx-progress{padding:15px}#bx-hen-neon .bx-progress h2{font-size:22px}}
 @media(prefers-reduced-motion:reduce){#bx-hen-neon *{animation:none!important;transition:none!important}}
+
+/* BX-HEN NEON LANDING — visible before the original launch click.
+ * The site previously retained minimal.css until launch, which made the
+ * published customization appear unchanged. This is CSS-only presentation. */
+html,body{background:#040819!important;color:#ecfaff!important}
+#initial-screen{
+  background:#050b22!important;
+  background-image:radial-gradient(ellipse at 18% 27%,rgba(75,29,161,.32),transparent 50%),radial-gradient(ellipse at 80% 78%,rgba(5,172,229,.22),transparent 55%)!important;
+  min-height:100vh!important;
+  border-top:4px solid #20eaff!important;
+}
+#initial-screen:before{
+  content:"BX-HEN v2.2  /  PERSONALIZACAO: RUOK999"!important;
+  color:#36e7ff!important;
+  text-shadow:0 0 17px rgba(0,217,255,.7)!important;
+  font:900 18px Arial,Helvetica,sans-serif!important;
+  letter-spacing:2px!important;
+  text-align:center!important;
+  line-height:1.6!important;
+  max-width:100%!important;
+  margin:10px auto 24px!important;
+}
+.bx-brand-top{color:#bda9ff!important}
+#pslogo{color:#f1faff!important;cursor:pointer!important;text-align:center!important}
+#pslogo:after{
+  content:"INICIAR DESBLOQUEIO  /  BX-HEN"!important;
+  display:block!important;
+  color:#c3efff!important;
+  font:800 13px Arial,Helvetica,sans-serif!important;
+  letter-spacing:1px!important;
+  margin-top:12px!important;
+  text-shadow:0 0 12px rgba(0,197,255,.35)!important;
+}
+#ps-logo-container{
+  background:#111437!important;
+  border:2px solid #2be6ff!important;
+  box-shadow:0 0 26px rgba(10,210,250,.36),inset 0 0 16px rgba(148,45,232,.22)!important;
+  border-radius:24px!important;
+  padding:23px!important;
+}
+#ps-logo{fill:#22e2ff!important;width:83px!important;height:83px!important;filter:drop-shadow(0 0 7px #367cff)}
+#click-to-start-text{color:#c6d7ff!important}
+#PS4FW{color:#a4eaff!important}
+#choosejb-initial{
+  background:#0c1433!important;
+  border:1px solid #6a3ac8!important;
+  box-shadow:0 0 18px rgba(164,62,229,.22)!important;
+  max-width:525px!important;
+}
+#choosejb-initial h3{color:#dbaaff!important}
+#choosejb-initial label{background:#17244b!important;border-color:#3e6eaf!important;color:#f7faff!important}
+#choosejb-initial label:focus-within{outline:2px solid #26eaff!important}
+#choosejb-initial input{accent-color:#1be9ff!important}
+#initial-screen header button{background:#17244b!important;border-color:#4e60a0!important;color:#c7eaff!important}
+#exploit-main-screen{background:#060b21!important}
+#exploit-status-panel,#exploit-main-screen .bg-gray-800,#exploit-main-screen .bg-gray-700{background:#101938!important;border:1px solid #3d4c91!important}
+#DebugConsole{background:#060b1c!important;border:1px solid #26c9f7!important;color:#dbf6ff!important}
+#exploitRun{background:#2157a5!important;border:1px solid #18deff!important;box-shadow:0 0 12px rgba(0,211,255,.25)!important}
+@media(max-width:520px){
+  #initial-screen:before{font-size:14px!important;letter-spacing:1px!important;margin:10px auto 18px!important}
+  #ps-logo{width:70px!important;height:70px!important}
+  #pslogo:after{font-size:11px!important}
+}
