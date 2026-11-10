@@ -45,13 +45,14 @@ jobs:
               cp -a native-bxhen/upstream/samples/font/. native-bxhen/font/
               cp -a native-bxhen/upstream/samples/_common native-bxhen/_common
               cp native-bxhen/main.cpp native-bxhen/font/font/main.cpp
+              python3 native-bxhen/make_icon.py native-bxhen/font/sce_sys/icon0.png
               cp native-bxhen/upstream/samples/input/input/controller.h native-bxhen/font/font/controller.h
               cp native-bxhen/upstream/samples/input/input/controller.cpp native-bxhen/font/font/controller.cpp
               cd native-bxhen/font
               sed -i "s/OpenOrbis Font Sample/BX-HEN Neon Test/g" Makefile
               sed -i "s/BREW00081/BXHN00001/g" Makefile
               sed -i "s/FONTDRAWEX000000/BXHENNEONMENU001/g" Makefile
-              sed -i "s/VERSION     := 1.01/VERSION     := 0.01/g" Makefile
+              sed -i "s/VERSION     := 1.01/VERSION     := 0.02/g" Makefile
               sed -i "s/-lSceFreeType/-lSceFreeType -lScePad -lSceUserService/g" Makefile
               sed -i "s@sce_sys/about/right.sprx @@g" Makefile
               sed -i "s@^COMMONDIR.*@COMMONDIR   := ../_common@" Makefile
@@ -61,16 +62,34 @@ jobs:
               cp ../tool-bins/gp4/bin/linux/create-gp4 "$OO_PS4_TOOLCHAIN/bin/linux/create-gp4"
               chmod +x "$OO_PS4_TOOLCHAIN/bin/linux/create-fself" "$OO_PS4_TOOLCHAIN/bin/linux/create-gp4"
               make -j2
+              echo "=== Verify PKG digests and signatures ==="
+              "$OO_PS4_TOOLCHAIN/bin/linux/PkgTool.Core" pkg_validate IV0000-BXHN00001_00-BXHENNEONMENU001.pkg
+              echo "=== Verify PKG entries ==="
+              "$OO_PS4_TOOLCHAIN/bin/linux/PkgTool.Core" pkg_listentries IV0000-BXHN00001_00-BXHENNEONMENU001.pkg
+              echo "=== Verify SFO fields ==="
+              "$OO_PS4_TOOLCHAIN/bin/linux/PkgTool.Core" sfo_listentries sce_sys/param.sfo
             '
       - name: Verify generated experimental package
         run: |
           set -euo pipefail
           test -s native-bxhen/font/IV0000-BXHN00001_00-BXHENNEONMENU001.pkg
+          test -s native-bxhen/font/eboot.bin
+          test -s native-bxhen/font/sce_sys/param.sfo
+          python3 - <<'PY'
+          import struct
+          from pathlib import Path
+          icon = Path("native-bxhen/font/sce_sys/icon0.png").read_bytes()
+          assert icon[:8] == b"\x89PNG\r\n\x1a\n", "Invalid PNG signature"
+          assert struct.unpack_from(">II", icon, 16) == (512, 512), "Icon not 512x512"
+          assert icon[24:26] == bytes([8, 2]), "Icon not 24-bit RGB"
+          assert len(icon) > 1000, "PNG unexpectedly small"
+          print("BX-HEN PS4 icon validated (512x512 RGB, no alpha)")
+          PY
           sha256sum native-bxhen/font/*.pkg | tee native-bxhen/font/SHA256SUMS.txt
       - name: Upload separate homebrew application test artifact
         uses: actions/upload-artifact@v4
         with:
-          name: BX-HEN-Neon-0.1-PS4-Test-PKG
+          name: BX-HEN-Neon-0.2-PKG-Validation
           path: |
             native-bxhen/font/IV0000-BXHN00001_00-BXHENNEONMENU001.pkg
             native-bxhen/font/SHA256SUMS.txt
