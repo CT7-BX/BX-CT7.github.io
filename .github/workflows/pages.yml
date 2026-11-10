@@ -58,10 +58,14 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Syncing files to GitHub Pages can exceed the action's 10-minute default.
+    # Give the Pages service enough time without changing the host artifact.
+    timeout-minutes: 35
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/deploy-pages@v4
         id: deployment
+        with:
+          timeout: 1800000  # 30 minutes, milliseconds (action default: 600000)
