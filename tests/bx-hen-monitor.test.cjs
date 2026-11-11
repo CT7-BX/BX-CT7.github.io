@@ -128,3 +128,14 @@ test('status announcements and refresh control remain accessible', () => {
   env.refresh();
   assert.match(status.textContent, /Consultando histórico/);
 });
+
+test('temporary HTTP failure keeps the last successful report visible', () => {
+  const env = environment();
+  env.requests[0].respond(200, report([run(321)]));
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+  env.refresh();
+  env.requests[1].respond(503, '');
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registros');
+  assert.match(env.get('bx-monitor-status').textContent, /HTTP 503/);
+});
