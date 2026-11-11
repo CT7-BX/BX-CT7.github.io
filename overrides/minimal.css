@@ -30,4 +30,14 @@ body{background-image:none!important}
 #bx-dev-button{background:#24272d!important;border-color:#474b53!important;color:#ddd!important;box-shadow:none!important}
 #bx-hen-overlay .bx-hen-panel,#bx-dev-overlay .bx-dev-card{background:#1a1c21!important;border:1px solid #3c4048!important;box-shadow:none!important}
 button{transition:none!important}
+/* Margins work on PS4 WebKit versions without flex gap support. */
+#initial-screen header>div>button{margin:0 3px!important;min-width:44px;min-height:44px}
+#initial-screen header>button{min-height:44px}
+#choosejb-initial>div{margin:-4px!important}
+#choosejb-initial label{margin:4px!important}
+#initial-screen{height:auto!important;box-sizing:border-box!important}
+#initial-screen header{flex-wrap:wrap!important}
+#pslogo:focus,#scrollDown:focus,button:focus,input:focus,select:focus,a:focus{outline:2px solid #c3c5cd!important;outline-offset:3px}
+#PS4FW,#click-to-start-text{max-width:100%;overflow-wrap:break-word;word-wrap:break-word}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{animation:none!important;transition:none!important}}
 @media(max-width:520px){#initial-screen{padding:70px 12px 35px!important}#choosejb-initial{padding:12px!important}#choosejb-initial label{flex:1 1 100%!important;min-width:0!important}#initial-screen header{right:9px!important;top:9px!important}}

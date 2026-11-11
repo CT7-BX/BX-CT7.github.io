@@ -10,24 +10,26 @@ on:
     - cron: '0 0 * * *'
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 concurrency:
-  group: bx-ct7-pages
+  group: bx-ct7-pages-${{ github.event.pull_request.number || 'publish' }}
   cancel-in-progress: false
 permissions:
   contents: read
   actions: read
-  pages: write
-  id-token: write
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - name: Test BX-HEN Core 0.1
-        run: node --test tests/bx-hen-core.test.cjs
-      - name: Test BX-HEN monitor regressions
-        run: node --test tests/bx-hen-monitor.test.cjs
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test browser regressions
+        run: node --test tests/*.test.cjs
+      - name: Test presentation and cache regressions
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Rebuild pinned upstream
         run: python3 build.py
       - name: Verify BX-HEN dashboard assets
@@ -40,21 +42,30 @@ jobs:
       - name: Verify source integrity, line endings, links and PKG catalog
         run: python3 diagnostics/verify_site.py
       - name: Generate sanitized BX-HEN test history
+        if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 diagnostics/generate_report.py
+        run: |
+          python3 diagnostics/generate_report.py
+          python3 -c "from pathlib import Path; from presentation import stamp_manifests; stamp_manifests(Path('dist'))"
       - name: Upload BX-HEN test report
-        uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: bx-hen-ci-report-${{ github.run_id }}
           path: diagnostics/latest-report.json
           retention-days: 90
       - name: Publish static artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
+    permissions:
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     # The deploy-pages action caps its timeout input at 600000 ms (10 minutes).
     timeout-minutes: 35

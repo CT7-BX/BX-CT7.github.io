@@ -12,6 +12,7 @@ import sys
 import tempfile
 from html.parser import HTMLParser
 from urllib.parse import urlsplit
+from urllib.parse import unquote
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SITE = ROOT / "dist"
@@ -80,7 +81,7 @@ class PageInspector(HTMLParser):
             self.in_script = False
 
 
-def check_html(rel):
+def check_html(rel, allow_http=False):
     path = SITE / rel
     parsed = PageInspector()
     parsed.feed(path.read_text(encoding="utf-8"))
@@ -89,7 +90,8 @@ def check_html(rel):
             continue
         url = urlsplit(ref)
         if url.scheme or url.netloc:
-            check(url.scheme == "https", "Non-HTTPS external link in " + rel + ": " + ref)
+            check(url.scheme == "https" or (allow_http and url.scheme == "http"),
+                  "Non-HTTPS external link in " + rel + ": " + ref)
             continue
         dest = (path.parent / url.path).resolve()
         check(dest == SITE.resolve() or SITE.resolve() in dest.parents, "Reference escapes site: " + ref)
@@ -101,6 +103,32 @@ def check_html(rel):
                 tmp.write(script)
                 tmp.flush()
                 subprocess.run(["node", "--check", tmp.name], check=True, capture_output=True, text=True)
+
+
+def check_cache():
+    manifests = list((SITE / 'includes/caches/manifest').glob('*.manifest'))
+    check(bool(manifests), 'Missing cache manifests')
+    for manifest in manifests:
+        section = 'CACHE:'
+        text = manifest.read_text(encoding='utf-8')
+        check(text.startswith('CACHE MANIFEST\n'), 'Invalid manifest header')
+        check(bool(re.search(r'^# BX-CT7 content: [a-f0-9]{64}$', text, re.M)),
+              'Missing content revision: ' + manifest.name)
+        for line in text.splitlines()[1:]:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if line in ('CACHE:', 'NETWORK:', 'FALLBACK:'):
+                section = line
+                continue
+            if section != 'CACHE:':
+                continue
+            url = urlsplit(line)
+            check(not url.scheme and not url.netloc, 'External cache entry: ' + line)
+            target = (manifest.parent / unquote(url.path)).resolve()
+            check(target == SITE.resolve() or SITE.resolve() in target.parents, 'Cache entry escapes site')
+            check(target.is_file() or (target / 'index.html').is_file(),
+                  'Missing cache resource in ' + manifest.name + ': ' + line)
 
 
 def check_catalog():
@@ -160,6 +188,9 @@ def main():
         raw.decode("utf-8")
         check(raw.endswith(b"\n"), "Missing final newline: " + rel)
     check_minimal_host()
+    check_cache()
+    # The original host intentionally supports HTTP payload-server navigation.
+    check_html('index.html', allow_http=True)
     check_html("bx-hen/index.html")
     check_html("bx-hen/store/index.html")
     for rel in JS_ASSETS:

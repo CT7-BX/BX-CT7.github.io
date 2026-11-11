@@ -49,6 +49,7 @@ def build_report(raw_runs, generated):
             "commit": str(run.get("head_sha", ""))[:12],
             "url": "https://github.com/" + REPOSITORY + "/actions/runs/" + str(run_id),
         })
+    results = results[:30]
     return {
         "schema_version": 1,
         "project": "BX-HEN Test Monitor",
@@ -58,7 +59,7 @@ def build_report(raw_runs, generated):
         "console_tested": False,
         "jailbreak_validated": False,
         "record_count": len(results),
-        "runs": results[:30],
+        "runs": results,
     }
 
 

@@ -32,3 +32,24 @@ O site gerado fica em `dist/`. No GitHub Pages, o workflow `Build BX-CT7 PS4 Hos
 WebKitty é distribuído sob licença AGPL-3.0. A compilação preserva o `LICENSE` original. Alterações originais BX-CT7 ficam no código de personalização deste repositório.
 
 Este é um backup de recuperação. Não é necessariamente idêntico, arquivo por arquivo, ao host anterior.
+
+## Validação da interface
+
+Requer Node.js com `node --test` e Python 3.9+:
+
+```sh
+node --test tests/*.test.cjs
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+python3 build.py
+python3 diagnostics/verify_site.py
+```
+
+Pull requests executam os testes e a reconstrução sem publicar. Na branch `main`,
+o Pages publica somente após essas verificações. Os manifests AppCache incluem
+uma revisão calculada pelo conteúdo, também em builds locais.
+
+A validação cobre sintaxe, referências locais, recursos de cache, catálogo e
+regressões da interface. A apresentação mantém zoom disponível, foco visível e
+margens compatíveis com WebKit sem flex gap. Aparência no PS4, navegação por
+controle, persistência real do cache offline, payloads e desbloqueio exigem teste
+físico separado; os testes automatizados não comprovam esses resultados.
