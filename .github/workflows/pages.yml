@@ -57,9 +57,10 @@ jobs:
           retention-days: 90
       - name: Publish static artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: dist
+          include-hidden-files: true  # Preserve .nojekyll in the Pages archive.
   deploy:
     if: github.event_name != 'pull_request'
     needs: build
@@ -73,7 +74,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5.0.1
         id: deployment
         with:
           timeout: 600000  # Maximum accepted by deploy-pages@v4
