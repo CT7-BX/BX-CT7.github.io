@@ -34,6 +34,7 @@
      ['WebGL',testWebGL()],
      ['Cache offline',typeof window.applicationCache!=='undefined'?'API presente':'indisponível'],
      ['WebAssembly',typeof window.WebAssembly!=='undefined'?'API presente':'indisponível'],
+     ['Download HTML (indicativo)',('download' in document.createElement('a'))?'atributo suportado':'atributo não detectado'],
      ['HTTPS',location.protocol==='https:'?'sim':'não'],
      ['Fuso horário (UTC, indicativo)',(function(){var offset=new Date().getTimezoneOffset();if(typeof offset!=='number'||!isFinite(offset))return 'não informado';var sign=offset<=0?'+':'-';var abs=Math.abs(offset);return 'UTC'+sign+('0'+Math.floor(abs/60)).slice(-2)+':'+('0'+(abs%60)).slice(-2);})()],
      ['Idioma do navegador',navigator.language||navigator.userLanguage||'não informado'],
