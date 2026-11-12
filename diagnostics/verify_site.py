@@ -38,6 +38,7 @@ CHECK_FILES = [
     "dist/bx-hen/store/catalog.json",
 ]
 JS_ASSETS = [
+    "dist/includes/js/languages/pt-br.js",
     "dist/includes/js/site-status.js",
     "dist/includes/js/dev-diagnostics.js",
     "dist/bx-hen/extras.js",
@@ -193,6 +194,8 @@ def check_minimal_host():
               "Minimal CSS missing in cache manifest: " + manifest.name)
         check('../../../includes/js/site-status.js' in manifest.read_text(encoding='utf-8'),
               'Release status script missing from offline cache')
+        check('../../../includes/js/languages/pt-br.js' in manifest.read_text(encoding='utf-8'),
+              'Portuguese translation missing from offline cache')
 
 
 def main():

@@ -59,6 +59,7 @@ node --test tests/*.test.cjs
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 python3 build.py
 node --test tests/hen-selection.integration.cjs
+node --test tests/language.integration.cjs
 python3 diagnostics/verify_site.py
 ```
 

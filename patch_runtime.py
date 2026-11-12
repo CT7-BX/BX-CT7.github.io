@@ -591,6 +591,17 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         manifest.write_text(txt, encoding='utf-8')
 if 'includes/css/minimal.css' not in index.read_text(encoding='utf-8'):
     raise RuntimeError('Interface minimalista não integrada ao host')
+language_source = source / 'languages/pt-br.js'
+if not language_source.is_file():
+    raise RuntimeError('Tradução pt-BR ausente')
+shutil.copy2(language_source, root / 'includes/js/languages/pt-br.js')
+for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
+    text = manifest.read_text(encoding='utf-8')
+    item = '../../../includes/js/languages/pt-br.js'
+    if item not in text.splitlines():
+        text = text.replace('CACHE:', 'CACHE:\n' + item, 1)
+        manifest.write_text(text, encoding='utf-8')
+
 from presentation import improve_html, add_release_status, ensure_hen_cache, stamp_manifests
 index.write_text(improve_html(index.read_text(encoding='utf-8')), encoding='utf-8')
 add_release_status(root, source)
