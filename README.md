@@ -37,8 +37,13 @@ Este é um backup de recuperação. Não é necessariamente idêntico, arquivo p
 
 ### Atualizações e diagnóstico
 
-A página principal confere a publicação automaticamente ao abrir e quando a
-conexão retorna. Ela mostra **Versão mais recente**, **Nova atualização disponível**
+A página principal confere a publicação ao abrir, a cada 10 segundos e quando a
+conexão retorna. A aplicação não pausa a contagem em abas ocultas; o navegador
+pode atrasar ou suspender timers em segundo plano. Não há contador nem novos
+controles. Consultas seguintes preservam o texto enquanto aguardam resposta,
+sem piscar a mensagem de verificação. A saída da página e o início de uma
+atualização encerram o timer; retornar pelo histórico restaura a verificação.
+Ela mostra **Versão mais recente**, **Nova atualização disponível**
 ou informa que não conseguiu verificar. O código da revisão fica apenas nos
 diagnósticos. Quando existe uma publicação diferente, o único botão visível é
 **Atualizar agora**: no PS4 com AppCache ele abre o fluxo de cache original;

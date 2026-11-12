@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync('overrides/site-status.js', 'utf8');
 const revision = 'a'.repeat(40);
 function environment(options = {}) {
-  const nodes = {}, requests = [], events = {};
+  const nodes = {}, requests = [], events = {}, intervals = [];
   for (const id of ['bx-site-status', 'bx-site-check', 'bx-site-message', 'bx-site-network', 'bx-site-revision'])
     nodes[id] = { textContent: '', style: {}, attributes: {}, getAttribute() { return options.revision || revision; },
       setAttribute(k, v) { this.attributes[k] = v; } };
@@ -19,11 +19,16 @@ function environment(options = {}) {
     abort() { this.aborted = true; }
     respond(data, status = 200) { this.readyState = 4; this.status = status; this.responseText = JSON.stringify(data); this.onreadystatechange(); }
   }
-  vm.runInNewContext(source, { document: { readyState: 'complete', getElementById(id) { return nodes[id]; } },
+  const document = { readyState: 'complete', hidden: !!options.hidden, getElementById(id) { return nodes[id]; } };
+  vm.runInNewContext(source, { document,
     navigator, window: { applicationCache: options.ps4 ? {} : undefined,
-      location: { reload() { reloads++; } }, addEventListener(name, fn) { events[name] = fn; } },
+      location: { reload() { reloads++; } }, addEventListener(name, fn) { events[name] = fn; },
+      setInterval(fn, delay) { intervals.push({ fn, delay, cleared: false }); return intervals.length; },
+      clearInterval(id) { intervals[id - 1].cleared = true; } },
     isPS4Console() { return !!options.ps4; }, XMLHttpRequest: XHR });
-  return { nodes, requests, events, navigator, update: () => nodes['bx-site-check'].onclick(),
+  return { nodes, requests, events, navigator, document, intervals,
+    tick: () => intervals.filter(t => !t.cleared).forEach(t => t.fn()),
+    update: () => nodes['bx-site-check'].onclick(),
     message: () => nodes['bx-site-message'].textContent, title: () => nodes['bx-site-revision'].textContent,
     get cacheClicks() { return cacheClicks; }, get reloads() { return reloads; } };
 }
@@ -90,4 +95,69 @@ test('connection loss before click prevents update and missing PS4 cache target 
   const missing = environment({ ps4: true, missingCache: true }); newer(missing); missing.update();
   assert.equal(missing.title(), 'Não foi possível atualizar');
   assert.equal(missing.reloads, 0);
+});
+
+test('checks immediately and on each 10-second tick without resetting visible status', () => {
+  const env = environment();
+  assert.equal(env.requests.length, 1);
+  assert.equal(env.intervals.length, 1);
+  assert.equal(env.intervals[0].delay, 10000);
+  current(env); const message = env.message();
+  env.tick(); assert.equal(env.requests.length, 2);
+  assert.equal(env.title(), 'Versão mais recente');
+  assert.equal(env.message(), message);
+  current(env); env.tick(); assert.equal(env.requests.length, 3);
+  newer(env); assert.equal(env.title(), 'Nova atualização disponível');
+  assert.equal(env.nodes['bx-site-check'].hidden, false);
+  env.tick(); assert.equal(env.title(), 'Nova atualização disponível');
+  assert.equal(env.nodes['bx-site-check'].hidden, false);
+  assert.equal(env.reloads, 0); assert.equal(env.cacheClicks, 0);
+});
+
+test('hidden documents keep the same timer with no visibility listener', () => {
+  const env = environment({ hidden: true }); current(env);
+  assert.equal(env.events.visibilitychange, undefined);
+  env.tick(); current(env); env.tick();
+  assert.equal(env.requests.length, 3);
+  assert.equal(env.intervals[0].cleared, false);
+});
+
+test('poll cancels an unfinished request and ignores its late response', () => {
+  const env = environment(); const old = env.requests[0];
+  assert.equal(old.timeout, 8000);
+  env.tick(); assert.equal(old.aborted, true);
+  newer(env); old.respond({ schema_version: 1, revision }); old.onerror();
+  assert.equal(env.title(), 'Nova atualização disponível');
+});
+
+test('navigation stops timer and requests; history return resumes exactly once', () => {
+  const env = environment(); const old = env.requests[0];
+  env.events.pagehide(); assert.equal(old.aborted, true);
+  assert.equal(env.intervals[0].cleared, true);
+  env.tick(); assert.equal(env.requests.length, 1);
+  old.respond({ schema_version: 1, revision });
+  env.events.pageshow(); assert.equal(env.requests.length, 2);
+  env.events.pageshow(); assert.equal(env.requests.length, 2);
+  assert.equal(env.intervals.filter(t => !t.cleared).length, 1);
+});
+
+test('starting update stops polling even if the browser has not navigated yet', () => {
+  const env = environment({ ps4: true }); newer(env);
+  env.tick(); const pending = env.requests[1];
+  env.update(); assert.equal(pending.aborted, true);
+  assert.equal(env.intervals[0].cleared, true);
+  pending.respond({ schema_version: 1, revision });
+  env.tick(); env.events.pageshow(); env.events.online();
+  assert.equal(env.requests.length, 2);
+  assert.equal(env.title(), 'Atualizando o site...');
+  assert.equal(env.cacheClicks, 1);
+});
+
+test('unchanged results do not rewrite live-region text every 10 seconds', () => {
+  const env = environment(); current(env);
+  const node = env.nodes['bx-site-message'];
+  let value = node.textContent, writes = 0;
+  Object.defineProperty(node, 'textContent', { get() { return value; }, set(next) { value = next; writes++; } });
+  env.tick(); current(env); env.tick(); current(env);
+  assert.equal(writes, 0);
 });
