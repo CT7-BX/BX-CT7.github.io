@@ -591,7 +591,8 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         manifest.write_text(txt, encoding='utf-8')
 if 'includes/css/minimal.css' not in index.read_text(encoding='utf-8'):
     raise RuntimeError('Interface minimalista não integrada ao host')
-from presentation import improve_html, stamp_manifests
+from presentation import improve_html, ensure_hen_cache, stamp_manifests
 index.write_text(improve_html(index.read_text(encoding='utf-8')), encoding='utf-8')
+ensure_hen_cache(root)
 stamp_manifests(root)
 print('BX-CT7 Minimal: uma página principal, arquivos do HEN preservados.')

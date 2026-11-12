@@ -19,6 +19,14 @@
         try { return window.localStorage ? localStorage.getItem(key) : null; }
         catch (e) { return null; }
     }
+    function selectedPayload() {
+        try { return storage.session.getString('payload_path', null); }
+        catch (e) { return null; }
+    }
+    function hostText(id, limit) {
+        var node = el(id);
+        return node ? String(node.textContent || '').slice(-limit) : '';
+    }
     function details() {
         var version = fw();
         var selectedHen = (typeof user !== 'undefined' && user) ? user.currentJbFlavor : null;
@@ -35,6 +43,9 @@
             ['HEN selecionado (não prova ativação)', fmt(selectedHen)],
             ['GoldHEN selecionado no host', fmt(gh)],
             ['Cadeia selecionada (ID)', fmt(chain)],
+            ['Payload selecionado (não prova execução)', fmt(selectedPayload())],
+            ['Estado informado pelo host', fmt(hostText('state', 1000))],
+            ['nexHEN', 'Experimental; suporte e execução no console não confirmados'],
             ['Layout atual', fmt(currentLayout || 'neon')],
             ['Modo de teste do WebKitty', dev ? 'Ativado nesta sessão' : 'Desativado'],
             ['Itens cadastrados no host', count],
@@ -62,10 +73,13 @@
     function copyReport() {
         var rows = details(), lines = ['BX-CT7 PS4 Host - diagnóstico'];
         for (var i = 0; i < rows.length; i++) lines.push(rows[i][0] + ': ' + rows[i][1]);
+        lines.push('', 'Últimas mensagens do host (até 12000 caracteres):',
+                   hostText('console', 12000) || 'Nenhuma mensagem disponível.',
+                   '', 'Relatório local. Revise o conteúdo antes de compartilhar.');
         var str = lines.join('\n'), input = el('bx-dev-report');
         input.value = str; input.style.display = 'block'; input.select();
         try { document.execCommand('copy'); } catch (e) {}
-        txt(el('bx-dev-note'), 'Relatório selecionado. Copie manualmente se necessário.');
+        txt(el('bx-dev-note'), 'Relatório local selecionado, incluindo mensagens do host. Revise antes de compartilhar.');
     }
     window.bxOpenDiagnostics = function () {
         var panel = el('bx-dev-overlay');
@@ -131,7 +145,9 @@
         var note = document.createElement('p');
         note.id = 'bx-dev-note';
         note.className = 'bx-dev-warning';
-        txt(note, 'Ferramentas internas de GoldHEN como Debug Settings e plugins são controladas no próprio PS4.');
+        note.setAttribute('role', 'status');
+        note.setAttribute('aria-live', 'polite');
+        txt(note, 'Se o nexHEN não concluir, copie o diagnóstico após a falha. Nada é enviado automaticamente.');
         card.appendChild(note);
         overlay.appendChild(card);
         overlay.onclick = function (event) { if (event.target === overlay) window.bxCloseDiagnostics(); };

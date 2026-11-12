@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from presentation import improve_html, stamp_manifests
+from presentation import improve_html, ensure_hen_cache, stamp_manifests
 from diagnostics.generate_report import build_report
 from diagnostics import verify_site
 
@@ -65,14 +65,43 @@ class PresentationTests(unittest.TestCase):
                 for entry, error in [('missing.css', 'Missing cache resource'),
                                      ('../../../../outside', 'Cache entry escapes site')]:
                     manifest.write_text('CACHE MANIFEST\nCACHE:\n' + entry + '\n')
+                    for asset in ('includes/payloads/HEN/nexHEN-ps4.elf', 'includes/payloads/Bins/elfldr.bin',
+                                  'includes/payloads/Bins/elfldr.elf'):
+                        file = root / asset
+                        file.parent.mkdir(parents=True, exist_ok=True)
+                        file.write_bytes(b'unchanged fixture')
+                    ensure_hen_cache(root)
                     stamp_manifests(root)
                     with self.assertRaisesRegex(ValueError, error):
                         verify_site.check_cache()
                 manifest.write_text('CACHE MANIFEST\nCACHE:\n../../../index.html\nNETWORK:\n*\n')
+                ensure_hen_cache(root)
                 stamp_manifests(root)
                 verify_site.check_cache()
             finally:
                 verify_site.SITE = original_site
+
+    def test_hen_cache_is_idempotent_and_preserves_payload_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cache = root / 'includes/caches/manifest'
+            cache.mkdir(parents=True)
+            manifest = cache / '1302-1352.manifest'
+            manifest.write_text('CACHE MANIFEST\nCACHE:\nNETWORK:\n*\n')
+            for asset in ('includes/payloads/HEN/nexHEN-ps4.elf', 'includes/payloads/Bins/elfldr.bin',
+                          'includes/payloads/Bins/elfldr.elf'):
+                file = root / asset
+                file.parent.mkdir(parents=True, exist_ok=True)
+                file.write_bytes(b'original binary')
+            ensure_hen_cache(root)
+            first = manifest.read_bytes()
+            ensure_hen_cache(root)
+            self.assertEqual(first, manifest.read_bytes())
+            self.assertEqual(first.count(b'nexHEN-ps4.elf'), 1)
+            self.assertEqual((root / 'includes/payloads/HEN/nexHEN-ps4.elf').read_bytes(), b'original binary')
+            (root / 'includes/payloads/Bins/elfldr.bin').unlink()
+            with self.assertRaisesRegex(ValueError, 'Missing nexHEN dependency'):
+                ensure_hen_cache(root)
 
 
 if __name__ == '__main__':

@@ -41,6 +41,7 @@ Requer Node.js com `node --test` e Python 3.9+:
 node --test tests/*.test.cjs
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 python3 build.py
+node --test tests/hen-selection.integration.cjs
 python3 diagnostics/verify_site.py
 ```
 
@@ -53,3 +54,17 @@ regressões da interface. A apresentação mantém zoom disponível, foco visív
 margens compatíveis com WebKit sem flex gap. Aparência no PS4, navegação por
 controle, persistência real do cache offline, payloads e desbloqueio exigem teste
 físico separado; os testes automatizados não comprovam esses resultados.
+
+## nexHEN experimental no firmware 13.52
+
+O host mantém o nexHEN original da revisão fixada. Seu ELF e os dois arquivos
+do carregador ELF entram nos manifests offline; o CI verifica hashes, assinatura
+ELF, seleção do HEN e o reconhecimento da cadeia já existente para 13.52.
+Essas verificações não comprovam que o payload suporta ou conclui a execução
+nesse firmware. Não foram adicionados offsets nem alterações de kernel.
+
+Se o processo não terminar, abra Configurações → Diagnóstico do Host /
+Desenvolvedor → Copiar diagnóstico. O relatório local inclui payload selecionado,
+estado e as últimas mensagens do host, sem enviar dados automaticamente.
+Revise o relatório antes de compartilhar. Após atualizar o site, use Atualizar
+cache com a rede disponível para receber a correção do cache do nexHEN.

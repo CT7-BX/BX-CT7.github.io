@@ -32,6 +32,8 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Rebuild pinned upstream
         run: python3 build.py
+      - name: Verify nexHEN selection and offline dependencies (no execution)
+        run: node --test tests/hen-selection.integration.cjs
       - name: Verify BX-HEN dashboard assets
         run: |
           test -s dist/bx-hen/index.html

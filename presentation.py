@@ -34,6 +34,28 @@ def improve_html(html):
     return html
 
 
+def ensure_hen_cache(root):
+    """Cache the existing experimental HEN; never rewrite executable bytes."""
+    assets = ('includes/payloads/HEN/nexHEN-ps4.elf',
+              'includes/payloads/Bins/elfldr.bin', 'includes/payloads/Bins/elfldr.elf')
+    for asset in assets:
+        if not (root / asset).is_file():
+            raise ValueError('Missing nexHEN dependency: ' + asset)
+    manifests = list((root / 'includes/caches/manifest').glob('*.manifest'))
+    if not manifests:
+        raise ValueError('Missing offline manifests')
+    for path in manifests:
+        text = path.read_text(encoding='utf-8')
+        if text.count('CACHE:') != 1:
+            raise ValueError('Cache section changed: ' + path.name)
+        cache_section = text.split('CACHE:', 1)[1].split('NETWORK:', 1)[0].split('FALLBACK:', 1)[0]
+        missing = ['../../../' + asset for asset in assets
+                   if '../../../' + asset not in cache_section.splitlines()]
+        if missing:
+            text = text.replace('CACHE:', 'CACHE:\n' + '\n'.join(missing), 1)
+            path.write_text(text, encoding='utf-8')
+
+
 def stamp_manifests(root):
     """Invalidate AppCache on content changes, including builds without GITHUB_SHA."""
     manifests = sorted((root / 'includes/caches/manifest').glob('*.manifest'))

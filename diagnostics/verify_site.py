@@ -114,6 +114,10 @@ def check_cache():
         check(text.startswith('CACHE MANIFEST\n'), 'Invalid manifest header')
         check(bool(re.search(r'^# BX-CT7 content: [a-f0-9]{64}$', text, re.M)),
               'Missing content revision: ' + manifest.name)
+        cache_entries = text.split('CACHE:', 1)[-1].split('NETWORK:', 1)[0].split('FALLBACK:', 1)[0].splitlines()
+        for asset in ('includes/payloads/HEN/nexHEN-ps4.elf', 'includes/payloads/Bins/elfldr.bin',
+                      'includes/payloads/Bins/elfldr.elf'):
+            check('../../../' + asset in cache_entries, 'Missing nexHEN offline dependency: ' + asset)
         for line in text.splitlines()[1:]:
             line = line.strip()
             if not line or line.startswith('#'):
