@@ -1,6 +1,46 @@
 """Small, fail-closed HTML presentation changes; no loader or payload edits."""
 import hashlib
 import re
+import json
+import os
+import subprocess
+
+
+def add_release_status(root, source):
+    """Publish the loaded revision and an explicit network-only update check."""
+    revision = os.environ.get('GITHUB_SHA', '')
+    if not revision:
+        try:
+            revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=source.parent,
+                                               text=True).strip()
+        except (OSError, subprocess.CalledProcessError):
+            revision = 'local-build'
+    if not re.fullmatch(r'[a-f0-9]{40}|local-build', revision):
+        raise ValueError('Invalid build revision')
+    asset = root / 'includes/js/site-status.js'
+    asset.write_bytes((source / 'site-status.js').read_bytes())
+    index = root / 'index.html'
+    html = index.read_text(encoding='utf-8')
+    anchor = '<p id="PS4FW" class="text-white/70 text-lg mt-4 mb-6"></p>'
+    if html.count(anchor) != 1 or html.count('</body>') != 1:
+        raise ValueError('Status insertion point changed')
+    panel = ('\n<div id="bx-site-status" data-revision="' + revision + '">'
+             '<span id="bx-site-revision">Site ' + revision[:7] + '</span>'
+             '<span id="bx-site-network">Rede não informada</span>'
+             '<button type="button" id="bx-site-check">Verificar atualização</button>'
+             '<p id="bx-site-message" role="status" aria-live="polite" aria-atomic="true">'
+             'A revisão identifica o site; não confirma execução do HEN.</p></div>')
+    html = html.replace(anchor, anchor + panel, 1)
+    html = html.replace('</body>', '<script src="./includes/js/site-status.js"></script>\n</body>', 1)
+    index.write_text(html, encoding='utf-8')
+    (root / 'release.json').write_text(json.dumps({'schema_version': 1, 'revision': revision}) + '\n',
+                                     encoding='utf-8')
+    for path in (root / 'includes/caches/manifest').glob('*.manifest'):
+        text = path.read_text(encoding='utf-8')
+        if text.count('CACHE:') != 1:
+            raise ValueError('Missing cache section')
+        text = text.replace('CACHE:', 'CACHE:\n../../../includes/js/site-status.js', 1)
+        path.write_text(text, encoding='utf-8')
 
 
 def improve_html(html):

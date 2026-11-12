@@ -38,6 +38,8 @@ CHECK_FILES = [
     "dist/bx-hen/store/catalog.json",
 ]
 JS_ASSETS = [
+    "dist/includes/js/site-status.js",
+    "dist/includes/js/dev-diagnostics.js",
     "dist/bx-hen/extras.js",
     "dist/bx-hen/core.js",
     "dist/bx-hen/test-monitor.js",
@@ -173,6 +175,14 @@ def check_minimal_host():
           "Minimal theme migration not injected before page startup")
     check('window.location.replace("../")' in legacy_html,
           "Legacy dashboard does not redirect to the single main page")
+    release = json.loads((SITE / 'release.json').read_text(encoding='utf-8'))
+    check(release.get('schema_version') == 1 and
+          bool(re.fullmatch(r'[a-f0-9]{40}|local-build', release.get('revision', ''))),
+          'Invalid public release metadata')
+    check('data-revision="' + release['revision'] + '"' in html,
+          'Loaded-page revision does not match release metadata')
+    check(html.count('src="./includes/js/site-status.js"') == 1,
+          'Release status script missing or duplicated')
     check("width:max-content" not in css, "Unsupported legacy width remains in minimal CSS")
     check("flex-direction:row!important" in css,
           "HEN option layout may inherit a conflicting mobile flex direction")
@@ -181,6 +191,8 @@ def check_minimal_host():
     for manifest in manifests:
         check("../../../includes/css/minimal.css" in manifest.read_text(encoding="utf-8"),
               "Minimal CSS missing in cache manifest: " + manifest.name)
+        check('../../../includes/js/site-status.js' in manifest.read_text(encoding='utf-8'),
+              'Release status script missing from offline cache')
 
 
 def main():

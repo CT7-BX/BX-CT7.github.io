@@ -2,13 +2,35 @@
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from presentation import improve_html, ensure_hen_cache, stamp_manifests
+from presentation import improve_html, add_release_status, ensure_hen_cache, stamp_manifests
 from diagnostics.generate_report import build_report
 from diagnostics import verify_site
 
 
 class PresentationTests(unittest.TestCase):
+    def test_release_metadata_matches_loaded_html_and_offline_script(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'includes/js').mkdir(parents=True)
+            cache = root / 'includes/caches/manifest'
+            cache.mkdir(parents=True)
+            manifest = cache / 'test.manifest'
+            manifest.write_text('CACHE MANIFEST\nCACHE:\nNETWORK:\n*\n')
+            (root / 'index.html').write_text('<p id="PS4FW" class="text-white/70 text-lg mt-4 mb-6"></p></body>')
+            with patch.dict('os.environ', {'GITHUB_SHA': 'b' * 40}):
+                add_release_status(root, Path('overrides'))
+            import json
+            data = json.loads((root / 'release.json').read_text())
+            self.assertEqual(data['revision'], 'b' * 40)
+            self.assertIn('data-revision="' + data['revision'] + '"', (root / 'index.html').read_text())
+            self.assertIn('../../../includes/js/site-status.js', manifest.read_text())
+            self.assertEqual((root / 'includes/js/site-status.js').read_bytes(), Path('overrides/site-status.js').read_bytes())
+            with patch.dict('os.environ', {'GITHUB_SHA': '<injected>'}):
+                with self.assertRaisesRegex(ValueError, 'Invalid build revision'):
+                    add_release_status(root, Path('overrides'))
+
     def fixture(self):
         return ('<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">'
                 '<link id="main-stylesheet" href=""><link id="color-stylesheet" href="">'

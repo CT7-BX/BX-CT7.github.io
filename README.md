@@ -35,6 +35,23 @@ Este é um backup de recuperação. Não é necessariamente idêntico, arquivo p
 
 ## Validação da interface
 
+### Atualizações e diagnóstico
+
+A página principal mostra a revisão carregada e o estado de rede informado pelo
+navegador. O botão **Verificar atualização** consulta a revisão publicada somente
+quando acionado. Se ela for diferente, use **Atualizar cache** com internet e
+reabra o site. A revisão identifica os arquivos da página, não a ativação de HEN.
+
+O painel de diagnóstico permite navegação por teclado, fecha com Esc e devolve
+o foco ao controle de origem. Quando a cópia automática não é aceita pelo
+navegador, o texto permanece selecionado para cópia manual ou fotografia.
+
+O catálogo trata consultas concorrentes, timeout, respostas inválidas e catálogo
+vazio. Uma falha de atualização preserva o último catálogo válido na página.
+O layout inclui fallback para WebKit sem CSS Grid e nomes/hash longos no celular.
+
+### Executar verificações
+
 Requer Node.js com `node --test` e Python 3.9+:
 
 ```sh
