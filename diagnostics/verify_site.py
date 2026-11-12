@@ -38,6 +38,8 @@ CHECK_FILES = [
     "dist/bx-hen/store/catalog.json",
 ]
 JS_ASSETS = [
+    "dist/includes/js/cache-status.js",
+    "dist/includes/js/iframe_cache.js",
     "dist/includes/js/languages/pt-br.js",
     "dist/includes/js/site-status.js",
     "dist/includes/js/dev-diagnostics.js",
@@ -89,7 +91,7 @@ def check_html(rel, allow_http=False):
     parsed = PageInspector()
     parsed.feed(path.read_text(encoding="utf-8"))
     for ref in parsed.refs:
-        if ref.startswith(("#", "mailto:", "data:")):
+        if ref == 'about:blank' or ref.startswith(("#", "mailto:", "data:")):
             continue
         url = urlsplit(ref)
         if url.scheme or url.netloc:
@@ -210,6 +212,7 @@ def main():
     check_cache()
     # The original host intentionally supports HTTP payload-server navigation.
     check_html('index.html', allow_http=True)
+    check_html('cache.html')
     check_html("bx-hen/index.html")
     check_html("bx-hen/store/index.html")
     for rel in JS_ASSETS:

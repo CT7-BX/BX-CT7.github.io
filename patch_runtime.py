@@ -441,7 +441,16 @@ if cache_page.is_file():
         })();
     </script>
 </head>''')
+    from cache_ui import improve_cache_page
+    cache_text = improve_cache_page(cache_text)
+    shutil.copy2(source / 'cache-status.js', root / 'includes/js/cache-status.js')
     cache_page.write_text(cache_text, encoding='utf-8')
+
+# A failed swap must not be reported as a completed offline update.
+if not update('includes/js/iframe_cache.js',
+              'try { appCache.swapCache(); } catch (e) {}',
+              "try { appCache.swapCache(); } catch (e) { window.parent.postMessage({type:'CACHE_ERROR', reason:'Não foi possível ativar o novo cache.'}, '*'); return; }"):
+    raise RuntimeError('Cache swap handler changed; review required')
 
 bridge_src = source / 'bx-theme-bridge.css'
 if not bridge_src.is_file():
@@ -452,6 +461,7 @@ shutil.copy2(bridge_src, bridge_dest)
 for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
     txt = manifest.read_text(encoding='utf-8')
     for asset in [
+        '../../../includes/js/cache-status.js',
         '../../../includes/css/bx-ct7.css',
         '../../../includes/css/bx-theme-bridge.css',
         '../../../includes/css/colors/ruby.css',
