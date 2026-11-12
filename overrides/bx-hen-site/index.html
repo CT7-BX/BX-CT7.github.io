@@ -117,7 +117,9 @@ function run(){
   support.textContent='JavaScript e Promise disponíveis';
   running=true;button.disabled=true;setStatus('Inicializando diagnósticos...');
   try {
-    if(!core.diagnostics().started){
+    var modules=core.diagnostics().modules,registered=false,i;
+    for(i=0;i<modules.length;i++)if(modules[i].name==='browser-startup')registered=true;
+    if(!registered&&!core.diagnostics().started){
       core.register('browser-startup',{
         start:function(context){
           context.emit('startup:diagnostics',{browser:navigator.userAgent||'unknown',documentReady:!!document.body});
