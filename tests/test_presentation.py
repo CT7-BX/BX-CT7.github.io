@@ -18,13 +18,16 @@ class PresentationTests(unittest.TestCase):
             cache.mkdir(parents=True)
             manifest = cache / 'test.manifest'
             manifest.write_text('CACHE MANIFEST\nCACHE:\nNETWORK:\n*\n')
-            (root / 'index.html').write_text('<p id="PS4FW" class="text-white/70 text-lg mt-4 mb-6"></p></body>')
+            (root / 'index.html').write_text('<p id="PS4FW" class="text-white/70 text-lg mt-4 mb-6"></p><button id="updateCache"></button></body>')
             with patch.dict('os.environ', {'GITHUB_SHA': 'b' * 40}):
                 add_release_status(root, Path('overrides'))
             import json
             data = json.loads((root / 'release.json').read_text())
             self.assertEqual(data['revision'], 'b' * 40)
             self.assertIn('data-revision="' + data['revision'] + '"', (root / 'index.html').read_text())
+            self.assertNotIn('Verificar atualização</button>', (root / 'index.html').read_text())
+            self.assertIn('id="updateCache" hidden aria-hidden="true"', (root / 'index.html').read_text())
+            self.assertIn('>Atualizar agora</button>', (root / 'index.html').read_text())
             self.assertIn('../../../includes/js/site-status.js', manifest.read_text())
             self.assertEqual((root / 'includes/js/site-status.js').read_bytes(), Path('overrides/site-status.js').read_bytes())
             with patch.dict('os.environ', {'GITHUB_SHA': '<injected>'}):

@@ -7,7 +7,7 @@ import subprocess
 
 
 def add_release_status(root, source):
-    """Publish the loaded revision and an explicit network-only update check."""
+    """Publish revision metadata for automatic checks and explicit updates."""
     revision = os.environ.get('GITHUB_SHA', '')
     if not revision:
         try:
@@ -25,11 +25,16 @@ def add_release_status(root, source):
     if html.count(anchor) != 1 or html.count('</body>') != 1:
         raise ValueError('Status insertion point changed')
     panel = ('\n<div id="bx-site-status" data-revision="' + revision + '">'
-             '<span id="bx-site-revision">Site ' + revision[:7] + '</span>'
+             '<span id="bx-site-revision">Verificando atualização...</span>'
              '<span id="bx-site-network">Rede não informada</span>'
-             '<button type="button" id="bx-site-check">Verificar atualização</button>'
+             '<button type="button" id="bx-site-check" hidden disabled style="display:none">Atualizar agora</button>'
              '<p id="bx-site-message" role="status" aria-live="polite" aria-atomic="true">'
-             'A revisão identifica o site; não confirma execução do HEN.</p></div>')
+             'Conferindo se existe uma nova versão do site.</p></div>')
+    # Keep the original event target for the PS4 cache handler, out of the UI.
+    old_button = '<button id="updateCache"'
+    if html.count(old_button) != 1:
+        raise ValueError('Original cache control changed')
+    html = html.replace(old_button, old_button + ' hidden aria-hidden="true" tabindex="-1" style="display:none"', 1)
     html = html.replace(anchor, anchor + panel, 1)
     html = html.replace('</body>', '<script src="./includes/js/site-status.js"></script>\n</body>', 1)
     index.write_text(html, encoding='utf-8')

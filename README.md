@@ -37,10 +37,13 @@ Este é um backup de recuperação. Não é necessariamente idêntico, arquivo p
 
 ### Atualizações e diagnóstico
 
-A página principal mostra a revisão carregada e o estado de rede informado pelo
-navegador. O botão **Verificar atualização** consulta a revisão publicada somente
-quando acionado. Se ela for diferente, use **Atualizar cache** com internet e
-reabra o site. A revisão identifica os arquivos da página, não a ativação de HEN.
+A página principal confere a publicação automaticamente ao abrir e quando a
+conexão retorna. Ela mostra **Versão mais recente**, **Nova atualização disponível**
+ou informa que não conseguiu verificar. O código da revisão fica apenas nos
+diagnósticos. Quando existe uma publicação diferente, o único botão visível é
+**Atualizar agora**: no PS4 com AppCache ele abre o fluxo de cache original;
+nos demais navegadores recarrega a página. Não há download ou recarga automática.
+A verificação identifica os arquivos da página, não a ativação de HEN.
 
 O painel de diagnóstico permite navegação por teclado, fecha com Esc e devolve
 o foco ao controle de origem. Quando a cópia automática não é aceita pelo
