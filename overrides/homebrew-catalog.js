@@ -16,10 +16,11 @@
       /^https:\/\/[A-Za-z0-9.-]+(?::443)?(?:\/|$)/.test(item.download_url) &&
       item.download_url.indexOf('@') === -1 &&
       typeof item.sha256 === 'string' && /^[a-fA-F0-9]{64}$/.test(item.sha256) &&
-      typeof item.license === 'string' && item.license.length > 1 && item.license !== 'A confirmar';
+      typeof item.license === 'string' && item.license.replace(/\s/g, '').length > 1 && item.license !== 'A confirmar';
   }
   function addItem(container, item) {
-    if (!item || (item.id !== 'minecraft-online-manager' && item.id !== 'java')) return;
+    if (!item || typeof item.title !== 'string' || !item.title.replace(/\s/g, '') ||
+        (item.id !== 'minecraft-online-manager' && item.id !== 'java')) return;
     if (document.getElementById('bx-homebrew-' + item.id)) return;
     var outer = node(container, 'div', 'payload payload-card bx-homebrew-entry');
     outer.id = 'bx-homebrew-' + item.id;
@@ -53,24 +54,35 @@
   window.bxRenderHomebrewCards = function (container) {
     if (!container) return;
     /* The upstream Homebrew tab is cleared and re-rendered on navigation. */
-    var request = new XMLHttpRequest();
-    request.open('GET', source, true);
+    var renderToken = String(new Date().getTime()) + '-' + String(Math.random()).slice(2);
+    container.setAttribute('data-bx-homebrew-render', renderToken);
+    if (container.bxCatalogRequest) { try { container.bxCatalogRequest.abort(); } catch (ignore) {} }
+    var request, done = false;
+    function fallback() {
+      if (done || container.getAttribute('data-bx-homebrew-render') !== renderToken) return;
+      done = true; container.bxCatalogRequest = null; addFallback(container);
+    }
+    try {
+    request = new XMLHttpRequest();
+    container.bxCatalogRequest = request;
+    request.open('GET', source, true); request.timeout = 12000;
     request.onreadystatechange = function () {
       if (request.readyState !== 4) return;
       /* Never append to an inactive tab or after a different render. */
-      if (container.getAttribute('data-bx-homebrew-render') !== renderToken) return;
-      if (request.status !== 200) { addFallback(container); return; }
+      if (done || container.getAttribute('data-bx-homebrew-render') !== renderToken) return;
+      if (request.status === 0) return;
+      if (request.status !== 200) { fallback(); return; }
       try {
         var body = JSON.parse(request.responseText);
-        if (!body || !body.items || !body.items.length) throw Error('invalid catalog');
+        if (!body || body.schema_version !== 1 || !Array.isArray(body.items) || !body.items.length || body.items.length > 200)
+          throw Error('invalid catalog');
         for (var i = 0; i < body.items.length; i++) addItem(container, body.items[i]);
-      } catch (error) { addFallback(container); }
+        done = true; container.bxCatalogRequest = null;
+      } catch (error) { fallback(); }
     };
-    request.onerror = function () {
-      if (container.getAttribute('data-bx-homebrew-render') === renderToken) addFallback(container);
-    };
-    var renderToken = String(new Date().getTime()) + '-' + String(Math.random()).slice(2);
-    container.setAttribute('data-bx-homebrew-render', renderToken);
-    try { request.send(null); } catch (error) { addFallback(container); }
+    request.onerror = fallback;
+    request.ontimeout = fallback;
+    request.send(null);
+    } catch (error) { fallback(); }
   };
 })();
