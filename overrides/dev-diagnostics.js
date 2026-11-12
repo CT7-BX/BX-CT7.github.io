@@ -3,6 +3,7 @@
    enable test mode or execute payloads. Compatible with PS4's older browser. */
 (function () {
     'use strict';
+    var previousFocus = null, closeControl = null;
     function el(id) { return document.getElementById(id); }
     function txt(node, value) { if (node) node.textContent = String(value); }
     function fmt(value) { return value === undefined || value === null || value === '' ? 'Indisponível' : String(value); }
@@ -36,7 +37,9 @@
         var isConsole = typeof isPS4Console === 'function' && isPS4Console();
         var dev = typeof devMode !== 'undefined' && devMode;
         var count = typeof payloadsList !== 'undefined' ? payloadsList.length : 0;
+        var release = el('bx-site-status');
         return [
+            ['Revisão do site carregada', release ? fmt(release.getAttribute('data-revision')) : 'Não informada'],
             ['Plataforma', isConsole ? 'PlayStation 4' : 'Navegador externo'],
             ['Firmware detectado', fmt(version)],
             ['Cadeia do firmware', supported(version)],
@@ -77,19 +80,28 @@
                    hostText('console', 12000) || 'Nenhuma mensagem disponível.',
                    '', 'Relatório local. Revise o conteúdo antes de compartilhar.');
         var str = lines.join('\n'), input = el('bx-dev-report');
-        input.value = str; input.style.display = 'block'; input.select();
-        try { document.execCommand('copy'); } catch (e) {}
-        txt(el('bx-dev-note'), 'Relatório local selecionado, incluindo mensagens do host. Revise antes de compartilhar.');
+        input.value = str; input.style.display = 'block'; input.focus(); input.select();
+        var copied = false;
+        try { copied = document.execCommand('copy'); } catch (e) {}
+        txt(el('bx-dev-note'), copied ? 'Relatório copiado. Revise antes de compartilhar.' :
+            'Cópia automática indisponível. O relatório está selecionado; também pode fotografar as mensagens.');
     }
     window.bxOpenDiagnostics = function () {
         var panel = el('bx-dev-overlay');
         if (!panel) return;
+        if (panel.style.display !== 'flex') previousFocus = document.activeElement;
         fill();
+        var report = el('bx-dev-report');
+        if (report) { report.value = ''; report.style.display = 'none'; }
+        panel.setAttribute('aria-hidden', 'false');
         panel.style.display = 'flex';
+        if (closeControl) closeControl.focus();
     };
     window.bxCloseDiagnostics = function () {
         var panel = el('bx-dev-overlay');
-        if (panel) panel.style.display = 'none';
+        if (panel) { panel.style.display = 'none'; panel.setAttribute('aria-hidden', 'true'); }
+        if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
+        previousFocus = null;
     };
     function ready() {
         if (el('bx-dev-overlay')) return;
@@ -97,6 +109,8 @@
         overlay.id = 'bx-dev-overlay';
         overlay.setAttribute('role', 'dialog');
         overlay.setAttribute('aria-label', 'Diagnóstico do BX-CT7');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-hidden', 'true');
         var card = document.createElement('div');
         card.className = 'bx-dev-card';
         var head = document.createElement('div');
@@ -104,6 +118,7 @@
         var h = document.createElement('h2');
         txt(h, 'Diagnóstico e opções avançadas');
         var close = document.createElement('button');
+        closeControl = close; close.type = 'button';
         txt(close, 'Fechar ✕');
         close.onclick = window.bxCloseDiagnostics;
         head.appendChild(h); head.appendChild(close);
@@ -118,20 +133,22 @@
         var actions = document.createElement('div');
         actions.className = 'bx-dev-actions';
         var refresh = document.createElement('button');
+        refresh.type = 'button';
         txt(refresh, 'Atualizar informações'); refresh.onclick = fill;
         actions.appendChild(refresh);
         var copy = document.createElement('button');
+        copy.type = 'button';
         txt(copy, 'Copiar diagnóstico'); copy.onclick = copyReport;
         actions.appendChild(copy);
         var advanced = document.createElement('button');
+        advanced.type = 'button';
         txt(advanced, 'Abrir aba Avançado');
         advanced.onclick = function () {
             window.bxCloseDiagnostics();
             var settingsOverlay = el('settings-popup-overlay');
             if (settingsOverlay && !settingsOverlay.classList.contains('hidden') && typeof settingsPopup === 'function') settingsPopup();
             var tab = el('advanced-tab');
-            if (tab && !tab.closest) { tab.click(); }
-            else if (tab) { tab.click(); }
+            if (tab) tab.click();
             var screen = el('exploit-main-screen');
             if (screen && screen.scrollIntoView) screen.scrollIntoView();
         };
@@ -152,6 +169,18 @@
         overlay.appendChild(card);
         overlay.onclick = function (event) { if (event.target === overlay) window.bxCloseDiagnostics(); };
         document.body.appendChild(overlay);
+        document.addEventListener('keydown', function (event) {
+            if (overlay.style.display !== 'flex') return;
+            var key = event.keyCode || event.which;
+            if (key === 27) { event.preventDefault(); window.bxCloseDiagnostics(); return; }
+            if (key !== 9) return;
+            var first = close, last = report.style.display === 'block' ? report : advanced;
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault(); last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault(); first.focus();
+            }
+        }, false);
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready, false);
     else ready();
