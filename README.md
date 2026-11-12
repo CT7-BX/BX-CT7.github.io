@@ -58,6 +58,17 @@ O catálogo trata consultas concorrentes, timeout, respostas inválidas e catál
 vazio. Uma falha de atualização preserva o último catálogo válido na página.
 O layout inclui fallback para WebKit sem CSS Grid e nomes/hash longos no celular.
 
+A tela de cache mantém falhas visíveis, oferece **Tentar novamente** e
+**Voltar ao site**, valida as mensagens do iframe e não anuncia sucesso se
+a ativação do novo cache falhar. Seu comportamento real ainda depende de teste
+no PS4 com AppCache; o navegador comum mostra quando essa API não existe.
+
+Consultas de homebrews agora têm timeout e cancelam a requisição anterior ao
+renderizar novamente. O histórico de CI valida a resposta antes de trocar a
+lista visível. Uma indisponibilidade da API de histórico do GitHub é registrada
+explicitamente e não impede a publicação de um site que passou nas verificações
+de compilação e integridade.
+
 ### Executar verificações
 
 Requer Node.js com `node --test` e Python 3.9+:

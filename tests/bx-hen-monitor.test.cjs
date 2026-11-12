@@ -6,7 +6,7 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync('overrides/bx-hen-site/test-monitor.js', 'utf8');
 
-function environment() {
+function environment(options = {}) {
   function element(tag) {
     return {
       tagName: tag, children: [], attributes: {}, className: '', textContent: '',
@@ -20,8 +20,8 @@ function environment() {
   const byId = (id, node = main) => node.id === id ? node : node.children.map(child => byId(id, child)).find(Boolean);
   const requests = [];
   class FakeXHR {
-    constructor() { requests.push(this); this.readyState = 0; this.status = 0; this.aborted = false; }
-    open(method, url, async) { this.method = method; this.url = url; this.async = async; }
+    constructor() { if(options.constructorFails)throw Error('blocked');requests.push(this); this.readyState = 0; this.status = 0; this.aborted = false; }
+    open(method, url, async) { if(options.openFails)throw Error('blocked');this.method = method; this.url = url; this.async = async; }
     send() { this.sent = true; }
     abort() { this.aborted = true; }
     respond(status, body) {
@@ -138,4 +138,36 @@ test('temporary HTTP failure keeps the last successful report visible', () => {
   assert.equal(env.get('bx-monitor-runs').children.length, 1);
   assert.equal(env.get('bx-monitor-count').textContent, '1 registros');
   assert.match(env.get('bx-monitor-status').textContent, /HTTP 503/);
+});
+
+test('malformed reports cannot partially erase the last valid list', () => {
+  const env = environment();env.requests[0].respond(200, report([run(321)]));
+  env.refresh();env.requests[1].respond(200, report([run(456), null]));
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+  assert.match(env.get('bx-monitor-runs').children[0].children[0].children[0].textContent, /321/);
+  assert.match(env.get('bx-monitor-status').textContent, /Não foi possível ler/);
+});
+
+test('optional CI metadata outage is explicit and preserves visible runs', () => {
+  const env = environment();env.requests[0].respond(200, report([run(321)]));
+  env.refresh();env.requests[1].respond(200, JSON.stringify({runs:[],collection_status:'unavailable'}));
+  assert.match(env.get('bx-monitor-status').textContent, /não pôde ser coletado/);
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+});
+
+test('log links are always built from the run ID, never an arbitrary response URL', () => {
+  const env = environment();const item = run(123);item.url='javascript:alert(1)';
+  env.requests[0].respond(200,report([item]));
+  assert.equal(env.get('bx-monitor-runs').children[0].children[2].href,
+    'https://github.com/CT7-BX/BX-CT7.github.io/actions/runs/123');
+});
+
+test('XHR construction/open failures are reported and late errors cannot replace success', () => {
+  for(const option of ['constructorFails','openFails']){
+    const env=environment({[option]:true});assert.match(env.get('bx-monitor-status').textContent,/não é suportada/);
+  }
+  const env=environment();env.requests[0].respond(200,report([run(123)]));
+  const message=env.get('bx-monitor-status').textContent;
+  env.requests[0].onerror();env.requests[0].ontimeout();
+  assert.equal(env.get('bx-monitor-status').textContent,message);
 });

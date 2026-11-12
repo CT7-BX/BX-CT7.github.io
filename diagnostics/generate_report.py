@@ -8,6 +8,7 @@ import datetime
 import json
 import os
 import pathlib
+import sys
 import urllib.error
 import urllib.request
 
@@ -26,12 +27,18 @@ def from_api():
     req = urllib.request.Request(URL, headers=headers)
     with urllib.request.urlopen(req, timeout=25) as response:
         payload = json.load(response)
-    return payload.get("workflow_runs", [])
+    if not isinstance(payload, dict) or not isinstance(payload.get('workflow_runs'), list):
+        raise ValueError('Invalid Actions response')
+    return payload['workflow_runs']
 
 
 def build_report(raw_runs, generated):
+    if not isinstance(raw_runs, list):
+        raise ValueError('Invalid Actions run collection')
     results = []
     for run in raw_runs:
+        if not isinstance(run, dict):
+            continue
         if run.get("status") != "completed":
             continue
         conclusion = run.get("conclusion")
@@ -39,7 +46,7 @@ def build_report(raw_runs, generated):
             continue
         run_id = run.get("id")
         created = run.get("created_at")
-        if not isinstance(run_id, int) or not isinstance(created, str):
+        if type(run_id) is not int or run_id <= 0 or not isinstance(created, str):
             continue
         results.append({
             "id": run_id,
@@ -65,8 +72,15 @@ def build_report(raw_runs, generated):
 
 def main():
     generated = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
-    runs = from_api()
-    report = build_report(runs, generated)
+    try:
+        report = build_report(from_api(), generated)
+        report['collection_status'] = 'available'
+    except (OSError, ValueError, urllib.error.URLError):
+        # CI history is optional metadata; a GitHub API outage must not prevent
+        # publishing a site that passed all build/integrity checks.
+        report = build_report([], generated)
+        report['collection_status'] = 'unavailable'
+        print('CI history could not be collected; publishing an explicit unavailable status.', file=sys.stderr)
     for destination in (OUTPUT, ARTIFACT):
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
