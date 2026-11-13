@@ -18,7 +18,7 @@ function load(){
  x.timeout=12000;
  x.onreadystatechange=function(){
   if(x.readyState!==4||current!==requestId||done)return;
-  if(x.status===0)return;
+  if(x.status===0){fail('Falha de conexão ao consultar os relatórios.');return;}
   if(x.status<200||x.status>=300){fail('Histórico indisponível (HTTP '+x.status+').');return;}
   try{render(JSON.parse(x.responseText));done=true;activeRequest=null;}catch(e){fail('Não foi possível ler o histórico.');}
  };
