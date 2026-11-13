@@ -137,3 +137,29 @@ qualquer um desses arquivos. A nova revisão upstream atualiza também PS4Debug
 para 1.3.3 e PS4-Xplorer para 2.09; os binários são os originais do WebKitty,
 sem edição local. GoldHEN e nexHEN não foram modificados nesta integração.
 Nenhum desses testes executa o desbloqueio ou comprova funcionamento físico.
+
+
+## Robustez da edição de novembro
+
+As personalizações obrigatórias agora interrompem a construção quando um
+marcador do WebKitty muda. Nenhuma revisão que perca silenciosamente parte da
+integração é publicada. O verificador também confere a lista completa e os
+hashes dos arquivos protegidos contra o inventário gerado na construção.
+O cálculo da revisão do cache lê arquivos em blocos e evita uma passagem
+redundante antes de gerar os metadados finais.
+
+A página e o JSON do catálogo local entram nos manifestos offline. Os cartões
+Homebrew usam links com fragmento para manter a identidade do arquivo salvo.
+A loja continua aceitando os links antigos com consulta; se a primeira consulta
+falhar, tenta uma vez o catálogo salvo e avisa que ele pode estar desatualizado.
+Essa inclusão no manifesto ainda precisa ser validada no AppCache real do PS4.
+
+Falhas ao iniciar uma atualização devolvem o botão e a consulta periódica,
+sem atualização automática. Os erros na preparação do cache ficam visíveis.
+O diagnóstico mostra o estado do cache, a última linha do registro do host e
+o resultado da consulta de atualização em português. O diálogo restaura a
+rolagem anterior ao fechar e limpa mensagens antigas de cópia ao reabrir.
+
+A rotina de revisão do WebKitty conserva o relatório da proposta como artefato
+e no resumo do Actions mesmo se os testes do candidato falharem. Uma falha
+continua impedindo a abertura da proposta e a publicação.

@@ -37,8 +37,15 @@ jobs:
           python3 build.py
           node --test tests/*.integration.cjs
           python3 diagnostics/verify_site.py
-      - name: Save validated proposal
-        if: steps.candidate.outputs.changed == 'true'
+      - name: Record review summary even if validation fails
+        if: always() && steps.candidate.outputs.changed == 'true'
+        run: |
+          if [ -f upstream-review.md ]; then
+            cat upstream-review.md >> "$GITHUB_STEP_SUMMARY"
+            printf '\nValidation result: %s\n' '${{ job.status }}' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Save candidate review evidence
+        if: always() && steps.candidate.outputs.changed == 'true'
         uses: actions/upload-artifact@v7.0.2
         with:
           name: webkitty-proposal
