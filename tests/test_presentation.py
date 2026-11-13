@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from presentation import improve_html, add_release_status, ensure_hen_cache, stamp_manifests
+from presentation import improve_html, add_release_status, ensure_hen_cache, ensure_catalog_cache, stamp_manifests
 from diagnostics.generate_report import build_report
 from diagnostics import verify_site
 
@@ -127,6 +127,51 @@ class PresentationTests(unittest.TestCase):
             (root / 'includes/payloads/Bins/elfldr.bin').unlink()
             with self.assertRaisesRegex(ValueError, 'Missing nexHEN dependency'):
                 ensure_hen_cache(root)
+
+
+    def test_local_catalog_cache_is_complete_idempotent_and_requires_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cache = root/'includes/caches/manifest'
+            cache.mkdir(parents=True)
+            manifest = cache/'1400.manifest'
+            manifest.write_text('CACHE MANIFEST\nCACHE:\nNETWORK:\n*\n')
+            for name in ('index.html','catalog.json'):
+                path = root/'bx-hen/store'/name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('local catalog fixture')
+            ensure_catalog_cache(root)
+            first = manifest.read_bytes()
+            ensure_catalog_cache(root)
+            self.assertEqual(first, manifest.read_bytes())
+            self.assertIn(b'../../../bx-hen/store/index.html', first)
+            self.assertIn(b'../../../bx-hen/store/catalog.json', first)
+            (root/'bx-hen/store/catalog.json').unlink()
+            with self.assertRaisesRegex(ValueError, 'Missing catalog asset'):
+                ensure_catalog_cache(root)
+
+    def test_upstream_inventory_rejects_changed_bytes_and_untracked_files(self):
+        import json
+        import hashlib
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            site = root/'dist'
+            (site/'src').mkdir(parents=True)
+            original = site/'src/chain.js'
+            original.write_bytes(b'original upstream')
+            (root/'build.py').write_text("SHA = '"+'a'*40+"'\n")
+            (site/'upstream-integrity.json').write_text(json.dumps({
+                'revision':'a'*40,'physical_ps4_tested':False,
+                'protected_files':{'src/chain.js':hashlib.sha256(original.read_bytes()).hexdigest()}}))
+            with patch.object(verify_site, 'ROOT', root), patch.object(verify_site, 'SITE', site):
+                verify_site.check_upstream_integrity()
+                original.write_bytes(b'changed')
+                with self.assertRaisesRegex(ValueError, 'checksum mismatch'):
+                    verify_site.check_upstream_integrity()
+                original.write_bytes(b'original upstream')
+                (site/'src/untracked.js').write_bytes(b'extra')
+                with self.assertRaisesRegex(ValueError, 'Incomplete protected file inventory'):
+                    verify_site.check_upstream_integrity()
 
 
 if __name__ == '__main__':

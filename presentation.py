@@ -101,6 +101,22 @@ def ensure_hen_cache(root):
             path.write_text(text, encoding='utf-8')
 
 
+def ensure_catalog_cache(root):
+    """Make the existing local catalog usable with the host's offline cache."""
+    assets = ('bx-hen/store/index.html', 'bx-hen/store/catalog.json')
+    for asset in assets:
+        if not (root / asset).is_file():
+            raise ValueError('Missing catalog asset: ' + asset)
+    for path in (root / 'includes/caches/manifest').glob('*.manifest'):
+        text = path.read_text(encoding='utf-8')
+        if text.count('CACHE:') != 1:
+            raise ValueError('Cache section changed: ' + path.name)
+        entries = text.split('CACHE:', 1)[1].split('NETWORK:', 1)[0].splitlines()
+        missing = ['../../../' + asset for asset in assets if '../../../' + asset not in entries]
+        if missing:
+            path.write_text(text.replace('CACHE:', 'CACHE:\n' + '\n'.join(missing), 1), encoding='utf-8')
+
+
 def stamp_manifests(root):
     """Invalidate AppCache on content changes, including builds without GITHUB_SHA."""
     manifests = sorted((root / 'includes/caches/manifest').glob('*.manifest'))
@@ -108,9 +124,11 @@ def stamp_manifests(root):
     for path in sorted(root.rglob('*')):
         if path.is_file() and path not in manifests:
             name = path.relative_to(root).as_posix().encode('utf-8')
-            data = path.read_bytes()
             digest.update(len(name).to_bytes(8, 'big') + name)
-            digest.update(len(data).to_bytes(8, 'big') + data)
+            digest.update(path.stat().st_size.to_bytes(8, 'big'))
+            with path.open('rb') as asset:
+                for chunk in iter(lambda: asset.read(1024 * 1024), b''):
+                    digest.update(chunk)
     marker = '# BX-CT7 content: ' + digest.hexdigest()
     for path in manifests:
         text = re.sub(r'^# BX-CT7 content: [^\n]*\n?', '', path.read_text(encoding='utf-8'), flags=re.M)

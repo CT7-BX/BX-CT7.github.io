@@ -196,8 +196,25 @@ def check_minimal_host():
               "Minimal CSS missing in cache manifest: " + manifest.name)
         check('../../../includes/js/site-status.js' in manifest.read_text(encoding='utf-8'),
               'Release status script missing from offline cache')
+        for asset in ('bx-hen/store/index.html', 'bx-hen/store/catalog.json'):
+            check('../../../' + asset in manifest.read_text(encoding='utf-8').split('CACHE:',1)[1].split('NETWORK:',1)[0].splitlines(),
+                  'Local catalog missing from offline cache: ' + asset)
         check('../../../includes/js/languages/pt-br.js' in manifest.read_text(encoding='utf-8'),
               'Portuguese translation missing from offline cache')
+
+
+def check_upstream_integrity():
+    inventory = json.loads((SITE/'upstream-integrity.json').read_text(encoding='utf-8'))
+    expected = re.search(r"^SHA = '([a-f0-9]{40})'$", (ROOT/'build.py').read_text(encoding='utf-8'), re.M)
+    check(expected is not None and inventory.get('revision') == expected.group(1), 'Upstream revision mismatch')
+    check(inventory.get('physical_ps4_tested') is False, 'Unverified physical test claim')
+    files = inventory.get('protected_files')
+    actual = {p.relative_to(SITE).as_posix() for folder in ('src','includes/payloads')
+              for p in (SITE/folder).rglob('*') if p.is_file()}
+    check(isinstance(files, dict) and set(files) == actual and bool(actual), 'Incomplete protected file inventory')
+    for name, expected_hash in files.items():
+        check(hashlib.sha256((SITE/name).read_bytes()).hexdigest() == expected_hash,
+              'Protected file checksum mismatch: ' + name)
 
 
 def main():
@@ -218,6 +235,7 @@ def main():
     for rel in JS_ASSETS:
         subprocess.run(["node", "--check", str(ROOT / rel)], check=True, capture_output=True, text=True)
     check_catalog()
+    check_upstream_integrity()
     print("BX-HEN verification: syntax, UTF-8, LF line breaks, references and catalog OK")
     print("Note: no PS4 or kernel capability is tested here.")
 

@@ -6,17 +6,10 @@ import sys, re, shutil, hashlib, os
 root = Path(sys.argv[1]).resolve()
 source = Path(__file__).resolve().parent / 'overrides'
 
+from runtime_patch import replace_required
+
 def update(path, old, new):
-    file = root / path
-    if not file.exists():
-        print('Aviso: ausente', path)
-        return False
-    text = file.read_text(encoding='utf-8')
-    if old not in text:
-        print('Aviso: upstream mudou, marcador não encontrado:', path, repr(old[:48]))
-        return False
-    file.write_text(text.replace(old, new, 1), encoding='utf-8')
-    return True
+    return replace_required(root, path, old, new)
 
 index = root / 'index.html'
 if not index.exists():
@@ -601,9 +594,9 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         text = text.replace('CACHE:', 'CACHE:\n' + item, 1)
         manifest.write_text(text, encoding='utf-8')
 
-from presentation import improve_html, add_release_status, ensure_hen_cache, stamp_manifests
+from presentation import improve_html, add_release_status, ensure_hen_cache, ensure_catalog_cache, stamp_manifests
 index.write_text(improve_html(index.read_text(encoding='utf-8')), encoding='utf-8')
 add_release_status(root, source)
 ensure_hen_cache(root)
-stamp_manifests(root)
+ensure_catalog_cache(root)
 print('BX-CT7 Minimal: uma página principal, arquivos do HEN preservados.')
