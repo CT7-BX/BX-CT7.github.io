@@ -229,8 +229,9 @@ design_path.write_text(head + tail, encoding='utf-8')
 
 # Opções experimentais: mostrar controles em firmwares reconhecidos.
 # Não ampliar a lista de firmwares nem alterar payloads ou exploit chains.
-update('index.html', '<li class="hidden flex-1 advancedPayloadsTab"',
-       '<li class="flex-1 advancedPayloadsTab"')
+if not update('index.html', '<li id="advancedPayloadsTab" class="hidden flex-1"',
+              '<li id="advancedPayloadsTab" class="flex-1"'):
+    raise RuntimeError('Advanced payload tab markup changed; review required')
 update('index.html', '<li class="hidden flex-1" id="customPayloadsTab"',
        '<li class="flex-1" id="customPayloadsTab"')
 update('index.html', '                loadSettings();',
@@ -378,17 +379,6 @@ if not update('index.html', '</body>',
               '<script src="./includes/js/homebrew-catalog.js"></script>\n</body>'):
     raise RuntimeError('Não foi possível carregar catálogo Homebrew')
 
-# O botão nativo continua visualmente idêntico. Só no PS4 14.00
-# redireciona para a página oficial do Afterglow, armazenada localmente.
-# A detecção ocorre no navegador, sem forçar firmware ou alterar kernel.
-update('index.html', '</body>',
-       '<script src="./includes/js/afterglow-router.js"></script>\n</body>')
-router_src = source / 'afterglow-router.js'
-router_dest = root / 'includes/js/afterglow-router.js'
-if not router_src.is_file():
-    raise RuntimeError('Afterglow router ausente')
-shutil.copy2(router_src, router_dest)
-
 # Existing compatibility checks are preserved.
 for f in source.iterdir():
     if f.is_file():
@@ -468,7 +458,6 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         '../../../includes/css/colors/brasil.css',
         '../../../includes/css/layouts/neon.css',
         '../../../includes/css/layouts/painel.css',
-        '../../../includes/js/afterglow-router.js',
         '../../../includes/js/dev-diagnostics.js',
         '../../../includes/js/bx-hen-browser.js',
         '../../../includes/js/homebrew-catalog.js'
@@ -508,7 +497,7 @@ checks = {
     'layout Painel': 'value="painel" onchange="setLayout(this.value);"',
     'versão 2.2': 'Version: 2.2',
     'créditos BX-CT7': 'Personalização e edição BX-CT7',
-    'roteador firmware 14.00': 'afterglow-router.js',
+    'cadeia integrada firmware 14.00': 'slopkitAfterglowExp',
     'painel de diagnóstico': 'bx-dev-button',
     'módulo BX-HEN 0.1': 'bx-hen-browser.js',
     'link de entrada do BX-HEN': 'bx-hen/',
@@ -523,7 +512,7 @@ for old in ('value="compact" onchange="setLayout(this.value);"',):
     if old in out:
         raise RuntimeError('Layout removido ainda aparece: ' + old)
 for asset in ('includes/css/layouts/neon.css', 'includes/css/layouts/painel.css',
-              'includes/js/afterglow-router.js', 'includes/js/dev-diagnostics.js',
+              'includes/js/dev-diagnostics.js',
               'includes/js/bx-hen-browser.js', 'includes/js/homebrew-catalog.js',
               'includes/css/bx-theme-bridge.css',
               'bx-hen/index.html', 'cache.html'):

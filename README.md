@@ -4,7 +4,7 @@
 
 **[Abrir BX-CT7 PS4 Host](https://ct7-bx.github.io/BX-CT7.github.io/)**
 
-Repositório de reconstrução do **BX-CT7 PS4 Host**, baseado na revisão pública do [WebKitty](https://github.com/ArabPixel/WebKitty) (`6bdb9f764ba428978cb657a718296c3d6752e9b0`, 03/11/2026).
+Repositório de reconstrução do **BX-CT7 PS4 Host**, baseado na revisão pública do [WebKitty](https://github.com/ArabPixel/WebKitty) (`21c2d899c7381cc9f98e4dfb8da8504d2581b831`, 11/11/2026).
 
 Este repositório contém o **código de reconstrução e as personalizações**, não uma cópia integral do antigo repositório suspenso. O WebKitty e os seus arquivos binários são obtidos diretamente da origem pública durante a compilação.
 
@@ -105,3 +105,35 @@ Desenvolvedor → Copiar diagnóstico. O relatório local inclui payload selecio
 estado e as últimas mensagens do host, sem enviar dados automaticamente.
 Revise o relatório antes de compartilhar. Após atualizar o site, use Atualizar
 cache com a rede disponível para receber a correção do cache do nexHEN.
+
+
+## Integração nativa e atualizações do WebKitty
+
+O firmware 14.00 usa a cadeia Slopkit Afterglow integrada ao WebKitty na própria
+interface BX-CT7. A construção não baixa mais o repositório Afterglow separado
+nem redireciona para outra página de entrada. O nome e os créditos da técnica
+continuam preservados; esta integração não representa um exploit independente.
+A revisão integrada mantém 13.52 em Relapse, conforme o upstream.
+
+A cada seis horas, `Review WebKitty updates` consulta a revisão mais recente.
+Quando encontra novidade, altera somente o SHA fixado, reconstrói o site e roda
+os testes e a verificação de referências/cache. Apenas candidatos aprovados
+nessas verificações geram uma proposta de atualização (pull request), com link
+para a comparação completa e indicação de mudanças em kernel ou payloads.
+Uma revisão que falha não é publicada; a execução no Actions mostra a falha.
+Revisões já propostas, inclusive recusadas, não geram propostas repetidas.
+
+A automação não mescla propostas. A revisão humana deve conferir a comparação,
+os resultados dos testes e, quando necessário, o funcionamento no PS4. Após a
+mesclagem, o fluxo normal de construção e publicação roda novamente. Propostas
+criadas com o token do Actions não disparam outro workflow de pull request;
+por isso a validação completa acontece antes da criação da proposta.
+O GitHub precisa permitir que Actions crie pull requests neste repositório;
+se essa política estiver desativada, a execução falha sem publicar alterações.
+
+`upstream-integrity.json` registra a revisão e os SHA-256 dos arquivos de
+exploração e payloads baixados. A construção falha se a personalização alterar
+qualquer um desses arquivos. A nova revisão upstream atualiza também PS4Debug
+para 1.3.3 e PS4-Xplorer para 2.09; os binários são os originais do WebKitty,
+sem edição local. GoldHEN e nexHEN não foram modificados nesta integração.
+Nenhum desses testes executa o desbloqueio ou comprova funcionamento físico.
