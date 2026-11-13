@@ -1,3 +1,7 @@
 dist/
 __pycache__/
 *.tar.gz
+
+diagnostics/firmware-results.json
+upstream-candidate.txt
+upstream-review.md

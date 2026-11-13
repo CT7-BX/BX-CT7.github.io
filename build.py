@@ -40,7 +40,6 @@ for name, digest in protected.items():
 }, indent=2) + '\n', encoding='utf-8')
 # Metadata participates in the offline content revision too.
 from presentation import stamp_manifests
-stamp_manifests(dest)
-
 (dest/'.nojekyll').touch()
+stamp_manifests(dest)
 print('Reconstrução disponível em:',dest)
