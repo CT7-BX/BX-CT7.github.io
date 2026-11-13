@@ -42,6 +42,7 @@
      ['Viewport (CSS px)',(document.documentElement.clientWidth||0)+' x '+(document.documentElement.clientHeight||0)],
      ['Tela (CSS px)',(window.screen&&screen.width||0)+' x '+(window.screen&&screen.height||0)],
      ['Escala de pixels',typeof window.devicePixelRatio==='number'?String(window.devicePixelRatio):'não informada'],
+     ['Orientação do viewport (indicativo)',(function(){var w=document.documentElement.clientWidth||0,h=document.documentElement.clientHeight||0;return !w||!h?'não informada':w>h?'paisagem':h>w?'retrato':'quadrado';})()],
      ['Entrada por toque',('ontouchstart' in window)?'API detectada':'API não detectada'],
      ['Cookies (configuração)',typeof navigator.cookieEnabled==='boolean'?(navigator.cookieEnabled?'habilitados (indicativo)':'desabilitados (indicativo)'):'não informado'],
      ['Foco da janela',typeof document.hasFocus==='function'?(document.hasFocus()?'janela com foco':'janela sem foco'):'API indisponível'],
