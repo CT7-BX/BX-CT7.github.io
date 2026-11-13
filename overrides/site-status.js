@@ -10,7 +10,7 @@
     function init() {
         var box = id('bx-site-status'), button = id('bx-site-check'), message = id('bx-site-message');
         if (!box || !button || !message) return;
-        var revision = box.getAttribute('data-revision'), available = false;
+        var revision = box.getAttribute('data-revision'), available = false, knownAvailable = false;
         var timer = null, stopped = true, updating = false, firstCheck = true;
         function stop() {
             stopped = true; ++serial;
@@ -53,7 +53,12 @@
                 if (done || current !== serial) return;
                 done = true; active = null; state(name, title, detail);
             }
-            function failure(detail) { finish('unavailable', 'Não foi possível verificar', detail); }
+            function failure(detail) {
+                if (knownAvailable) {
+                    finish('available', 'Nova atualização disponível',
+                           'Uma atualização já foi confirmada. A nova consulta falhou; você ainda pode tentar Atualizar agora.');
+                } else finish('unavailable', 'Não foi possível verificar', detail);
+            }
             try {
                 var request = new XMLHttpRequest(); active = request;
                 request.open('GET', './release.json?check=' + new Date().getTime(), true);
@@ -71,8 +76,10 @@
                         if (!/^[a-f0-9]{40}$/.test(revision)) {
                             failure('Esta é uma versão local; não foi possível comparar com a publicação.');
                         } else if (data.revision === revision) {
+                            knownAvailable = false;
                             finish('current', 'Versão mais recente', 'Você já está usando a versão mais recente do site.');
                         } else {
+                            knownAvailable = true;
                             finish('available', 'Nova atualização disponível',
                                    'Uma nova versão do site já foi liberada. Toque em Atualizar agora para recebê-la.');
                         }

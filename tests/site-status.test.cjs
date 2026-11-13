@@ -184,3 +184,11 @@ test('browser history restore after an update resumes the 10-second checks once'
   env.events.pageshow({persisted:true});
   assert.equal(env.requests.length,2);
 });
+
+test('confirmed update remains available through a transient polling failure',()=>{
+ const e=environment();newer(e);e.tick();e.requests[1].onerror();
+ assert.equal(e.title(),'Nova atualização disponível');assert.equal(e.nodes['bx-site-check'].hidden,false);assert.match(e.message(),/nova consulta falhou/);
+ e.navigator.onLine=false;e.events.offline();assert.equal(e.nodes['bx-site-check'].hidden,true);
+ e.navigator.onLine=true;e.events.online();e.requests[2].onerror();assert.equal(e.nodes['bx-site-check'].hidden,false);
+ e.tick();current(e);assert.equal(e.title(),'Versão mais recente');e.tick();e.requests[4].onerror();assert.equal(e.title(),'Não foi possível verificar');
+});
