@@ -8,7 +8,11 @@
     var finished = false, failed = false;
     var origin = window.location.protocol + '//' + window.location.host;
     var destination = typeof mainPage === 'string' ? mainPage : './';
-    back.href = destination;
+    var hashIndex = destination.indexOf('#');
+    var path = hashIndex === -1 ? destination : destination.substring(0, hashIndex);
+    var hash = hashIndex === -1 ? '' : destination.substring(hashIndex);
+    // Explicit return must not immediately reopen an incomplete cache attempt.
+    back.href = path + (path.indexOf('?') === -1 ? '?' : '&') + 'cacheReturn=1' + hash;
     function error(reason) {
         if (finished || failed) return;
         failed = true;

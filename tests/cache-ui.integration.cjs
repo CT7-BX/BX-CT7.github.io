@@ -73,3 +73,10 @@ test('cache preparation errors stay readable and the first failure is preserved'
   assert.equal(env.nodes.cacheStatus.textContent,message);
   assert.equal(env.nodes.cacheFrame.src,undefined);
 });
+
+test('explicit back link skips automatic cache once while completion uses normal destination',()=>{
+  const env=environment();
+  assert.equal(env.nodes['bx-cache-back'].href,'./?test=0&cacheReturn=1');
+  env.send({type:'CACHE_COMPLETE'});env.timers[0].fn();
+  assert.equal(env.replaced,'./?test=0');
+});

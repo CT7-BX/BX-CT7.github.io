@@ -173,3 +173,14 @@ test('failed update navigation restores polling and offers a manual retry', () =
     assert.equal(env.title(),'Nova atualização disponível');
   }
 });
+
+test('browser history restore after an update resumes the 10-second checks once', () => {
+  const env=environment({ps4:true});newer(env);env.update();env.events.pagehide();
+  assert.equal(env.intervals.filter(t=>!t.cleared).length,0);
+  env.events.pageshow({persisted:true});
+  assert.equal(env.requests.length,2);
+  assert.equal(env.intervals.filter(t=>!t.cleared).length,1);
+  newer(env);assert.equal(env.title(),'Nova atualização disponível');
+  env.events.pageshow({persisted:true});
+  assert.equal(env.requests.length,2);
+});

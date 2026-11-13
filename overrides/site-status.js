@@ -113,7 +113,11 @@
         window.addEventListener('online', check, false);
         window.addEventListener('offline', check, false);
         window.addEventListener('pagehide', stop, false);
-        window.addEventListener('pageshow', function () { if (stopped && !updating) start(); }, false);
+        window.addEventListener('pageshow', function (event) {
+            // A restored page is no longer leaving for the cache update screen.
+            if (event && event.persisted) updating = false;
+            if (stopped && !updating) start();
+        }, false);
         start();
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, false);
