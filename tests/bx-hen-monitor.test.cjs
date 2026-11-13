@@ -136,7 +136,7 @@ test('temporary HTTP failure keeps the last successful report visible', () => {
   env.refresh();
   env.requests[1].respond(503, '');
   assert.equal(env.get('bx-monitor-runs').children.length, 1);
-  assert.equal(env.get('bx-monitor-count').textContent, '1 registros');
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
   assert.match(env.get('bx-monitor-status').textContent, /HTTP 503/);
 });
 
@@ -170,4 +170,13 @@ test('XHR construction/open failures are reported and late errors cannot replace
   const message=env.get('bx-monitor-status').textContent;
   env.requests[0].onerror();env.requests[0].ontimeout();
   assert.equal(env.get('bx-monitor-status').textContent,message);
+});
+
+test('monitor uses singular and plural record labels', () => {
+  const env = environment();
+  env.requests[0].respond(200, report([run(1)]));
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+  env.refresh();
+  env.requests[1].respond(200, report([run(1), run(2)]));
+  assert.equal(env.get('bx-monitor-count').textContent, '2 registros');
 });
