@@ -435,6 +435,18 @@ update('includes/js/cache.js',
 
     // check for applicationCache""")
 
+# Replace only language fetching; retain upstream translation application code.
+language_path = root / 'includes/js/language.js'
+language_text = language_path.read_text(encoding='utf-8')
+start = language_text.find('function loadLanguage() {')
+end = language_text.find('function isRtl()', start)
+if start != 0 or end < 0:
+    raise RuntimeError('Language loader boundaries changed; review required')
+language_path.write_text((source / 'language-loader.js').read_text(encoding='utf-8') + '\n' + language_text[end:].rstrip() + '\n', encoding='utf-8')
+
+shutil.copy2(source / 'settings-accessibility.js', root / 'includes/js/settings-accessibility.js')
+update('index.html', '</body>', '<script src="./includes/js/settings-accessibility.js"></script>\n</body>')
+
 # Existing compatibility checks are preserved.
 for f in source.iterdir():
     if f.is_file():
@@ -508,6 +520,7 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
     txt = manifest.read_text(encoding='utf-8')
     for asset in [
         '../../../includes/js/cache-status.js',
+        '../../../includes/js/settings-accessibility.js',
         '../../../includes/css/bx-ct7.css',
         '../../../includes/css/bx-theme-bridge.css',
         '../../../includes/css/colors/ruby.css',

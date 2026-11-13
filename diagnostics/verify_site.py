@@ -38,6 +38,8 @@ CHECK_FILES = [
     "dist/bx-hen/store/catalog.json",
 ]
 JS_ASSETS = [
+    "dist/includes/js/settings-accessibility.js",
+    "dist/includes/js/language.js",
     "dist/includes/js/cache-status.js",
     "dist/includes/js/iframe_cache.js",
     "dist/includes/js/languages/pt-br.js",
