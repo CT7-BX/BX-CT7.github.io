@@ -135,3 +135,12 @@
   border:1px solid #39a9c6;border-radius:8px;color:#e5faff;text-decoration:none;
   background:#125177;cursor:pointer;font-size:12px;font-weight:bold;margin-top:auto}
 #homebrew .bx-homebrew-link:focus{outline:2px solid #63dcf8;outline-offset:2px}
+
+/* Keep diagnostics readable with long logs and short mobile viewports. */
+#bx-dev-overlay .bx-dev-head{flex-wrap:wrap}
+#bx-dev-overlay button{min-height:44px}
+#bx-dev-overlay .bx-dev-row{min-width:0}
+#bx-dev-overlay .bx-dev-row strong{word-wrap:break-word;word-break:break-word}
+#bx-dev-overlay #bx-dev-report{resize:vertical;font:13px/1.5 monospace}
+#bx-dev-overlay .bx-dev-actions>button{margin:4px}
+@media(max-width:420px){#bx-dev-overlay .bx-dev-row{display:block}#bx-dev-overlay .bx-dev-row span,#bx-dev-overlay .bx-dev-row strong{display:block;max-width:100%;text-align:left}#bx-dev-overlay .bx-dev-row strong{margin-top:5px}}

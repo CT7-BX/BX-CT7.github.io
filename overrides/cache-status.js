@@ -10,7 +10,7 @@
     var destination = typeof mainPage === 'string' ? mainPage : './';
     back.href = destination;
     function error(reason) {
-        if (finished) return;
+        if (finished || failed) return;
         failed = true;
         status.textContent = 'Não foi possível atualizar o cache.\n' + reason +
             '\nConfira a conexão e tente novamente. Esta mensagem ficará visível.';
@@ -49,7 +49,11 @@
         error('Este navegador não oferece o cache offline usado pelo PS4. Use Voltar ao site.');
         return;
     }
-    var firmware = getPs4FwVersion();
-    status.textContent = 'Iniciando atualização do cache para o firmware ' + (firmware || 'não identificado') + '...';
-    frame.src = getCachePage(firmware);
+    try {
+        var firmware = getPs4FwVersion();
+        status.textContent = 'Iniciando atualização do cache para o firmware ' + (firmware || 'não identificado') + '...';
+        frame.src = getCachePage(firmware);
+    } catch (e) {
+        error('Não foi possível preparar a página de cache neste navegador.');
+    }
 })();

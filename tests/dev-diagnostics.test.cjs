@@ -13,7 +13,7 @@ function environment() {
       attributes: {}, setAttribute(k, v) { this.attributes[k] = v; }, getAttribute(k) { return this.attributes[k]; }, focus() { document.activeElement = this; }, select() { this.selected = true; } };
   }
   const body = node('body');
-  const state = node('div'); state.id = 'state'; state.textContent = 'Loading ELF';
+  const state = node('div'); state.id = 'state'; state.textContent = 'Estado do processo';
   const log = node('div'); log.id = 'console'; log.textContent = 'old'.repeat(5000) + 'LAST HOST LINE';
   body.appendChild(state); body.appendChild(log);
   const all = (n = body) => [n, ...n.children.flatMap(c => all(c))];
@@ -42,7 +42,8 @@ test('local report includes selected ELF and bounded host logs without executing
   assert.equal(report.selected, true);
   assert.match(report.value, /13\.52/);
   assert.match(report.value, /nexHEN-ps4\.elf/);
-  assert.match(report.value, /Loading ELF/);
+  assert.match(report.value, /Última linha do registro do host:.*LAST HOST LINE/);
+  assert.doesNotMatch(report.value, /Estado do processo/);
   assert.match(report.value, /LAST HOST LINE/);
   const tail = report.value.split('Últimas mensagens do host (até 12000 caracteres):\n')[1].split('\n\nRelatório local.')[0];
   assert.equal(tail.length, 12000);
@@ -78,4 +79,15 @@ test('reopening clears stale report and failed copy does not claim success', () 
   window.bxCloseDiagnostics(); window.bxOpenDiagnostics();
   assert.equal(document.getElementById('bx-dev-report').value, '');
   assert.equal(document.getElementById('bx-dev-report').style.display, 'none');
+});
+
+
+test('dialog restores scrolling and resets stale copy announcements when reopened', () => {
+  const env=environment();env.body.style.overflow='auto';env.window.applicationCache={status:4};
+  env.window.bxOpenDiagnostics();assert.equal(env.body.style.overflow,'hidden');
+  env.all().find(n=>n.textContent==='Copiar diagnóstico').onclick();
+  assert.match(env.document.getElementById('bx-dev-report').value,/Atualização pronta/);
+  env.window.bxOpenDiagnostics(); // Opening twice must preserve original overflow.
+  assert.match(env.document.getElementById('bx-dev-note').textContent,/Nada é enviado/);
+  env.window.bxCloseDiagnostics();assert.equal(env.body.style.overflow,'auto');
 });

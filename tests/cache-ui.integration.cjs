@@ -14,7 +14,7 @@ function environment(options={}){
     addEventListener(name,fn){events[name]=fn;},setTimeout(fn,ms){timers.push({fn,ms});}};
   vm.runInNewContext(fs.readFileSync('dist/includes/js/cache-status.js','utf8'),{
     window,document:{getElementById(id){return nodes[id];}},mainPage:'./?test=0',
-    getPs4FwVersion(){return '13.52';},getCachePage(fw){assert.equal(fw,'13.52');return './includes/caches/cache1302-1352.html';}
+    getPs4FwVersion(){if(options.firmwareThrows)throw Error('failed');return '13.52';},getCachePage(fw){assert.equal(fw,'13.52');return './includes/caches/cache1302-1352.html';}
   });
   return {nodes,timers,events,send(data,extra={}){events.message({source:nodes.cacheFrame.contentWindow,origin:'https://example.test',data,...extra});},
     get reloads(){return reloads;},get replaced(){return replaced;}};
@@ -61,4 +61,15 @@ test('failed cache swap emits error and never reports completion',()=>{
     window:{applicationCache:appCache,parent:{postMessage(data){messages.push(data);}}}
   });
   events.updateready();assert.equal(messages.length,1);assert.equal(messages[0].type,'CACHE_ERROR');
+});
+
+
+test('cache preparation errors stay readable and the first failure is preserved',()=>{
+  const env=environment({firmwareThrows:true});
+  assert.match(env.nodes.cacheStatus.textContent,/preparar a página de cache/);
+  assert.equal(env.nodes['bx-cache-retry'].hidden,false);
+  const message=env.nodes.cacheStatus.textContent;
+  env.nodes.cacheFrame.onerror();
+  assert.equal(env.nodes.cacheStatus.textContent,message);
+  assert.equal(env.nodes.cacheFrame.src,undefined);
 });

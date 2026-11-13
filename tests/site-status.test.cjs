@@ -10,7 +10,7 @@ function environment(options = {}) {
     nodes[id] = { textContent: '', style: {}, attributes: {}, getAttribute() { return options.revision || revision; },
       setAttribute(k, v) { this.attributes[k] = v; } };
   let cacheClicks = 0, reloads = 0;
-  if (!options.missingCache) nodes.updateCache = { click() { cacheClicks++; } };
+  if (!options.missingCache) nodes.updateCache = { click() { cacheClicks++; if(options.cacheThrows) throw Error('blocked'); } };
   const navigator = { onLine: options.offline ? false : true };
   class XHR {
     constructor() { requests.push(this); }
@@ -22,7 +22,7 @@ function environment(options = {}) {
   const document = { readyState: 'complete', hidden: !!options.hidden, getElementById(id) { return nodes[id]; } };
   vm.runInNewContext(source, { document,
     navigator, window: { applicationCache: options.ps4 ? {} : undefined,
-      location: { reload() { reloads++; } }, addEventListener(name, fn) { events[name] = fn; },
+      location: { reload() { reloads++; if(options.reloadThrows) throw Error('blocked'); } }, addEventListener(name, fn) { events[name] = fn; },
       setInterval(fn, delay) { intervals.push({ fn, delay, cleared: false }); return intervals.length; },
       clearInterval(id) { intervals[id - 1].cleared = true; } },
     isPS4Console() { return !!options.ps4; }, XMLHttpRequest: XHR });
@@ -160,4 +160,16 @@ test('unchanged results do not rewrite live-region text every 10 seconds', () =>
   Object.defineProperty(node, 'textContent', { get() { return value; }, set(next) { value = next; writes++; } });
   env.tick(); current(env); env.tick(); current(env);
   assert.equal(writes, 0);
+});
+
+
+test('failed update navigation restores polling and offers a manual retry', () => {
+  for(const options of [{ps4:true,cacheThrows:true},{reloadThrows:true}]) {
+    const env=environment(options);newer(env);env.update();
+    assert.equal(env.title(),'Não foi possível iniciar a atualização');
+    assert.equal(env.nodes['bx-site-check'].hidden,false);
+    assert.equal(env.intervals.filter(t=>!t.cleared).length,1);
+    env.tick();assert.equal(env.requests.length,2);newer(env);
+    assert.equal(env.title(),'Nova atualização disponível');
+  }
 });

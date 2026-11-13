@@ -3,7 +3,7 @@
    enable test mode or execute payloads. Compatible with PS4's older browser. */
 (function () {
     'use strict';
-    var previousFocus = null, closeControl = null;
+    var previousFocus = null, closeControl = null, previousOverflow = null;
     function el(id) { return document.getElementById(id); }
     function txt(node, value) { if (node) node.textContent = String(value); }
     function fmt(value) { return value === undefined || value === null || value === '' ? 'Indisponível' : String(value); }
@@ -28,6 +28,20 @@
         var node = el(id);
         return node ? String(node.textContent || '').slice(-limit) : '';
     }
+    function cacheState() {
+        try {
+            var cache = window.applicationCache;
+            if (!cache) return 'Indisponível neste navegador';
+            var states = ['Sem cache', 'Pronto', 'Verificando', 'Baixando', 'Atualização pronta', 'Obsoleto'];
+            return states[cache.status] || 'Estado não informado';
+        } catch (e) { return 'Não foi possível consultar'; }
+    }
+    function updateState(release) {
+        var names = {current:'Versão mais recente',available:'Nova atualização disponível',
+            checking:'Verificando',offline:'Sem conexão',unavailable:'Não foi possível verificar',updating:'Atualizando'};
+        var value = release ? release.getAttribute('data-update-state') : null;
+        return names[value] || 'Não informado';
+    }
     function details() {
         var version = fw();
         var selectedHen = (typeof user !== 'undefined' && user) ? user.currentJbFlavor : null;
@@ -40,6 +54,8 @@
         var release = el('bx-site-status');
         return [
             ['Revisão do site carregada', release ? fmt(release.getAttribute('data-revision')) : 'Não informada'],
+            ['Verificação de atualização', updateState(release)],
+            ['Estado do cache do navegador', cacheState()],
             ['Plataforma', isConsole ? 'PlayStation 4' : 'Navegador externo'],
             ['Firmware detectado', fmt(version)],
             ['Cadeia do firmware', supported(version)],
@@ -47,7 +63,7 @@
             ['GoldHEN selecionado no host', fmt(gh)],
             ['Cadeia selecionada (ID)', fmt(chain)],
             ['Payload selecionado (não prova execução)', fmt(selectedPayload())],
-            ['Estado informado pelo host', fmt(hostText('state', 1000))],
+            ['Última linha do registro do host', fmt(hostText('console', 1000).replace(/\s+$/, '').split('\n').pop().slice(-300))],
             ['nexHEN', 'Experimental; suporte e execução no console não confirmados'],
             ['Layout atual', fmt(currentLayout || 'neon')],
             ['Modo de teste do WebKitty', dev ? 'Ativado nesta sessão' : 'Desativado'],
@@ -89,10 +105,15 @@
     window.bxOpenDiagnostics = function () {
         var panel = el('bx-dev-overlay');
         if (!panel) return;
-        if (panel.style.display !== 'flex') previousFocus = document.activeElement;
+        if (panel.style.display !== 'flex') {
+            previousFocus = document.activeElement;
+            previousOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+        }
         fill();
         var report = el('bx-dev-report');
         if (report) { report.value = ''; report.style.display = 'none'; }
+        txt(el('bx-dev-note'), 'Se o nexHEN não concluir, copie o diagnóstico após a falha. Nada é enviado automaticamente.');
         panel.setAttribute('aria-hidden', 'false');
         panel.style.display = 'flex';
         if (closeControl) closeControl.focus();
@@ -100,6 +121,7 @@
     window.bxCloseDiagnostics = function () {
         var panel = el('bx-dev-overlay');
         if (panel) { panel.style.display = 'none'; panel.setAttribute('aria-hidden', 'true'); }
+        if (previousOverflow !== null) { document.body.style.overflow = previousOverflow; previousOverflow = null; }
         if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
         previousFocus = null;
     };

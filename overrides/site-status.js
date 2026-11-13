@@ -88,6 +88,7 @@
             if (navigator.onLine === false) { check(); return; }
             var original = id('updateCache');
             var ps4 = typeof isPS4Console === 'function' && isPS4Console();
+            try {
             if (ps4 && window.applicationCache) {
                 if (!original || typeof original.click !== 'function') {
                     state('unavailable', 'Não foi possível atualizar', 'Reabra o site para tentar novamente.'); return;
@@ -99,6 +100,14 @@
                 updating = true; stop();
                 state('updating', 'Atualizando o site...', 'Reabrindo a página para carregar a versão publicada.');
                 window.location.reload();
+            }
+            } catch (error) {
+                updating = false;
+                stopped = false;
+                state('available', 'Não foi possível iniciar a atualização',
+                      'A atualização continua disponível. Tente novamente.');
+                // Restore polling without immediately replacing the useful error.
+                timer = window.setInterval(check, 10000);
             }
         };
         window.addEventListener('online', check, false);
