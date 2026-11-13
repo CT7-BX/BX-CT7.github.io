@@ -180,3 +180,14 @@ test('monitor uses singular and plural record labels', () => {
   env.requests[1].respond(200, report([run(1), run(2)]));
   assert.equal(env.get('bx-monitor-count').textContent, '2 registros');
 });
+
+
+test('completed XHR with status zero reports a connection failure and keeps prior results', () => {
+  const env = environment();
+  env.requests[0].respond(200, report([run(321)]));
+  env.refresh();
+  env.requests[1].respond(0, '');
+  assert.match(env.get('bx-monitor-status').textContent, /Falha de conexão/);
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+});
