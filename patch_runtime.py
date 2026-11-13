@@ -15,6 +15,24 @@ index = root / 'index.html'
 if not index.exists():
     raise RuntimeError('WebKitty não contém index.html')
 
+# Keep this host on its own HTTPS address. The upstream first-visit question
+# would send the console to another operator's HTTP host before initialization.
+# Only this navigation prompt is removed; transport checks and loaders remain.
+update('index.html', r'''        // redirect to http request
+        var goToHttps = localStorage.getItem("dontHTTPS") != "1";
+        var isThisPS4 = navigator.userAgent.indexOf("PlayStation 4") !== -1;
+        var isLocalServer =  /^(127\.|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(window.location.hostname);
+        var isCurrentHTTPS = window.location.protocol === 'https:';
+        if (isThisPS4 && goToHttps && !isLocalServer && isCurrentHTTPS){
+            if (confirm("You are currently using HTTPS, which prevents loading payloads through a bin/elf loader servers, switch to http instead? (recommended)")){
+                window.abortLoading = true;
+                window.location.href = "http://webkitty.arabpixel.net";
+            } else{
+                localStorage.setItem("dontHTTPS", "1");
+            }
+        }
+''', '        // BX-CT7: stay on the current host; no first-visit HTTP redirect.\n')
+
 # Neon é o layout padrão. Compacto foi retirado do seletor; resta o Painel.
 # A opção antiga "Default" não é exibida no seletor.
 # Restaurar o layout nativo do WebKitty como opção independente.
