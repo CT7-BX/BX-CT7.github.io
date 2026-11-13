@@ -52,7 +52,7 @@ code{color:#8ae9d7}footer{text-align:center;color:#83abc5;padding:22px}
 <script>
 (function(){
 'use strict';
-var entries=[],activeRequest=null,requestId=0;
+var entries=[],activeRequest=null,requestId=0,savedCatalog=false;
 function id(x){return document.getElementById(x);}
 function node(tag,parent,value,cls){var x=document.createElement(tag);if(typeof value==='string')x.textContent=value;if(cls)x.className=cls;parent.appendChild(x);return x;}
 function safeUrl(u){return typeof u==='string'&&/^https:\/\/[A-Za-z0-9.-]+(?::443)?(?:\/|$)/.test(u)&&u.indexOf('@')===-1;}
@@ -83,28 +83,28 @@ var summary=id('summary');while(summary.firstChild)summary.removeChild(summary.f
 node('span',summary,'No catálogo: '+entries.length);
 node('span',summary,'Disponíveis: '+available);
 node('span',summary,'Em preparação: '+planned);
-id('status').textContent=count+' item(ns) exibido(s). Links externos não instalam PKGs automaticamente.';
+id('status').textContent=count+(count===1?' item exibido.':' itens exibidos.')+(savedCatalog?' Catálogo salvo; pode estar desatualizado.':'')+' Links externos não instalam PKGs automaticamente.';
 }
-function load(){
+function load(useCache){
 var current=++requestId,done=false;
 if(activeRequest){try{activeRequest.abort();}catch(ignore){}}
 activeRequest=null;id('status').textContent='Consultando catálogo...';
-function error(message){if(current!==requestId||done)return;done=true;activeRequest=null;id('status').textContent=message+(entries.length?' O último catálogo continua disponível.':'');}
+function error(message,trySaved){if(current!==requestId||done)return;done=true;activeRequest=null;if(trySaved&&!useCache&&!entries.length){load(true);return;}id('status').textContent=message+(entries.length?' O último catálogo continua disponível.':'');}
 try{
-var x=new XMLHttpRequest();activeRequest=x;x.open('GET','./catalog.json?v='+new Date().getTime(),true);x.timeout=12000;
+var x=new XMLHttpRequest();activeRequest=x;x.open('GET','./catalog.json'+(useCache?'':'?v='+new Date().getTime()),true);x.timeout=12000;
 x.onreadystatechange=function(){if(x.readyState!==4||current!==requestId||done)return;
 if(x.status===0)return;
-if(x.status<200||x.status>=300){error('Catálogo indisponível (HTTP '+x.status+').');return;}
-try{var next=validate(JSON.parse(x.responseText));entries=next;show();done=true;activeRequest=null;}
+if(x.status<200||x.status>=300){error('Catálogo indisponível (HTTP '+x.status+').',true);return;}
+try{var next=validate(JSON.parse(x.responseText));entries=next;savedCatalog=!!useCache;show();done=true;activeRequest=null;}
 catch(e){error('O catálogo não pôde ser interpretado.');}
 };
-x.onerror=function(){error('Falha ao carregar o catálogo.');};
-x.ontimeout=function(){error('Tempo de consulta esgotado.');};
+x.onerror=function(){error('Falha ao carregar o catálogo.',true);};
+x.ontimeout=function(){error('Tempo de consulta esgotado.',true);};
 x.send(null);
-}catch(e){error('Não foi possível consultar o catálogo.');}
+}catch(e){error('Não foi possível consultar o catálogo.',true);}
 }
-var query=location.search.match(/[?&]q=([^&]*)/);if(query){try{id('search').value=decodeURIComponent(query[1].replace(/\+/g,' '));}catch(e){}}
-id('search').oninput=show;id('filter').onchange=show;id('refresh').onclick=load;load();
+var query=(location.hash||location.search||'').match(/[#?&]q=([^&]*)/);if(query){try{id('search').value=decodeURIComponent(query[1].replace(/\+/g,' '));}catch(e){}}
+id('search').oninput=show;id('filter').onchange=show;id('refresh').onclick=function(){load(false);};load(false);
 })();
 </script>
 </body>

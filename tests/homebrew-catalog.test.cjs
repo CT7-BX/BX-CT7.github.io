@@ -44,5 +44,5 @@ test('blank distribution permission never marks a file as downloadable',()=>{
   }]});
   assert.ok(env.all().find(n=>n.textContent==='<script>Example</script>'));
   assert.ok(env.all().find(n=>n.textContent==='PKG ainda não disponibilizado — sem instalador'));
-  assert.ok(env.all().find(n=>n.tag==='a').href.startsWith('./bx-hen/store/?q='));
+  assert.ok(env.all().find(n=>n.tag==='a').href.startsWith('./bx-hen/store/index.html#q='));
 });

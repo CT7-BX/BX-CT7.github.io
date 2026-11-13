@@ -36,7 +36,7 @@
       'PKG ainda não disponibilizado — sem instalador');
     var action = node(card, 'a', 'bx-homebrew-link',
       available ? 'Ver download na loja' : 'Consultar projeto na loja');
-    action.href = './bx-hen/store/?q=' + encodeURIComponent(item.title);
+    action.href = './bx-hen/store/index.html#q=' + encodeURIComponent(item.title);
     action.setAttribute('aria-label', 'Abrir ' + item.title + ' na loja de PKGs');
   }
   function addFallback(container) {
