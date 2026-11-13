@@ -48,6 +48,28 @@ def add_release_status(root, source):
         path.write_text(text, encoding='utf-8')
 
 
+def harden_preferences(html):
+    """Storage failures and stale preferences must not abort early UI startup."""
+    marker = '// Prevent "Theme Flash"'
+    start = html.find(marker)
+    end = html.find('</script>', start)
+    if start == -1 or end == -1 or html.count(marker) != 1:
+        raise ValueError('Early preference script changed')
+    script = html[start:end]
+    helper = """function bxReadPreference(key) {
+            try { return localStorage.getItem(key); } catch (ignore) { return null; }
+        }
+        """
+    script = script.replace('localStorage.getItem(', 'bxReadPreference(')
+    anchor = '        if (savedTheme) {'
+    if script.count(anchor) != 1:
+        raise ValueError('Theme validation marker changed')
+    script = script.replace(anchor, """        if (!/^(index|neon|painel)$/.test(savedTheme)) savedTheme = 'index';
+        if (!/^(default|vibrant|catppuccino|ruby|brasil)$/.test(savedColor)) savedColor = 'default';
+""" + anchor, 1)
+    return html[:start] + helper + script + html[end:]
+
+
 def improve_html(html):
     old = 'content="width=device-width, initial-scale=1.0, maximum-scale=1"'
     if html.count(old) != 1:
@@ -70,6 +92,10 @@ def improve_html(html):
                            ('themePopup()', 'Personalizar aparência')]:
         html = html.replace('<button onclick="' + handler + '"',
                             '<button aria-label="' + label + '" onclick="' + handler + '"')
+    # Closing a popup must not be announced as opening its settings again.
+    for label, target in [('Configurações', 'close-settings'), ('Sobre o host', 'close-about')]:
+        pattern = r'(<button aria-label=")' + re.escape(label) + r'("[^>]*id="' + target + r'")'
+        html = re.sub(pattern, lambda match: match[1] + 'Fechar' + match[2], html)
     # Sharing metadata must point to this host, while upstream credits stay intact.
     html = html.replace('content="WebKitty"', 'content="BX-CT7 PS4 HOST"')
     html = html.replace('http://webkitty.arabpixel.net/includes/assets/icons/webkitty.svg',

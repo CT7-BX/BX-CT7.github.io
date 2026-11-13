@@ -390,6 +390,24 @@ if not update('index.html', '</body>',
               '<script src="./includes/js/homebrew-catalog.js"></script>\n</body>'):
     raise RuntimeError('Não foi possível carregar catálogo Homebrew')
 
+# Render the console placeholder as text, with a fallback before concatenation.
+update('includes/js/events.js',
+       "ui.consoleElement.innerHTML = '<center>' + (window.lang && window.lang.waitingUserInput) || 'Waiting for user action...' + '</center>';",
+       "ui.consoleElement.textContent = (window.lang && window.lang.waitingUserInput) || 'Aguardando uma ação';")
+
+# Malformed or ambiguous query parameters must not abort startup or enable tests.
+update('includes/js/testMode.js',
+       """        var pair = pairs[i].split('=');
+        if (decodeURIComponent(pair[0]) === name) {
+            return decodeURIComponent(pair[1] || '');
+        }""",
+       """        var separator = pairs[i].indexOf('=');
+        var key = separator === -1 ? pairs[i] : pairs[i].substring(0, separator);
+        var value = separator === -1 ? '' : pairs[i].substring(separator + 1);
+        try {
+            if (decodeURIComponent(key) === name) return decodeURIComponent(value);
+        } catch (ignore) { /* Ignore malformed URL input, keep normal mode. */ }""")
+
 # Existing compatibility checks are preserved.
 for f in source.iterdir():
     if f.is_file():
@@ -612,8 +630,8 @@ for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         text = text.replace('CACHE:', 'CACHE:\n' + item, 1)
         manifest.write_text(text, encoding='utf-8')
 
-from presentation import improve_html, add_release_status, ensure_hen_cache, ensure_catalog_cache, stamp_manifests
-index.write_text(improve_html(index.read_text(encoding='utf-8')), encoding='utf-8')
+from presentation import harden_preferences, improve_html, add_release_status, ensure_hen_cache, ensure_catalog_cache, stamp_manifests
+index.write_text(harden_preferences(improve_html(index.read_text(encoding='utf-8'))), encoding='utf-8')
 add_release_status(root, source)
 ensure_hen_cache(root)
 ensure_catalog_cache(root)
