@@ -1,9 +1,15 @@
 name: Build BX-CT7 PS4 Host
 on:
   workflow_dispatch:
-  # 08:00, 14:00 and 20:00 America/Cuiaba (UTC-4, no DST).
-  # Scheduled rebuild verifies pinned sources and republishes the current version;
-  # it does not automatically invent or merge code changes.
+    inputs:
+      verify_only:
+        description: Apenas verificar, sem publicar nem alterar o cache
+        type: boolean
+        required: false
+        default: false
+  # 09:00, 15:00 and 21:00 America/Sao_Paulo (UTC-3).
+  # Scheduled builds verify the frozen revision without republishing it.
+  # Only a reviewed main-branch push or manual dispatch publishes changes.
   schedule:
     - cron: '0 12 * * *'
     - cron: '0 18 * * *'
@@ -13,7 +19,7 @@ on:
   pull_request:
     branches: [main]
 concurrency:
-  group: bx-ct7-pages-${{ github.event.pull_request.number || 'publish' }}
+  group: bx-ct7-pages-${{ github.event.pull_request.number || ((github.event_name == 'schedule' || inputs.verify_only) && 'audit') || 'publish' }}
   cancel-in-progress: false
 permissions:
   contents: read
@@ -22,10 +28,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      publish: ${{ steps.policy.outputs.publish }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
+      - name: Decide whether this run may publish
+        id: policy
+        env:
+          VERIFY_ONLY: ${{ inputs.verify_only || false }}
+        run: python3 diagnostics/release_policy.py
       - name: Test browser regressions
         run: node --test tests/*.test.cjs
       - name: Test presentation and cache regressions
@@ -43,28 +56,44 @@ jobs:
           grep -q 'Não implementado' dist/bx-hen/index.html
       - name: Verify source integrity, line endings, links and PKG catalog
         run: python3 diagnostics/verify_site.py
+      - name: Preserve firmware routing audit
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: bx-ct7-firmware-audit-${{ github.run_id }}
+          path: diagnostics/firmware-results.json
+          retention-days: 90
+          if-no-files-found: warn
       - name: Generate sanitized BX-HEN test history
-        if: github.event_name != 'pull_request'
+        if: steps.policy.outputs.publish == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 diagnostics/generate_report.py
           python3 -c "from pathlib import Path; from presentation import stamp_manifests; stamp_manifests(Path('dist'))"
       - name: Upload BX-HEN test report
-        if: github.event_name != 'pull_request'
+        if: steps.policy.outputs.publish == 'true'
         uses: actions/upload-artifact@v7.0.2
         with:
           name: bx-hen-ci-report-${{ github.run_id }}
           path: diagnostics/latest-report.json
           retention-days: 90
+      - name: Preserve deployable snapshot
+        if: steps.policy.outputs.publish == 'true'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: bx-ct7-site-${{ github.sha }}
+          path: dist
+          include-hidden-files: true
+          retention-days: 90
       - name: Publish static artifact
-        if: github.event_name != 'pull_request'
+        if: steps.policy.outputs.publish == 'true'
         uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: dist
           include-hidden-files: true  # Preserve .nojekyll in the Pages archive.
   deploy:
-    if: github.event_name != 'pull_request'
+    if: needs.build.outputs.publish == 'true'
     needs: build
     permissions:
       pages: write
@@ -79,4 +108,4 @@ jobs:
       - uses: actions/deploy-pages@v5.0.1
         id: deployment
         with:
-          timeout: 600000  # Maximum accepted by deploy-pages@v4
+          timeout: 600000  # Maximum accepted by deploy-pages@v5

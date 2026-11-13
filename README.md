@@ -163,3 +163,12 @@ rolagem anterior ao fechar e limpa mensagens antigas de cópia ao reabrir.
 A rotina de revisão do WebKitty conserva o relatório da proposta como artefato
 e no resumo do Actions mesmo se os testes do candidato falharem. Uma falha
 continua impedindo a abertura da proposta e a publicação.
+
+
+## Edição consolidada
+
+Consulte [STABILITY.md](STABILITY.md) para o comportamento desta edição,
+política de publicação, cópia de recuperação e limites dos testes. Os testes
+agendados agora verificam sem republicar. O carregamento de idioma tem limite
+de espera e alternativas; a janela de configurações oferece navegação por
+teclado e restauração de foco. A matriz de firmwares é verificada em cada build.

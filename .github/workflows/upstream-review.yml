@@ -85,11 +85,22 @@ jobs:
             exit 0
           fi
           python3 scripts/upstream_update.py --apply "$revision"
-          git switch -c "$branch"
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add build.py
-          git commit -m "Propose reviewed WebKitty revision $revision"
           gh auth setup-git
-          git push origin "$branch"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
+            git fetch origin "$branch"
+            # A previous PR creation may have failed after pushing the branch.
+            # Reuse it only if its candidate and scope still match exactly.
+            git diff --quiet FETCH_HEAD -- build.py
+            test "$(git diff --name-only HEAD FETCH_HEAD)" = build.py
+            # The generated candidate has just been verified against FETCH_HEAD.
+            git restore --source=HEAD -- build.py
+            git switch -c "$branch" FETCH_HEAD
+          else
+            git switch -c "$branch"
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add build.py
+            git commit -m "Propose reviewed WebKitty revision $revision"
+            git push origin "$branch"
+          fi
           gh pr create --base main --head "$branch" --title "Review WebKitty update ${revision:0:7}" --body-file proposal/upstream-review.md
