@@ -61,3 +61,14 @@ Em caso de timeout/erro, o host apresenta o aviso já existente de carregador
 indisponível e não usa a alternativa que inicia outra exploração no HTTPS.
 Ausência de resposta não comprova que o payload não executou; não há reenvio
 automático. Os binários FAN permanecem intactos.
+
+## Novos binários FAN revisados
+
+Importação separada dos quatro binários de
+[WebKitty af65b34](https://github.com/ArabPixel/WebKitty/commit/af65b34d4a4899c6fd7c07d074bdb52e20092060),
+anunciada pelo upstream como suporte a 14.0x. Cada arquivo tem 9024 bytes,
+hash Git blob fixado e entrada no inventário protegido. As cópias anteriores
+continuam intactas. O seletor usa os arquivos novos e os manifestos incluem
+as dependências correspondentes. Isso não comprova correção da tela preta no
+13.52: nenhum teste físico foi realizado. O transporte continua sem reenvio
+ou segunda exploração automática após ausência de resposta.

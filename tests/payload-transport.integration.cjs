@@ -77,8 +77,32 @@ test('FAN requires a responding payload server and cannot silently restart the e
 test('all FAN temperatures carry the required-loader flag through the original router',()=>{
  const nodes={overlay:{id:'overlay'}},routed=[];
  const c=vm.createContext({ui:{chooseFanThresholdOverlay:nodes.overlay},payloadsPath:'./includes/payloads/Bins/',
-  isPS4Console:()=>true,toggleVisibility(){},storage:{session:{remove(){}}},payloadRouter(p){routed.push(p);},alert(){throw Error('Unexpected alert');}});
+  isPS4Console:()=>true,toggleVisibility(){},storage:{session:{remove(){}}},payloadRouter(p){routed.push(p);},alert(text){throw Error('Unexpected alert: '+text);}});
  vm.runInContext(fs.readFileSync('dist/includes/js/payloadsHandler.js','utf8'),c);
  for(const temp of ['60','70','80','85'])c.loadFanThreshold(temp);
- assert.equal(routed.length,4);for(const p of routed){assert.equal(p.needsPayloadLoader,true);assert.match(p.src,/fan-thresholds\/ps4-fan-threshold(60|70|80|85).bin$/);}
+ assert.equal(routed.length,4);for(const p of routed){assert.equal(p.needsPayloadLoader,true);assert.match(p.src,/fan-thresholds-reviewed\/ps4-fan-threshold(60|70|80|85).bin$/);}
+});
+
+test('all revised FAN payloads have the reviewed hashes and are available offline for 13.52',()=>{
+ const m=JSON.parse(fs.readFileSync('dist/payload-update.json'));assert.equal(m.fan_revision,'af65b34d4a4899c6fd7c07d074bdb52e20092060');
+ const cache=fs.readFileSync('dist/includes/caches/manifest/1302-1352.manifest','utf8');
+ for(const t of ['60','70','80','85']){
+  const file='includes/payloads/Bins/fan-thresholds-reviewed/ps4-fan-threshold'+t+'.bin';
+  assert.equal(fs.statSync('dist/'+file).size,9024);assert.ok(m.files[file]);assert.ok(cache.includes('../../../'+file));
+  assert.equal(fs.statSync('dist/includes/payloads/Bins/fan-thresholds/ps4-fan-threshold'+t+'.bin').size,8992);
+ }
+});
+test('FAN 70 follows the complete selector-to-loader path on 13.52 without invoking jailbreak',()=>{
+ const e=env();const logs=[];
+ Object.assign(e.c,{
+  commonMax:14,user:{ip:'127.0.0.1',ps4Fw:'13.52'},ui:{chooseFanThresholdOverlay:{id:'fan'}},payloadsPath:'./includes/payloads/Bins/',
+  isPS4Console:()=>true,isPayloadSupported:()=>true,getPs4FwVersion:()=> '13.52',toggleVisibility(){},
+  storage:{session:{remove(){}}},jailbreak(){throw Error('FAN must not restart jailbreak');},
+  log(text){logs.push(text);},alert(text){throw Error('Unexpected alert: '+text);},
+  window:{lang:{payloadLoaderSending:'Sending {payload}',payloadLoaderSendSuccess:'Sent {payload}'}}
+ });
+ vm.runInContext(fs.readFileSync('dist/includes/js/payloadsHandler.js','utf8'),e.c);
+ e.c.loadFanThreshold('70');assert.match(e.requests[0].url,/fan-thresholds-reviewed\/ps4-fan-threshold70.bin$/);
+ e.requests[0].respond();assert.equal(e.requests[1].url,'http://127.0.0.1:9090/');e.requests[1].respond(202);
+ assert.match(logs.join('\n'),/Sent Fan Threshold \(70°C\)/);assert.equal(e.requests.length,2);
 });

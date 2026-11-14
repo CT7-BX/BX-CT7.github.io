@@ -8,10 +8,23 @@ REVISION = 'f4caa56a29c4598e1dbd5422c1a0ff83e2a1c5e3'
 ASSETS = {'includes/payloads/HEN/goldhen_v2.4b18.14.bin':
           ('includes/payloads/HEN/goldhen_v2.4b18.14.bin', '2d04ed98d2af86677472278d47eefa1fec45bb48')}
 
+FAN_REVISION = 'af65b34d4a4899c6fd7c07d074bdb52e20092060'
+FAN_HASHES = {
+    '60': 'b8ddc6667db22bec49c43b5f84903c6e9938a6dd',
+    '70': '776a299927392e3fb2018ce2442fefed2a854ed8',
+    '80': 'b4c96eb18cee529540b8a77526862e046014e693',
+    '85': '9a82e596e65e0eeaeb17b1b7c30e08160c8abdd3',
+}
+FAN_ASSETS = {'includes/payloads/Bins/fan-thresholds/ps4-fan-threshold' + t + '.bin':
+              ('includes/payloads/Bins/fan-thresholds-reviewed/ps4-fan-threshold' + t + '.bin', h)
+              for t, h in FAN_HASHES.items()}
+
 def prepare(root):
     download_selected(root, 'ArabPixel/WebKitty', REVISION, ASSETS)
+    download_selected(root, 'ArabPixel/WebKitty', FAN_REVISION, FAN_ASSETS)
     metadata = {'repository': 'ArabPixel/WebKitty', 'revision': REVISION,
-                'physical_ps4_tested': False, 'files': dict(ASSETS.values())}
+                'physical_ps4_tested': False, 'fan_revision': FAN_REVISION,
+                'files': dict(list(ASSETS.values()) + list(FAN_ASSETS.values()))}
     (root / 'payload-update.json').write_text(json.dumps(metadata, indent=2) + '\n')
     return metadata
 
@@ -87,3 +100,12 @@ function loadAndSend(url, onDone, name, args) {
     update('includes/js/payloadsHandler.js',
            "        id: 'FanThreshold' + temperature,",
            "        id: 'FanThreshold' + temperature,\n        needsPayloadLoader: true,")
+
+    update('includes/js/payloadsHandler.js',
+           "payloadsPath + 'fan-thresholds/ps4-fan-threshold'",
+           "payloadsPath + 'fan-thresholds-reviewed/ps4-fan-threshold'")
+    for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
+        text = manifest.read_text()
+        if 'fan-thresholds/ps4-fan-threshold' in text:
+            entries = ['../../../' + target for target, digest in FAN_ASSETS.values()]
+            manifest.write_text(text.replace('CACHE:', 'CACHE:\n' + '\n'.join(entries), 1))
