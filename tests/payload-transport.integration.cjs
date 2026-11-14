@@ -106,3 +106,22 @@ test('FAN 70 follows the complete selector-to-loader path on 13.52 without invok
  e.requests[0].respond();assert.equal(e.requests[1].url,'http://127.0.0.1:9090/');e.requests[1].respond(202);
  assert.match(logs.join('\n'),/Sent Fan Threshold \(70°C\)/);assert.equal(e.requests.length,2);
 });
+test('every BIN failure on HTTPS stops without a second exploit even without the FAN guard',()=>{
+ const e=env();let alerts=0;
+ Object.assign(e.c,{user:{ip:'127.0.0.1',ps4Fw:'13.52'},window:{lang:{payloadLoaderSending:'Send {payload}',payloadLoaderSendFailed:'Failed {payload}'}},
+  log(){},alert(text){alerts++;assert.match(text,/9090/);},isHttps:()=>true,isFirmwareSupported:()=>true,
+  jailbreak(){throw Error('Must not restart exploit');},storage:{session:{set(){throw Error('Must not arm payload');}}}});
+ e.c.Loadpayloadlocal('/ftp.bin','FTP','FTP',false);e.requests[0].respond();e.timers[1].fn();e.timers[e.timers.length-1].fn();
+ assert.equal(alerts,1);assert.equal(e.requests.length,2);
+});
+test('ELF timeout does not boot a loader or send the same payload again',()=>{
+ const e=env();let alerts=0;
+ Object.assign(e.c,{user:{ip:'127.0.0.1',ps4Fw:'13.52'},window:{lang:{}},log(){},alert(){alerts++;}});
+ e.c.Loadpayloadlocal('/file.elf','Tool.elf','Tool',false);e.requests[0].respond();e.timers[1].fn();
+ assert.equal(alerts,1);assert.equal(e.requests.length,2);assert.equal(e.requests[1].url.includes('9021'),true);
+ e.requests[1].respond(202);assert.equal(alerts,1);assert.equal(e.requests.length,2);
+});
+test('missing BIN downloads report download failure instead of restarting an exploit',()=>{
+ const e=env();let message='';Object.assign(e.c,{user:{ip:'127.0.0.1'},window:{lang:{}},log(){},alert(text){message=text;}});
+ e.c.Loadpayloadlocal('/missing.bin','Tool','Tool',false);e.requests[0].onerror({});assert.match(message,/baixar o arquivo/);assert.equal(e.requests.length,1);
+});

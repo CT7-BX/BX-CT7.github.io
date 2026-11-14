@@ -72,3 +72,13 @@ continuam intactas. O seletor usa os arquivos novos e os manifestos incluem
 as dependências correspondentes. Isso não comprova correção da tela preta no
 13.52: nenhum teste físico foi realizado. O transporte continua sem reenvio
 ou segunda exploração automática após ausência de resposta.
+
+## Falhas comuns de comunicação
+
+A alternativa automática que iniciava outra exploração após falha de resposta
+foi removida de todo o transporte do host. ELF também não tenta inicializar
+um carregador e reenviar o arquivo após uma resposta ausente. BinLoader deve
+estar ativo no 9090; ELF precisa do serviço no 9021. Os controles explícitos
+de desbloqueio continuam existentes. Erros de download são diferenciados de
+erros de comunicação com o console. Essa mudança não corrige nem comprova
+a execução de binários no PS4; evita ações duplicadas após um resultado ambíguo.

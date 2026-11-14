@@ -109,3 +109,36 @@ function loadAndSend(url, onDone, name, args) {
         if 'fan-thresholds/ps4-fan-threshold' in text:
             entries = ['../../../' + target for target, digest in FAN_ASSETS.values()]
             manifest.write_text(text.replace('CACHE:', 'CACHE:\n' + '\n'.join(entries), 1))
+
+    # A missing HTTP reply is ambiguous: never start another exploit or resend
+    # an ELF automatically after a payload may already have executed.
+    transport = root / 'includes/js/deliverPayload.js'
+    text = transport.read_text()
+    start = text.index('    var handleFallback = function () {')
+    end = text.index('    // fetch payload binary and send via GoldHEN', start)
+    notice = '''    var handleFallback = function (reason) {
+        var detail = reason === 'download'
+            ? 'Não foi possível baixar o arquivo do payload. Confira a conexão e atualize o cache.'
+            : 'Não foi possível confirmar a resposta do carregador. No GoldHEN, confira Servers Settings → Enable BinLoader Server (porta 9090). Para ELF, o Elf Loader precisa estar ativo na porta 9021. A falta de resposta não confirma se o payload executou.';
+        log(detail, 'orange');
+        alert(detail);
+    };
+
+'''
+    text = text[:start] + notice + text[end:]
+    start = text.index('    if (isElf) {', text.index('function Loadpayloadlocal('))
+    end = text.index('    } else {\n        getPayload(PLfile,', start)
+    text = text[:start] + '''    if (isElf) {
+        sendElfToElfldr(PLfile, name, function (success) {
+            if (!success) handleFallback();
+        });
+''' + text[end:]
+    old = '''            if (!fetchReq || (fetchReq.status !== 200 && fetchReq.status !== 304) || !fetchReq.response) {
+                handleFallback();
+                return;
+            }'''
+    new = old.replace('handleFallback();', "handleFallback('download');")
+    if text.count(old) != 1:
+        raise ValueError('Payload download failure marker changed')
+    text = text.replace(old, new, 1)
+    transport.write_text(text)
