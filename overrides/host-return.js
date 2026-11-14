@@ -26,11 +26,13 @@
     }
     if (typeof originalCleanup === 'function') window.cleanUp = function () {
         running = true; completed = false;
+        if (document.body) document.body.classList.add('bx-host-running');
         return originalCleanup.apply(this, arguments);
     };
     if (typeof originalSuccess === 'function') window.jailbreakSuccess = function () {
         var result = originalSuccess.apply(this, arguments);
         running = false; completed = true;
+        if (document.body) document.body.classList.remove('bx-host-running');
         restore(false);
         return result;
     };

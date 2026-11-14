@@ -170,8 +170,11 @@ def apply_gta_theme(root, source):
     data = (source / 'gta-vi.css').read_bytes()
     (root / css).write_bytes(data)
     reference = css + '?v=' + hashlib.sha256(data).hexdigest()[:16]
+    minimal = 'includes/css/minimal.css'
+    minimal_reference = minimal + '?v=' + hashlib.sha256((root / minimal).read_bytes()).hexdigest()[:16]
     index = root / 'index.html'
     html = index.read_text(encoding='utf-8')
+    html = html.replace('href="./' + minimal + '"', 'href="./' + minimal_reference + '"')
     if html.count('</head>') != 1:
         raise ValueError('Theme insertion point changed')
     index.write_text(html.replace('</head>', '<link rel="stylesheet" href="./' + reference + '">\n</head>', 1), encoding='utf-8')
@@ -179,4 +182,5 @@ def apply_gta_theme(root, source):
         text = manifest.read_text(encoding='utf-8')
         if text.count('CACHE:') != 1:
             raise ValueError('Theme cache insertion point changed')
+        text = text.replace('../../../' + minimal + '\n', '../../../' + minimal_reference + '\n')
         manifest.write_text(text.replace('CACHE:', 'CACHE:\n../../../' + reference, 1), encoding='utf-8')

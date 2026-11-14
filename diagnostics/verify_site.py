@@ -174,7 +174,10 @@ def check_minimal_host():
     html = (SITE / "index.html").read_text(encoding="utf-8")
     css = (SITE / "includes/css/minimal.css").read_text(encoding="utf-8")
     legacy_html = (SITE / "bx-hen/index.html").read_text(encoding="utf-8")
-    check(html.count('href="./includes/css/minimal.css"') == 1,
+    expected_minimal = './includes/css/minimal.css?v=' + hashlib.sha256(css.encode('utf-8')).hexdigest()[:16]
+    minimal_refs = [ref for ref in re.findall(r'href="([^"]*)"', html)
+                    if urlsplit(ref).path == './includes/css/minimal.css']
+    check(minimal_refs == [expected_minimal],
           "Minimal stylesheet missing or duplicated in main host")
     check("bx-minimal-v1" in html and "localStorage.setItem('theme','index')" in html,
           "Minimal theme migration not injected before page startup")

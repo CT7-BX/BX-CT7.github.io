@@ -68,3 +68,7 @@ button{transition:none!important}
 #settings-popup #close-settings{position:sticky;bottom:0;z-index:1;width:100%;min-height:48px;margin:4px 0 0!important;padding:12px!important;border:1px solid #505050!important;border-radius:8px!important;background:#292929!important;color:#fff!important;font-size:14px!important}
 #settings-popup #close-settings:hover{background:#383838!important}
 @media(max-width:520px){#settings-popup-overlay{padding:10px!important}#settings-popup{max-height:calc(100vh - 20px)!important;padding:18px!important;border-radius:12px!important}#settings-popup>h2{font-size:23px!important}#settings-popup #chooseGoldHEN,#settings-popup #chooseExploitChain,#settings-popup #advancedPayloads{padding:12px!important}#settings-popup label p{flex-basis:140px}}
+/* Upper host only: payload catalog is disabled; keep status visible during a run. */
+#payloadsSection{display:none!important}
+#exploit-main-screen{display:none!important}
+body.bx-host-running #exploit-main-screen{display:flex!important}
