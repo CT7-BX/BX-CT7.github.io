@@ -102,3 +102,10 @@ estilos existentes. Altera fundos, cores, bordas e sombras; não altera
 medidas, posições, tipografia, HTML dos controles ou funcionamento.
 A página demonstrativa não é publicada. A folha participa dos manifestos e
 da identificação de conteúdo offline para que Atualizar agora a receba.
+
+## Cache sem progresso
+
+Após 90 segundos sem mensagem válida de progresso, a tela de cache informa
+que a conclusão ainda não foi confirmada e mostra Tentar novamente. Não
+cancela downloads, não reinicia automaticamente e aceita conclusão tardia.
+O progresso retoma a apresentação normal; sair da página libera o temporizador.

@@ -31,3 +31,8 @@ test('HTML and all offline caches use the same content-versioned theme URL',()=>
  assert.ok(ref.endsWith('?v='+hash));
  for(const name of fs.readdirSync('dist/includes/caches/manifest'))if(name.endsWith('.manifest'))assert.ok(fs.readFileSync('dist/includes/caches/manifest/'+name,'utf8').split('\n').includes('../../../'+ref));
 });
+
+test('sharing metadata describes exact firmware profiles without claiming every version is supported',()=>{
+ const html=fs.readFileSync('dist/index.html','utf8');assert.equal((html.match(/Compatibilidade varia conforme a cadeia e o payload/g)||[]).length,3);
+ assert.doesNotMatch(html,/host for 4.50-5.07 & 6.70 - 14.00/);
+});

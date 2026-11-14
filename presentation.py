@@ -96,6 +96,8 @@ def improve_html(html):
     for label, target in [('Configurações', 'close-settings'), ('Sobre o host', 'close-about')]:
         pattern = r'(<button aria-label=")' + re.escape(label) + r'("[^>]*id="' + target + r'")'
         html = re.sub(pattern, lambda match: match[1] + 'Fechar' + match[2], html)
+    html = html.replace('WebKitty is a user-friendly, feature-rich PS4 exploit host for 4.50-5.07 & 6.70 - 14.00.',
+                        'BX-CT7: host PS4 com perfis específicos, incluindo 14.02. Compatibilidade varia conforme a cadeia e o payload.')
     # Sharing metadata must point to this host, while upstream credits stay intact.
     html = html.replace('content="WebKitty"', 'content="BX-CT7 PS4 HOST"')
     html = html.replace('http://webkitty.arabpixel.net/includes/assets/icons/webkitty.svg',

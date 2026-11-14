@@ -5,18 +5,18 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 function environment(options={}){
-  const nodes={},events={},timers=[];let reloads=0,replaced=null;
+  const nodes={},events={},timers=[],idleTimers=[],allTimers=[];let reloads=0,replaced=null;
   for(const id of ['cacheStatus','progressFill','cacheFrame','bx-cache-retry','bx-cache-back','bx-cache-progress'])
     nodes[id]={style:{},attributes:{},textContent:'',setAttribute(k,v){this.attributes[k]=v;}};
   nodes.cacheFrame.contentWindow={};
   const window={applicationCache:options.unsupported?undefined:{},
     location:{protocol:'https:',host:'example.test',reload(){reloads++;},replace(url){if(options.replaceThrows)throw Error('blocked');replaced=url;}},
-    addEventListener(name,fn){events[name]=fn;},setTimeout(fn,ms){timers.push({fn,ms});}};
+    addEventListener(name,fn){events[name]=fn;},setTimeout(fn,ms){const t={fn,ms,cleared:false};allTimers.push(t);(ms===90000?idleTimers:timers).push(t);return allTimers.length;},clearTimeout(id){allTimers[id-1].cleared=true;}};
   vm.runInNewContext(fs.readFileSync('dist/includes/js/cache-status.js','utf8'),{
     window,document:{getElementById(id){return nodes[id];}},mainPage:'./?test=0',
     getPs4FwVersion(){if(options.firmwareThrows)throw Error('failed');return '13.52';},getCachePage(fw){assert.equal(fw,'13.52');return './includes/caches/cache1302-1352.html';}
   });
-  return {nodes,timers,events,send(data,extra={}){events.message({source:nodes.cacheFrame.contentWindow,origin:'https://example.test',data,...extra});},
+  return {nodes,timers,idleTimers,events,send(data,extra={}){events.message({source:nodes.cacheFrame.contentWindow,origin:'https://example.test',data,...extra});},
     get reloads(){return reloads;},get replaced(){return replaced;}};
 }
 
@@ -88,4 +88,21 @@ test('blocked return keeps successful cache status and offers the existing back 
  assert.equal(env.nodes['bx-cache-back'].href,'./?test=0&cacheReturn=1');
  assert.equal(env.replaced,null);env.send({type:'CACHE_ERROR'});
  assert.match(env.nodes.cacheStatus.textContent,/Cache atualizado/);
+});
+
+test('silent cache shows an honest wait notice and accepts late completion',()=>{
+ const e=environment();assert.equal(e.idleTimers[0].ms,90000);e.idleTimers[0].fn();
+ assert.match(e.nodes.cacheStatus.textContent,/conclusão ainda não foi confirmada/);assert.equal(e.nodes['bx-cache-retry'].hidden,false);assert.equal(e.timers.length,0);
+ e.send({type:'CACHE_COMPLETE'});assert.match(e.nodes.cacheStatus.textContent,/Cache atualizado/);assert.equal(e.timers.length,1);assert.equal(e.nodes['bx-cache-retry'].hidden,true);
+});
+test('valid progress renews the idle deadline and clears a temporary warning',()=>{
+ const e=environment();e.idleTimers[0].fn();e.send({type:'CACHE_PROGRESS',percent:35});
+ assert.equal(e.nodes['bx-cache-retry'].hidden,true);assert.equal(e.idleTimers.length,2);
+ e.send({type:'CACHE_DOWNLOADING'});assert.equal(e.idleTimers[1].cleared,true);
+});
+test('navigation and real errors cancel the idle deadline; history resumes waiting',()=>{
+ const e=environment();e.events.pagehide();assert.equal(e.idleTimers[0].cleared,true);
+ e.events.pageshow({persisted:true});assert.equal(e.idleTimers.length,2);
+ e.send({type:'CACHE_ERROR'});assert.equal(e.idleTimers[1].cleared,true);
+ const message=e.nodes.cacheStatus.textContent;e.idleTimers[1].fn();assert.equal(e.nodes.cacheStatus.textContent,message);
 });
