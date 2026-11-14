@@ -170,6 +170,10 @@ def apply_gta_theme(root, source):
     data = (source / 'gta-vi.css').read_bytes()
     (root / css).write_bytes(data)
     reference = css + '?v=' + hashlib.sha256(data).hexdigest()[:16]
+    choice = 'includes/js/theme-choice.js'
+    choice_data = (source / 'theme-choice.js').read_bytes()
+    (root / choice).write_bytes(choice_data)
+    choice_reference = choice + '?v=' + hashlib.sha256(choice_data).hexdigest()[:16]
     minimal = 'includes/css/minimal.css'
     minimal_reference = minimal + '?v=' + hashlib.sha256((root / minimal).read_bytes()).hexdigest()[:16]
     index = root / 'index.html'
@@ -178,10 +182,23 @@ def apply_gta_theme(root, source):
     html = html.replace('<html lang="pt-BR">', '<html lang="pt-BR" data-bx-payload-catalog="disabled">', 1)
     if html.count('</head>') != 1:
         raise ValueError('Theme insertion point changed')
-    index.write_text(html.replace('</head>', '<link rel="stylesheet" href="./' + reference + '">\n</head>', 1), encoding='utf-8')
+    anchor = '<!-- Choose GoldHEN version -->'
+    if html.count(anchor) != 1:
+        raise ValueError('Theme control insertion point changed')
+    controls = '''<div id="bx-theme-choice" class="mb-4" role="group" aria-labelledby="bx-theme-title">
+                <h3 id="bx-theme-title" class="text-lg font-semibold mb-2">Tema do site</h3>
+                <div class="radio-group space-y-2">
+                    <label class="flex items-center text-white/80"><input type="radio" name="bx-appearance" value="original"><span>Original</span></label>
+                    <label class="flex items-center text-white/80"><input type="radio" name="bx-appearance" value="gta"><span>GTA VI</span></label>
+                </div>
+                <p id="bx-theme-feedback" role="status" aria-live="polite"></p>
+            </div>
+            '''
+    html = html.replace(anchor, controls + anchor, 1)
+    index.write_text(html.replace('</head>', '<link rel="stylesheet" id="bx-theme-stylesheet" href="./' + reference + '">\n<script src="./' + choice_reference + '"></script>\n</head>', 1), encoding='utf-8')
     for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         text = manifest.read_text(encoding='utf-8')
         if text.count('CACHE:') != 1:
             raise ValueError('Theme cache insertion point changed')
         text = text.replace('../../../' + minimal + '\n', '../../../' + minimal_reference + '\n')
-        manifest.write_text(text.replace('CACHE:', 'CACHE:\n../../../' + reference, 1), encoding='utf-8')
+        manifest.write_text(text.replace('CACHE:', 'CACHE:\n../../../' + reference + '\n../../../' + choice_reference, 1), encoding='utf-8')

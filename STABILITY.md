@@ -116,3 +116,13 @@ A opção de exibir apenas a tela superior também interrompe a montagem de
 cartões e a restauração das abas ocultas na inicialização. Os arquivos e os
 carregadores permanecem preservados. O seletor HEN, as configurações, o cache
 e o painel de progresso durante a execução continuam disponíveis.
+
+## Temas selecionáveis
+
+Configurações → Tema do site permite escolher Original (preto/cinza) ou
+GTA VI. A escolha é aplicada sem recarregar e é lida antes de desenhar o corpo
+da página. O padrão continua GTA VI para preservar a aparência atual.
+A preferência é salva localmente; bloqueio do armazenamento informa a falha
+sem impedir a troca. Mudanças são sincronizadas entre abas do mesmo navegador.
+A folha GTA e o controlador estão disponíveis no cache offline com revisão
+por conteúdo. A troca não muda layout, firmware, HEN ou payload selecionado.

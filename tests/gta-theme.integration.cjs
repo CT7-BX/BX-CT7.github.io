@@ -36,3 +36,10 @@ test('sharing metadata describes exact firmware profiles without claiming every 
  const html=fs.readFileSync('dist/index.html','utf8');assert.equal((html.match(/Compatibilidade varia conforme a cadeia e o payload/g)||[]).length,3);
  assert.doesNotMatch(html,/host for 4.50-5.07 & 6.70 - 14.00/);
 });
+test('theme selector loads before the body and has the same offline script URL in all caches',()=>{
+ const html=fs.readFileSync('dist/index.html','utf8');const ref=html.match(/src=".\/(includes\/js\/theme-choice.js\?v=[a-f0-9]{16})"/)[1];
+ assert.ok(html.indexOf(ref)<html.indexOf('<body'));assert.match(html,/id="bx-theme-stylesheet"/);
+ for(const value of ['original','gta'])assert.match(html,new RegExp('name="bx-appearance" value="'+value+'"'));
+ assert.equal(fs.readFileSync('dist/includes/js/theme-choice.js','utf8'),fs.readFileSync('overrides/theme-choice.js','utf8'));
+ for(const name of fs.readdirSync('dist/includes/caches/manifest'))if(name.endsWith('.manifest'))assert.ok(fs.readFileSync('dist/includes/caches/manifest/'+name,'utf8').split('\n').includes('../../../'+ref));
+});
