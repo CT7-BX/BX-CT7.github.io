@@ -172,3 +172,11 @@ política de publicação, cópia de recuperação e limites dos testes. Os test
 agendados agora verificam sem republicar. O carregamento de idioma tem limite
 de espera e alternativas; a janela de configurações oferece navegação por
 teclado e restauração de foco. A matriz de firmwares é verificada em cada build.
+
+
+## Firmware 14.02
+
+O suporte foi acrescentado como perfil isolado, sem atualização geral da base
+nem mudança do visual. Veja [FW1402.md](FW1402.md) para componentes, hashes,
+cache e limites dos testes. Os 167 arquivos originais de exploração e payloads
+permanecem intactos; o novo firmware usa cópias separadas e revisadas.

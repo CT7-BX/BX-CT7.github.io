@@ -2,7 +2,8 @@
 
 Esta edição preserva o WebKitty fixado em
 `21c2d899c7381cc9f98e4dfb8da8504d2581b831`. O nome e os créditos de
-cada cadeia, incluindo Afterglow no 14.00, continuam preservados.
+cada cadeia, incluindo Afterglow no 14.00, continuam preservados. O perfil
+isolado 14.02 está descrito em [FW1402.md](FW1402.md).
 
 ## O que permanece estável
 
@@ -48,7 +49,7 @@ foco; a janela de diagnóstico mantém o controle do teclado quando aberta.
 
 ## Limites que os testes não resolvem
 
-O maior firmware reconhecido nesta revisão é 14.00. Isso não significa que
+O maior firmware reconhecido nesta revisão é 14.02, em um perfil separado. Isso não significa que
 qualquer versão inferior seja suportada, nem comprova desbloqueio no console.
 As cadeias e payloads não são executados nos testes automatizados.
 

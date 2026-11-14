@@ -16,17 +16,17 @@ test('all firmware choices map consistently to cache pages and cached chain file
   const page=path.resolve('dist',c.getCachePage(fw));assert.ok(fs.existsSync(page),fw);
   const manifest=path.resolve(path.dirname(page),fs.readFileSync(page,'utf8').match(/manifest="([^"]+)"/)[1]);
   const entries=fs.readFileSync(manifest,'utf8').split('CACHE:')[1].split('NETWORK:')[0].split('\n');
-  for(const id of available){assert.ok(fs.existsSync(path.join('dist',files[id])),fw+': '+files[id]);assert.ok(entries.includes('../../../'+files[id]),fw+': '+files[id]);}
+  for(const id of available){const file=id===9&&fw==='14.02'?'src/slopkit-afterglow-1402/jb.js':files[id];assert.ok(fs.existsSync(path.join('dist',file)),fw+': '+file);assert.ok(entries.includes('../../../'+file),fw+': '+file);}
   results.push({firmware:fw,recognized:true,default_chain:c.FIRMWARE_RANGES.find(r=>r.id===selected).label});
  }
  assert.ok(results.filter(r=>r.recognized).length>=50);
  const revision=JSON.parse(fs.readFileSync('dist/release.json','utf8')).revision;
  fs.writeFileSync('diagnostics/firmware-results.json',JSON.stringify({revision,physical_ps4_tested:false,payloads_executed:false,results},null,2)+'\n');
 });
-test('unsupported boundaries remain rejected and 14.00 remains the highest configured target',()=>{
- for(const fw of ['4.49','5.50','6.69','6.73','13.53','14.01','14.02','15.00']){
+test('unsupported boundaries remain rejected and 14.02 is the highest exact configured target',()=>{
+ for(const fw of ['4.49','5.50','6.69','6.73','13.53','14.01','14.03','14.04','15.00']){
   const c=firmware(fw);assert.equal(c.isFirmwareSupported(fw),false,fw);assert.equal(c.getDefaultChain(fw),null,fw);
  }
  const c=firmware('14.00');assert.equal(c.getDefaultChain('14.00'),c.EXPLOIT_CHAINS.SLOPKIT_AFTERGLOW);
- assert.equal(Math.max(...c.FIRMWARE_RANGES.map(r=>r.max)),14);
+ assert.equal(Math.max(...c.FIRMWARE_RANGES.map(r=>r.max)),14.02);
 });
