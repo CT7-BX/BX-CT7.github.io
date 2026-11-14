@@ -51,6 +51,12 @@ tem limite de espera e tenta alternativas quando um arquivo falha. As
 configurações permitem navegação por Tab, fechamento por Escape e retorno de
 foco; a janela de diagnóstico mantém o controle do teclado quando aberta.
 
+## Atualização de payloads
+
+A versão GoldHEN 2.4b18.14 e o transporte com limite de espera estão
+descritos em [PAYLOADS.md](PAYLOADS.md). As versões anteriores continuam
+disponíveis; arquivos de kernel e payloads antigos permanecem intactos.
+
 ## Limites que os testes não resolvem
 
 O maior firmware reconhecido nesta revisão é 14.02, em um perfil separado. Isso não significa que

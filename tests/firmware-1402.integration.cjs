@@ -18,9 +18,9 @@ test('14.02 is recognized exactly and keeps 14.00 routing intact',()=>{
 });
 test('GoldHEN 14.02 uses only the separate reviewed binary and normalizes stale versions',()=>{
  const h=host();h.c.loadJbFlavor();h.c.loadGoldHENVer();
- assert.equal(h.session.payload_path,'./includes/payloads/HEN/goldhen_v2.4b18.13_fw1402.bin');assert.equal(h.values.GHVer,'GHv2.4b18.13');
- assert.equal(h.nodes['input[name="goldhen"][value="GHv2.4b18.13"]'].checked,true);assert.equal(h.alerts.length,0);
- h.c.setGoldHENVer('GHv2.4b18.12');assert.equal(h.values.GHVer,'GHv2.4b18.13');assert.equal(h.alerts.length,1);
+ assert.equal(h.session.payload_path,'./includes/payloads/HEN/goldhen_v2.4b18.14.bin');assert.equal(h.values.GHVer,'GHv2.4b18.14');
+ assert.equal(h.nodes['input[name="goldhen"][value="GHv2.4b18.14"]'].checked,true);assert.equal(h.alerts.length,0);
+ h.c.setGoldHENVer('GHv2.4b18.12');assert.equal(h.values.GHVer,'GHv2.4b18.14');assert.equal(h.alerts.length,1);
 });
 test('PS4HEN 14.02 selects its separate binary while old firmware selections are unchanged',()=>{
  const h=host('14.02','PS4HEN');h.c.loadGoldHENVer();assert.equal(h.session.payload_path,'./includes/payloads/HEN/PS4HEN_fw1402.bin');
@@ -31,7 +31,7 @@ test('PS4HEN 14.02 selects its separate binary while old firmware selections are
 test('stale experimental HEN settings do not select an unvalidated HEN on 14.02',()=>{
  const h=host('14.02','nexHEN');h.c.loadJbFlavor();h.c.loadGoldHENVer();h.c.updateHenFlavorVisibility('14.02');
  assert.equal(h.user.currentJbFlavor,'GoldHEN');assert.equal(h.visible['nexHEN-label-initial'],false);assert.equal(h.visible['PS4HEN-label-initial'],true);
- assert.match(h.session.payload_path,/fw1402\.bin$/);h.c.saveJbFlavor('hen','nexHEN');assert.equal(h.user.currentJbFlavor,'GoldHEN');
+ assert.match(h.session.payload_path,/goldhen_v2\.4b18\.14\.bin$/);h.c.saveJbFlavor('hen','nexHEN');assert.equal(h.user.currentJbFlavor,'GoldHEN');
 });
 test('loading version preferences preserves an explicitly selected custom payload',()=>{
  const h=host();h.session.payload_path='./custom/example.bin';h.c.loadGoldHENVer();assert.equal(h.session.payload_path,'./custom/example.bin');
@@ -56,4 +56,26 @@ test('both native and legacy launch controllers route only 14.02 to the isolated
   const target=source.match(/getScript\((\(getPs4FwVersion\(\) === "14.02" \? "src\/slopkit-afterglow-1402\/jb\.js" : "src\/slopkit-afterglow\/jb\.js"\))/)[1];
   for(const fw of ['13.52','14.00','14.02'])assert.equal(vm.runInNewContext(target,{getPs4FwVersion(){return fw;}}),fw==='14.02'?'src/slopkit-afterglow-1402/jb.js':'src/slopkit-afterglow/jb.js');
  }
+});
+
+test('14.02 retains explicit GoldHEN 13 fallback and also accepts the new 14',()=>{
+ const h=host('14.02','GoldHEN','GHv2.4b18.13');h.c.loadGoldHENVer();
+ assert.match(h.session.payload_path,/13_fw1402.bin$/);h.c.setGoldHENVer('GHv2.4b18.14');h.c.GoldHEN();
+ assert.match(h.session.payload_path,/14.bin$/);h.c.setGoldHENVer('GHv2.4b18.13');h.c.GoldHEN();
+ assert.match(h.session.payload_path,/13_fw1402.bin$/);assert.equal(h.alerts.length,0);
+});
+test('new sessions default to GoldHEN 14 across supported GoldHEN firmwares',()=>{
+ for(const fw of ['5.05','9.00','11.00','13.52','14.00','14.02']){
+  const h=host(fw,'GoldHEN',null);delete h.values.GHVer;h.c.GoldHEN();
+  assert.match(h.session.payload_path,/goldhen_v2\.4b18\.14.bin$/);
+ }
+ const html=fs.readFileSync('dist/index.html','utf8');
+ for(const v of ['14','13','12','10','9','8','7'])assert.match(html,new RegExp('value="GHv2\\.4b18\\.'+v+'"'));
+});
+
+test('changing a GoldHEN version refreshes a stale HEN path without replacing custom payloads',()=>{
+ const h=host('14.02','GoldHEN','GHv2.4b18.13');h.c.loadGoldHENVer();
+ h.c.setGoldHENVer('GHv2.4b18.14');assert.match(h.session.payload_path,/14.bin$/);
+ h.c.setGoldHENVer('GHv2.4b18.13');assert.match(h.session.payload_path,/13_fw1402.bin$/);
+ h.session.payload_path='./custom/test.bin';h.c.setGoldHENVer('GHv2.4b18.14');assert.equal(h.session.payload_path,'./custom/test.bin');
 });
