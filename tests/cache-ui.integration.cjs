@@ -10,7 +10,7 @@ function environment(options={}){
     nodes[id]={style:{},attributes:{},textContent:'',setAttribute(k,v){this.attributes[k]=v;}};
   nodes.cacheFrame.contentWindow={};
   const window={applicationCache:options.unsupported?undefined:{},
-    location:{protocol:'https:',host:'example.test',reload(){reloads++;},replace(url){replaced=url;}},
+    location:{protocol:'https:',host:'example.test',reload(){reloads++;},replace(url){if(options.replaceThrows)throw Error('blocked');replaced=url;}},
     addEventListener(name,fn){events[name]=fn;},setTimeout(fn,ms){timers.push({fn,ms});}};
   vm.runInNewContext(fs.readFileSync('dist/includes/js/cache-status.js','utf8'),{
     window,document:{getElementById(id){return nodes[id];}},mainPage:'./?test=0',
@@ -79,4 +79,13 @@ test('explicit back link skips automatic cache once while completion uses normal
   assert.equal(env.nodes['bx-cache-back'].href,'./?test=0&cacheReturn=1');
   env.send({type:'CACHE_COMPLETE'});env.timers[0].fn();
   assert.equal(env.replaced,'./?test=0');
+});
+
+test('blocked return keeps successful cache status and offers the existing back link',()=>{
+ const env=environment({replaceThrows:true});env.send({type:'CACHE_COMPLETE'});
+ assert.doesNotThrow(()=>env.timers[0].fn());
+ assert.match(env.nodes.cacheStatus.textContent,/Cache atualizado.*Use Voltar ao site/);
+ assert.equal(env.nodes['bx-cache-back'].href,'./?test=0&cacheReturn=1');
+ assert.equal(env.replaced,null);env.send({type:'CACHE_ERROR'});
+ assert.match(env.nodes.cacheStatus.textContent,/Cache atualizado/);
 });

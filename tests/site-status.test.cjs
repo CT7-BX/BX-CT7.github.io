@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync('overrides/site-status.js', 'utf8');
 const revision = 'a'.repeat(40);
 function environment(options = {}) {
-  const nodes = {}, requests = [], events = {}, intervals = [];
+  const nodes = {}, requests = [], events = {}, intervals = [], timeouts = [];
   for (const id of ['bx-site-status', 'bx-site-check', 'bx-site-message', 'bx-site-network', 'bx-site-revision'])
     nodes[id] = { textContent: '', style: {}, attributes: {}, getAttribute() { return options.revision || revision; },
       setAttribute(k, v) { this.attributes[k] = v; } };
@@ -24,9 +24,11 @@ function environment(options = {}) {
     navigator, window: { applicationCache: options.ps4 ? {} : undefined,
       location: { reload() { reloads++; if(options.reloadThrows) throw Error('blocked'); } }, addEventListener(name, fn) { events[name] = fn; },
       setInterval(fn, delay) { intervals.push({ fn, delay, cleared: false }); return intervals.length; },
-      clearInterval(id) { intervals[id - 1].cleared = true; } },
+      clearInterval(id) { intervals[id - 1].cleared = true; },
+      setTimeout(fn, delay) { timeouts.push({fn, delay, cleared:false}); return timeouts.length; },
+      clearTimeout(id) { timeouts[id - 1].cleared = true; } },
     isPS4Console() { return !!options.ps4; }, XMLHttpRequest: XHR });
-  return { nodes, requests, events, navigator, document, intervals,
+  return { nodes, requests, events, navigator, document, intervals, timeouts,
     tick: () => intervals.filter(t => !t.cleared).forEach(t => t.fn()),
     update: () => nodes['bx-site-check'].onclick(),
     message: () => nodes['bx-site-message'].textContent, title: () => nodes['bx-site-revision'].textContent,
@@ -191,4 +193,19 @@ test('confirmed update remains available through a transient polling failure',()
  e.navigator.onLine=false;e.events.offline();assert.equal(e.nodes['bx-site-check'].hidden,true);
  e.navigator.onLine=true;e.events.online();e.requests[2].onerror();assert.equal(e.nodes['bx-site-check'].hidden,false);
  e.tick();current(e);assert.equal(e.title(),'Versão mais recente');e.tick();e.requests[4].onerror();assert.equal(e.title(),'Não foi possível verificar');
+});
+
+test('legacy XHR without timeout events ends visibly and ignores late success', () => {
+  const env=environment(); const request=env.requests[0];
+  assert.equal(env.timeouts[0].delay,8000);env.timeouts[0].fn();
+  assert.equal(request.aborted,true);assert.equal(env.title(),'Não foi possível verificar');
+  request.respond({schema_version:1,revision});assert.equal(env.title(),'Não foi possível verificar');
+  env.tick();current(env);assert.equal(env.title(),'Versão mais recente');
+});
+test('watchdogs are cleared on completion, supersession and navigation', () => {
+  const env=environment();current(env);assert.equal(env.timeouts[0].cleared,true);
+  env.tick();env.tick();assert.equal(env.timeouts[1].cleared,true);
+  newer(env);const message=env.message();env.timeouts[1].fn();assert.equal(env.message(),message);
+  env.tick();env.events.pagehide();assert.equal(env.timeouts[3].cleared,true);
+  env.timeouts[3].fn();assert.equal(env.message(),message);
 });

@@ -31,7 +31,12 @@
             finished = true; fill.style.width = '100%';
             if (progress) progress.setAttribute('aria-valuenow', '100');
             status.textContent = 'Cache atualizado. Voltando ao site...';
-            window.setTimeout(function () { window.location.replace(destination); }, 1000);
+            window.setTimeout(function () {
+                try { window.location.replace(destination); }
+                catch (e) {
+                    status.textContent = 'Cache atualizado. Não foi possível voltar automaticamente. Use Voltar ao site.';
+                }
+            }, 1000);
         } else if (data.type === 'CACHE_PROGRESS') {
             if (typeof data.percent === 'number' && isFinite(data.percent) && data.percent >= 0 && data.percent <= 100) {
                 var percent = Math.round(data.percent);

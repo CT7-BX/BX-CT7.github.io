@@ -4,7 +4,10 @@
  * Never executes payloads or changes the original PS4 cache implementation. */
 (function () {
     'use strict';
-    var active = null, serial = 0;
+    var active = null, serial = 0, watchdog = null;
+    function clearWatchdog() {
+        if (watchdog !== null) { window.clearTimeout(watchdog); watchdog = null; }
+    }
     function id(name) { return document.getElementById(name); }
     function text(node, value) { if (node && node.textContent !== value) node.textContent = value; }
     function init() {
@@ -13,7 +16,7 @@
         var revision = box.getAttribute('data-revision'), available = false, knownAvailable = false;
         var timer = null, stopped = true, updating = false, firstCheck = true;
         function stop() {
-            stopped = true; ++serial;
+            stopped = true; ++serial; clearWatchdog();
             if (timer !== null) { window.clearInterval(timer); timer = null; }
             if (active) { try { active.abort(); } catch (ignore) {} active = null; }
         }
@@ -38,6 +41,7 @@
         function check() {
             if (stopped || updating) return;
             var current = ++serial, done = false;
+            clearWatchdog();
             if (active) { try { active.abort(); } catch (ignore) {} }
             active = null; network();
             if (navigator.onLine === false) {
@@ -51,7 +55,7 @@
             }
             function finish(name, title, detail) {
                 if (done || current !== serial) return;
-                done = true; active = null; state(name, title, detail);
+                done = true; clearWatchdog(); active = null; state(name, title, detail);
             }
             function failure(detail) {
                 if (knownAvailable) {
@@ -87,6 +91,12 @@
                 };
                 request.onerror = function () { failure('A consulta falhou. A página carregada continua disponível.'); };
                 request.ontimeout = function () { failure('A consulta demorou demais. Reabra o site quando a conexão melhorar.'); };
+                // Some legacy WebKit versions do not deliver native XHR timeout events.
+                watchdog = window.setTimeout(function () {
+                    if (done || current !== serial) return;
+                    failure('A consulta demorou demais. Reabra o site quando a conexão melhorar.');
+                    try { request.abort(); } catch (ignore) {}
+                }, 8000);
                 request.send(null);
             } catch (error) { failure('A consulta não está disponível neste navegador.'); }
         }

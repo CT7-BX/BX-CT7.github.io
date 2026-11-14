@@ -15,6 +15,10 @@ isolado 14.02 está descrito em [FW1402.md](FW1402.md).
   intervalo quando o próprio navegador suspende a página.
 - Uma atualização só começa após clicar em Atualizar agora. Uma consulta que
   falha não apaga uma atualização já confirmada; ficar offline bloqueia o botão.
+- A consulta tem limite de espera também quando o WebKit não entrega o evento
+  de timeout; os temporizadores pendentes são liberados ao sair da página.
+- Se o retorno automático após salvar o cache for bloqueado, o site informa
+  que o cache foi salvo e orienta usar o link Voltar ao site já existente.
 - O retorno explícito da tela de cache não reabre imediatamente uma tentativa
   incompleta. O início normal do cache permanece para primeiras visitas.
 - O aviso inicial que encaminhava ao HTTP de outro host foi removido.
