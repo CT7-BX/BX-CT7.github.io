@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 test('approved GTA theme is included after existing styles and cached for every firmware',()=>{
  const html=fs.readFileSync('dist/index.html','utf8');
- assert.equal((html.match(/href="\.\/includes\/css\/gta-vi.css"/g)||[]).length,1);
+ assert.equal((html.match(/href="\.\/includes\/css\/gta-vi.css\?v=[a-f0-9]{16}"/g)||[]).length,1);
  assert.ok(html.indexOf('includes/css/gta-vi.css')>html.indexOf('includes/css/minimal.css'));
  assert.equal(fs.readFileSync('dist/includes/css/gta-vi.css','utf8'),fs.readFileSync('overrides/gta-vi.css','utf8'));
  for(const name of fs.readdirSync('dist/includes/caches/manifest'))if(name.endsWith('.manifest'))assert.match(fs.readFileSync('dist/includes/caches/manifest/'+name,'utf8'),/includes\/css\/gta-vi.css/);
@@ -23,4 +23,11 @@ test('diagnostics button has explicit light text on its specific dark background
  const background=rule[1].match(/background:(#[a-f0-9]{6})!important/)[1];
  function luminance(hex){const c=hex.slice(1).match(/../g).map(x=>parseInt(x,16)/255).map(v=>v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4));return c[0]*0.2126+c[1]*0.7152+c[2]*0.0722;}
  const a=luminance(foreground),b=luminance(background);assert.ok((Math.max(a,b)+0.05)/(Math.min(a,b)+0.05)>=7);
+});
+
+test('HTML and all offline caches use the same content-versioned theme URL',()=>{
+ const html=fs.readFileSync('dist/index.html','utf8');const ref=html.match(/href=".\/(includes\/css\/gta-vi.css\?v=[a-f0-9]{16})"/)[1];
+ const crypto=require('node:crypto');const hash=crypto.createHash('sha256').update(fs.readFileSync('dist/includes/css/gta-vi.css')).digest('hex').slice(0,16);
+ assert.ok(ref.endsWith('?v='+hash));
+ for(const name of fs.readdirSync('dist/includes/caches/manifest'))if(name.endsWith('.manifest'))assert.ok(fs.readFileSync('dist/includes/caches/manifest/'+name,'utf8').split('\n').includes('../../../'+ref));
 });
