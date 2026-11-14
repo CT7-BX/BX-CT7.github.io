@@ -175,6 +175,7 @@ def apply_gta_theme(root, source):
     index = root / 'index.html'
     html = index.read_text(encoding='utf-8')
     html = html.replace('href="./' + minimal + '"', 'href="./' + minimal_reference + '"')
+    html = html.replace('<html lang="pt-BR">', '<html lang="pt-BR" data-bx-payload-catalog="disabled">', 1)
     if html.count('</head>') != 1:
         raise ValueError('Theme insertion point changed')
     index.write_text(html.replace('</head>', '<link rel="stylesheet" href="./' + reference + '">\n</head>', 1), encoding='utf-8')

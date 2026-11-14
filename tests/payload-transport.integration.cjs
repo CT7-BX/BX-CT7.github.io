@@ -146,3 +146,10 @@ test('unsupported or missing catalog selections never send files',()=>{
  const e=env();let alerts=0;Object.assign(e.c,{isPayloadSupported:()=>false,user:{ps4Fw:'13.52'},window:{lang:{unsupportedFirmware:'Unsupported '}},alert(){alerts++;},Loadpayloadlocal(){throw Error('Must not send');}});
  e.c.payloadRouter(null);e.c.payloadRouter({src:'/wrong.bin'});assert.equal(alerts,2);
 });
+
+test('disabled lower catalog creates no cards or requests during startup',()=>{
+ const e=env();Object.assign(e.c,{document:{documentElement:{getAttribute(name){return name==='data-bx-payload-catalog'?'disabled':null;}},getElementById(){throw Error('Disabled catalog must not build or select cards');},createElement(){throw Error('Must not build cards');}}});
+ vm.runInContext(fs.readFileSync('dist/includes/js/payloadsHandler.js','utf8'),e.c);
+ assert.doesNotThrow(()=>{e.c.renderPayloads([{category:'homebrew'}]);e.c.loadLastTab();e.c.loadAdvancedPayloads();});assert.equal(e.requests.length,0);
+ assert.match(fs.readFileSync('dist/index.html','utf8'),/data-bx-payload-catalog="disabled"/);
+});

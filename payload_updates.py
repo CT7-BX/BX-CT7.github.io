@@ -167,3 +167,6 @@ function loadAndSend(url, onDone, name, args) {
 
 '''
     transport.write_text(text[:start] + router + text[end:])
+
+    for signature in ('function renderPayloads(payloads) {', 'function loadLastTab() {', 'function loadAdvancedPayloads() {'):
+        update('includes/js/payloadsHandler.js', signature, signature + "\n    if (document.documentElement && document.documentElement.getAttribute('data-bx-payload-catalog') === 'disabled') return;")

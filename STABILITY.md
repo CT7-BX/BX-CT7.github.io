@@ -109,3 +109,10 @@ Após 90 segundos sem mensagem válida de progresso, a tela de cache informa
 que a conclusão ainda não foi confirmada e mostra Tentar novamente. Não
 cancela downloads, não reinicia automaticamente e aceita conclusão tardia.
 O progresso retoma a apresentação normal; sair da página libera o temporizador.
+
+## Área inferior desativada
+
+A opção de exibir apenas a tela superior também interrompe a montagem de
+cartões e a restauração das abas ocultas na inicialização. Os arquivos e os
+carregadores permanecem preservados. O seletor HEN, as configurações, o cache
+e o painel de progresso durante a execução continuam disponíveis.
