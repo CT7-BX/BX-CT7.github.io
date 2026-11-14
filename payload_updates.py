@@ -83,3 +83,7 @@ function loadAndSend(url, onDone, name, args) {
     update('index.html', '</body>', '<script src="./includes/js/host-return.js"></script>\n</body>')
     for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         manifest.write_text(manifest.read_text().replace('CACHE:', 'CACHE:\n../../../' + recovery, 1))
+
+    update('includes/js/payloadsHandler.js',
+           "        id: 'FanThreshold' + temperature,",
+           "        id: 'FanThreshold' + temperature,\n        needsPayloadLoader: true,")

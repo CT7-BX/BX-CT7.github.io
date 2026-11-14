@@ -53,3 +53,11 @@ Não há reenvio, nova tentativa automática ou mudança da detecção de sucess
 Durante uma cadeia ativa, o retorno não interfere na interface. Essa correção
 cobre o estado oculto encontrado no código; a foto não permite confirmar
 outras causas de falha de renderização do navegador do PS4.
+
+## FAN sem segunda exploração automática
+
+As quatro temperaturas do FAN exigem resposta do carregador de payloads.
+Em caso de timeout/erro, o host apresenta o aviso já existente de carregador
+indisponível e não usa a alternativa que inicia outra exploração no HTTPS.
+Ausência de resposta não comprova que o payload não executou; não há reenvio
+automático. Os binários FAN permanecem intactos.

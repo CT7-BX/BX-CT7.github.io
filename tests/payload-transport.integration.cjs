@@ -59,3 +59,26 @@ test('return recovery is included once in the page and available in all offline 
  assert.equal(fs.readFileSync('dist/includes/js/host-return.js','utf8'),fs.readFileSync('overrides/host-return.js','utf8'));
  for(const name of fs.readdirSync('dist/includes/caches/manifest'))if(name.endsWith('.manifest'))assert.match(fs.readFileSync('dist/includes/caches/manifest/'+name,'utf8'),/includes\/js\/host-return.js/);
 });
+
+test('FAN requires a responding payload server and cannot silently restart the exploit on HTTPS',()=>{
+ const e=env();let attempts=0,alerts=0;
+ Object.assign(e.c,{
+  user:{ip:'127.0.0.1',ps4Fw:'13.52'},isPS4Console:()=>true,isHttps:()=>true,isFirmwareSupported:()=>true,
+  getPs4FwVersion:()=> '13.52',log(){},alert(){alerts++;},
+  window:{lang:{payloadLoaderSending:'Sending {payload}',payloadLoaderSendFailed:'Failed {payload}',binLoaderNotDetected:'Loader unavailable',payloadRequiresPayloadLoader:'Requires loader'}},
+  jailbreak(){attempts++;},storage:{session:{set(){throw Error('Must not prepare another exploit');}}}
+ });
+ e.c.Loadpayloadlocal('/fan.bin','Fan Threshold','FanThreshold70',true);
+ e.requests[0].respond();assert.equal(e.requests.length,2);e.timers[1].fn();
+ assert.equal(attempts,0);assert.equal(alerts,1);assert.equal(e.timers.length,2);
+ e.timers[e.timers.length-1].fn();assert.equal(alerts,1);assert.equal(attempts,0);
+ e.requests[1].respond(200);assert.equal(attempts,0);assert.equal(e.requests.length,2);
+});
+test('all FAN temperatures carry the required-loader flag through the original router',()=>{
+ const nodes={overlay:{id:'overlay'}},routed=[];
+ const c=vm.createContext({ui:{chooseFanThresholdOverlay:nodes.overlay},payloadsPath:'./includes/payloads/Bins/',
+  isPS4Console:()=>true,toggleVisibility(){},storage:{session:{remove(){}}},payloadRouter(p){routed.push(p);},alert(){throw Error('Unexpected alert');}});
+ vm.runInContext(fs.readFileSync('dist/includes/js/payloadsHandler.js','utf8'),c);
+ for(const temp of ['60','70','80','85'])c.loadFanThreshold(temp);
+ assert.equal(routed.length,4);for(const p of routed){assert.equal(p.needsPayloadLoader,true);assert.match(p.src,/fan-thresholds\/ps4-fan-threshold(60|70|80|85).bin$/);}
+});
