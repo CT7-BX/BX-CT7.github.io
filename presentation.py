@@ -160,3 +160,19 @@ def stamp_manifests(root):
         text = re.sub(r'^# BX-CT7 content: [^\n]*\n?', '', path.read_text(encoding='utf-8'), flags=re.M)
         path.write_text(text.rstrip() + '\n' + marker + '\n', encoding='utf-8')
     return marker
+
+
+def apply_gta_theme(root, source):
+    """Publish only the approved paint-only theme, preserving the live host markup."""
+    css = 'includes/css/gta-vi.css'
+    (root / css).write_bytes((source / 'gta-vi.css').read_bytes())
+    index = root / 'index.html'
+    html = index.read_text(encoding='utf-8')
+    if html.count('</head>') != 1:
+        raise ValueError('Theme insertion point changed')
+    index.write_text(html.replace('</head>', '<link rel="stylesheet" href="./' + css + '">\n</head>', 1), encoding='utf-8')
+    for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
+        text = manifest.read_text(encoding='utf-8')
+        if text.count('CACHE:') != 1:
+            raise ValueError('Theme cache insertion point changed')
+        manifest.write_text(text.replace('CACHE:', 'CACHE:\n../../../' + css, 1), encoding='utf-8')

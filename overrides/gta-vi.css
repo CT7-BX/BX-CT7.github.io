@@ -1,0 +1,25 @@
+/* Paint-only local concept: no dimensions, spacing, positioning or typography changes. */
+html,body{background:#170d25!important;color:#fff0f5!important}
+body{background-image:radial-gradient(ellipse at 15% 10%,rgba(255,91,151,.15),transparent 55%),radial-gradient(ellipse at 90% 55%,rgba(65,215,208,.10),transparent 50%)!important}
+#initial-screen{background:radial-gradient(ellipse at 50% 32%,rgba(248,118,160,.14),transparent 55%),linear-gradient(165deg,#23122f 0%,#171229 60%,#10282e 100%)!important}
+#initial-screen:before{color:#f3a5cc!important;text-shadow:0 0 18px rgba(255,111,173,.45)}
+.bx-brand-top{color:#f9bbd8!important}
+#initial-screen header button{background:linear-gradient(135deg,#34213d,#241c34)!important;border-color:#8b4d79!important;color:#ffe3ef!important;box-shadow:0 0 16px rgba(247,106,163,.10)!important}
+#ps-logo-container{background:linear-gradient(155deg,#ffb08c 0%,#ed81b9 42%,#aa79d2 78%,#62d8d0 100%)!important;border-color:#ffc6de!important;box-shadow:0 0 36px rgba(240,126,181,.22),inset 0 0 26px rgba(255,238,239,.16)!important}
+#ps-logo{fill:#291334!important;filter:drop-shadow(0 2px 1px rgba(255,255,255,.18))}
+#click-to-start-text{color:#ffe1ef!important;text-shadow:0 0 20px rgba(244,126,185,.18)}
+#PS4FW{color:#bcb0d4!important}
+#choosejb-initial{background:linear-gradient(145deg,rgba(43,25,58,.95),rgba(22,39,49,.96))!important;border-color:#755071!important;box-shadow:0 12px 40px rgba(7,4,20,.2)!important}
+#choosejb-initial h3{color:#ffe0ed!important}
+#choosejb-initial label{background:linear-gradient(110deg,#34233f,#252b3d)!important;border-color:#785575!important;color:#fbe6f5!important}
+#choosejb-initial label:focus-within{outline-color:#6ce0d3!important}
+#choosejb-initial input{accent-color:#f48dbd!important}
+#bx-site-status{background:rgba(20,16,35,.55)!important;border-color:#66506f!important;color:#c5b5d5!important}
+#bx-site-revision{color:#7ce0ce!important}
+#bx-site-status button{background:linear-gradient(110deg,#e68ab7,#b394dc)!important;border-color:#ffc7e3!important;color:#25132f!important}
+#exploit-main-screen{background:#171229!important}
+#settings-popup{background:linear-gradient(150deg,#24152f,#121e29)!important;border-color:#8e5c87!important;color:#ffe7f2!important;box-shadow:0 18px 70px rgba(14,5,27,.65)!important}
+#settings-popup label:not(.hidden){background:linear-gradient(110deg,#34213d,#202b39)!important;border-color:#775471!important;color:#f5dce9!important}
+#settings-popup h2,#settings-popup h3{color:#ffd6e9!important}
+#settings-popup input{accent-color:#f48dbd!important}
+#settings-popup button,#close-settings{background:linear-gradient(110deg,#e887b5,#a993d8)!important;border-color:#ffc6df!important;color:#25142f!important}

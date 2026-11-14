@@ -94,3 +94,11 @@ A janela de configurações mantém o foco mesmo se não houver controles
 visíveis. O idioma anunciado pelo documento e o seletor acompanham o idioma
 realmente carregado, incluindo o retorno ao inglês em caso de falha.
 Esses ajustes não modificam estilos, payloads ou cadeias de kernel.
+
+## Tema GTA VI aprovado
+
+O tema de cores aprovado é aplicado por `includes/css/gta-vi.css`, após os
+estilos existentes. Altera fundos, cores, bordas e sombras; não altera
+medidas, posições, tipografia, HTML dos controles ou funcionamento.
+A página demonstrativa não é publicada. A folha participa dos manifestos e
+da identificação de conteúdo offline para que Atualizar agora a receba.

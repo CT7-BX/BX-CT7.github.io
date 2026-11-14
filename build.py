@@ -46,7 +46,8 @@ for name, digest in protected.items():
     'firmware_addons': [firmware_addon, payload_addon]
 }, indent=2) + '\n', encoding='utf-8')
 # Metadata participates in the offline content revision too.
-from presentation import stamp_manifests
+from presentation import stamp_manifests, apply_gta_theme
+apply_gta_theme(dest, root / "overrides")
 (dest/'.nojekyll').touch()
 stamp_manifests(dest)
 print('Reconstrução disponível em:',dest)
