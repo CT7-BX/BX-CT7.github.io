@@ -37,6 +37,7 @@
      ['IndexedDB (API, indicativo)',(typeof window.indexedDB!=='undefined'&&window.indexedDB!==null)?'API presente (uso não testado)':'API indisponível'],
      ['Download HTML (indicativo)',('download' in document.createElement('a'))?'atributo suportado':'atributo não detectado'],
      ['HTTPS',location.protocol==='https:'?'sim':'não'],
+     ['Estado de carregamento (indicativo)',typeof document.readyState==='string'?document.readyState:'não informado'],
      ['Fuso horário (UTC, indicativo)',(function(){var offset=new Date().getTimezoneOffset();if(typeof offset!=='number'||!isFinite(offset))return 'não informado';var sign=offset<=0?'+':'-';var abs=Math.abs(offset);return 'UTC'+sign+('0'+Math.floor(abs/60)).slice(-2)+':'+('0'+(abs%60)).slice(-2);})()],
      ['Idioma do navegador',navigator.language||navigator.userLanguage||'não informado'],
      ['Estado de rede (indicativo)',typeof navigator.onLine==='boolean'?(navigator.onLine?'navegador indica online':'navegador indica offline'):'não informado'],
