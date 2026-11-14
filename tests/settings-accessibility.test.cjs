@@ -29,3 +29,10 @@ test('an Escape already handled by a nested dialog cannot close settings too',()
  e.events.keydown({keyCode:27,defaultPrevented:true,preventDefault(){throw Error('Already handled');}});
  assert.equal(e.calls,1);assert.equal(e.panel.attributes['aria-hidden'],'false');
 });
+
+test('empty settings controls keep Tab focus inside the dialog',()=>{
+ const e=environment();delete e.nodes['close-settings'];e.panel.querySelectorAll=()=>[];
+ e.window.settingsPopup();assert.equal(e.document.activeElement,e.panel);assert.equal(e.panel.attributes.tabindex,'-1');
+ let prevented=false;e.events.keydown({keyCode:9,preventDefault(){prevented=true;}});
+ assert.equal(prevented,true);assert.equal(e.document.activeElement,e.panel);
+});

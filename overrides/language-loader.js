@@ -46,6 +46,9 @@ function loadLanguage() {
             var clean = {}, key;
             for (key in strings) if (Object.prototype.hasOwnProperty.call(strings, key) && typeof strings[key] === 'string') clean[key] = strings[key];
             user.currentLanguage = actualLanguage;
+            if (document.documentElement) document.documentElement.lang = actualLanguage;
+            var actualRadio = document.querySelector('input[name="language"][value="' + actualLanguage + '"]');
+            if (actualRadio) actualRadio.checked = true;
             bxLanguageLastCommitted = clean; window.lang = clean; resolve(clean);
         }
         script('en', function (english) {

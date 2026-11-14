@@ -1,12 +1,12 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 function environment(language='pt-br'){
- const scripts=[],timers=new Map(),queries=[];let next=0;
+ const scripts=[],timers=new Map(),queries=[],radios={},root={lang:"pt-BR"};let next=0;
  const head={appendChild(s){scripts.push(s);s.parentNode=head;},removeChild(s){const i=scripts.indexOf(s);if(i>=0)scripts.splice(i,1);s.parentNode=null;}};
  const window={setTimeout(fn,ms){assert.equal(ms,8000);timers.set(++next,fn);return next;},clearTimeout(id){timers.delete(id);}};
  const user={currentLanguage:language};
- const context={window,user,Promise,document:{head,getElementById(id){return scripts.find(s=>s.id===id);},createElement(){return {};},querySelector(selector){queries.push(selector);return {checked:false};}}};
+ const context={window,user,Promise,document:{head,documentElement:root,getElementById(id){return scripts.find(s=>s.id===id);},createElement(){return {};},querySelector(selector){queries.push(selector);return radios[selector]||(radios[selector]={checked:false});}}};
  vm.createContext(context);vm.runInContext(fs.readFileSync('overrides/language-loader.js','utf8'),context);
- return {window,user,scripts,timers,queries,load(){return context.loadLanguage();},latest(){return scripts[scripts.length-1];},success(strings){window.lang=strings;this.latest().onload();},fail(){this.latest().onerror();},timeout(){const fn=timers.values().next().value;fn();}};
+ return {window,user,scripts,timers,queries,radios,root,load(){return context.loadLanguage();},latest(){return scripts[scripts.length-1];},success(strings){window.lang=strings;this.latest().onload();},fail(){this.latest().onerror();},timeout(){const fn=timers.values().next().value;fn();}};
 }
 const en={clickToStart:'Start',waitingUserInput:'Waiting'};
 test('selected language merges with English and clears its timeouts',async()=>{
@@ -30,4 +30,13 @@ test('superseded request cannot replace the latest committed language',async()=>
  const e=environment('en'),first=e.load();const rejected=assert.rejects(first,/superseded/),old=e.latest();
  e.user.currentLanguage='pt-br';const latest=e.load();e.success({...en});e.success({clickToStart:'Iniciar'});await latest;
  e.window.lang={clickToStart:'Old'};old.onload();await rejected;assert.equal(e.window.lang.clickToStart,'Iniciar');assert.equal(e.timers.size,0);
+});
+
+test('English fallback updates the page language and selected language control',async()=>{
+ const e=environment(),result=e.load();e.success({...en});e.fail();await result;
+ assert.equal(e.root.lang,'en');assert.equal(e.radios['input[name="language"][value="en"]'].checked,true);
+});
+test('translated success announces the actual language without changing it on late execution',async()=>{
+ const e=environment('es'),result=e.load();e.success({...en});e.success({clickToStart:'Iniciar'});await result;
+ assert.equal(e.root.lang,'es');assert.equal(e.radios['input[name="language"][value="es"]'].checked,true);
 });

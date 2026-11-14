@@ -81,3 +81,16 @@ User-Agent simulado ser reconhecido não comprova execução no console.
 
 O ZIP é uma cópia estática. Abrir os arquivos diretamente no computador não
 reproduz o ambiente do navegador do PS4 nem prova funcionamento do desbloqueio.
+
+## Refinamentos de navegação e acessibilidade
+
+O catálogo de homebrew reutiliza um resultado válido por até 30 segundos ao
+reabrir a aba, reduzindo pedidos repetidos. Consultas travadas têm limite
+independente do evento de timeout do WebKit; uma nova renderização cancela
+a consulta e o temporizador anteriores. Catálogos sem projetos reconhecidos
+usam os cartões de informação em vez de deixar a aba vazia.
+
+A janela de configurações mantém o foco mesmo se não houver controles
+visíveis. O idioma anunciado pelo documento e o seletor acompanham o idioma
+realmente carregado, incluindo o retorno ao inglês em caso de falha.
+Esses ajustes não modificam estilos, payloads ou cadeias de kernel.

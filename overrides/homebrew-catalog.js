@@ -3,6 +3,7 @@
 (function () {
   'use strict';
   var source = './bx-hen/store/catalog.json';
+  var cachedItems = null, cachedAt = 0;
   function node(parent, tag, className, value) {
     var n = document.createElement(tag);
     if (className) n.className = className;
@@ -56,11 +57,24 @@
     /* The upstream Homebrew tab is cleared and re-rendered on navigation. */
     var renderToken = String(new Date().getTime()) + '-' + String(Math.random()).slice(2);
     container.setAttribute('data-bx-homebrew-render', renderToken);
-    if (container.bxCatalogRequest) { try { container.bxCatalogRequest.abort(); } catch (ignore) {} }
-    var request, done = false;
+    if (container.bxCancelCatalog) container.bxCancelCatalog();
+    if (cachedItems && new Date().getTime() - cachedAt >= 0 && new Date().getTime() - cachedAt < 30000) {
+      for (var n = 0; n < cachedItems.length; n++) addItem(container, cachedItems[n]);
+      return;
+    }
+    var request, done = false, timer = null;
+    function clearTimer() { if (timer !== null) { window.clearTimeout(timer); timer = null; } }
+    container.bxCancelCatalog = function () {
+      var pending = !done;
+      done = true; clearTimer();
+      if (pending && request) { try { request.abort(); } catch (ignore) {} }
+      if (container.bxCatalogRequest === request) container.bxCatalogRequest = null;
+    };
     function fallback() {
       if (done || container.getAttribute('data-bx-homebrew-render') !== renderToken) return;
-      done = true; container.bxCatalogRequest = null; addFallback(container);
+      done = true; clearTimer(); container.bxCatalogRequest = null;
+      if (request && request.readyState !== 4) { try { request.abort(); } catch (ignore) {} }
+      addFallback(container);
     }
     try {
     request = new XMLHttpRequest();
@@ -76,12 +90,21 @@
         var body = JSON.parse(request.responseText);
         if (!body || body.schema_version !== 1 || !Array.isArray(body.items) || !body.items.length || body.items.length > 200)
           throw Error('invalid catalog');
-        for (var i = 0; i < body.items.length; i++) addItem(container, body.items[i]);
-        done = true; container.bxCatalogRequest = null;
+        var accepted = [];
+        for (var i = 0; i < body.items.length; i++) {
+          var item = body.items[i];
+          if (item && (item.id === 'java' || item.id === 'minecraft-online-manager') &&
+              typeof item.title === 'string' && item.title.replace(/\s/g, '')) accepted.push(item);
+        }
+        if (!accepted.length) { fallback(); return; }
+        cachedItems = accepted; cachedAt = new Date().getTime();
+        for (var j = 0; j < accepted.length; j++) addItem(container, accepted[j]);
+        done = true; clearTimer(); container.bxCatalogRequest = null;
       } catch (error) { fallback(); }
     };
     request.onerror = fallback;
     request.ontimeout = fallback;
+    timer = window.setTimeout(fallback, 12000);
     request.send(null);
     } catch (error) { fallback(); }
   };
