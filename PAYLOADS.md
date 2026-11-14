@@ -82,3 +82,12 @@ estar ativo no 9090; ELF precisa do serviço no 9021. Os controles explícitos
 de desbloqueio continuam existentes. Erros de download são diferenciados de
 erros de comunicação com o console. Essa mudança não corrige nem comprova
 a execução de binários no PS4; evita ações duplicadas após um resultado ambíguo.
+
+## Seleção sem alterar o catálogo
+
+A seleção de um arquivo legado usa uma variável local, sem substituir a
+origem moderna do catálogo. O PSVue preserva sua origem base ao preparar
+base e atualização, inclusive em cliques posteriores. Se a origem já for
+a atualização, não prepara o mesmo arquivo duas vezes. As regras de firmware
+e o processamento dos arquivos permanecem os existentes. Testes simulam
+a alternância 4.74 → 13.52 → 4.74 e seleções repetidas sem executar arquivos.

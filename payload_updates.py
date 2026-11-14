@@ -142,3 +142,28 @@ function loadAndSend(url, onDone, name, args) {
         raise ValueError('Payload download failure marker changed')
     text = text.replace(old, new, 1)
     transport.write_text(text)
+
+    # Resolve per-call paths without mutating the shared catalog across clicks/FW changes.
+    text = transport.read_text()
+    start = text.index('function payloadRouter(payload) {')
+    end = text.index('function requiresPayloadServer(', start)
+    router = '''function payloadRouter(payload) {
+    if (!payload || !isPayloadSupported(payload)) {
+        alert(window.lang.unsupportedFirmware + user.ps4Fw);
+        return;
+    }
+    if (payload.src == undefined && payload.legacySrc == undefined) {
+        Loadpayloadonline(undefined);
+        return;
+    }
+    var source = payload.src;
+    if (getPs4FwVersion() <= 4.74 && payload.legacySrc != undefined) source = payload.legacySrc;
+    Loadpayloadlocal(source, payload.name, payload.id, payload.needsPayloadLoader);
+    if (payload.id === 'PSVue' && typeof source === 'string') {
+        var updateSource = source.replace('base', '124');
+        if (updateSource !== source) Loadpayloadlocal(updateSource, payload.name, payload.id, payload.needsPayloadLoader);
+    }
+}
+
+'''
+    transport.write_text(text[:start] + router + text[end:])

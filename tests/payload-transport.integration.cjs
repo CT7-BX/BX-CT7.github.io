@@ -125,3 +125,24 @@ test('missing BIN downloads report download failure instead of restarting an exp
  const e=env();let message='';Object.assign(e.c,{user:{ip:'127.0.0.1'},window:{lang:{}},log(){},alert(text){message=text;}});
  e.c.Loadpayloadlocal('/missing.bin','Tool','Tool',false);e.requests[0].onerror({});assert.match(message,/baixar o arquivo/);assert.equal(e.requests.length,1);
 });
+test('legacy selection never mutates the catalog when changing firmware',()=>{
+ const e=env(),sent=[];let firmware='4.74';
+ Object.assign(e.c,{isPayloadSupported:()=>true,getPs4FwVersion:()=>firmware,Loadpayloadlocal(...args){sent.push(args);}});
+ const payload=Object.freeze({id:'FTP',name:'FTP',src:'/modern.bin',legacySrc:'/legacy.bin',needsPayloadLoader:true});
+ e.c.payloadRouter(payload);firmware='13.52';e.c.payloadRouter(payload);firmware='4.74';e.c.payloadRouter(payload);
+ assert.deepEqual(sent.map(x=>x[0]),['/legacy.bin','/modern.bin','/legacy.bin']);assert.equal(payload.src,'/modern.bin');assert.equal(sent[0][3],true);
+});
+test('repeated PSVue selection preserves its base URL and selects base plus update each time',()=>{
+ const e=env(),sent=[];Object.assign(e.c,{isPayloadSupported:()=>true,getPs4FwVersion:()=> '13.52',Loadpayloadlocal(path){sent.push(path);}});
+ const payload=Object.freeze({id:'PSVue',name:'PSVue',src:'/psvue-base.pkg'});
+ e.c.payloadRouter(payload);e.c.payloadRouter(payload);
+ assert.deepEqual(sent,['/psvue-base.pkg','/psvue-124.pkg','/psvue-base.pkg','/psvue-124.pkg']);assert.equal(payload.src,'/psvue-base.pkg');
+});
+test('PSVue with only an update URL cannot enqueue the same file twice',()=>{
+ const e=env(),sent=[];Object.assign(e.c,{isPayloadSupported:()=>true,getPs4FwVersion:()=> '13.52',Loadpayloadlocal(path){sent.push(path);}});
+ e.c.payloadRouter({id:'PSVue',src:'/psvue-124.pkg'});assert.deepEqual(sent,['/psvue-124.pkg']);
+});
+test('unsupported or missing catalog selections never send files',()=>{
+ const e=env();let alerts=0;Object.assign(e.c,{isPayloadSupported:()=>false,user:{ps4Fw:'13.52'},window:{lang:{unsupportedFirmware:'Unsupported '}},alert(){alerts++;},Loadpayloadlocal(){throw Error('Must not send');}});
+ e.c.payloadRouter(null);e.c.payloadRouter({src:'/wrong.bin'});assert.equal(alerts,2);
+});
