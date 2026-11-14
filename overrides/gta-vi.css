@@ -23,3 +23,5 @@ body{background-image:radial-gradient(ellipse at 15% 10%,rgba(255,91,151,.15),tr
 #settings-popup h2,#settings-popup h3{color:#ffd6e9!important}
 #settings-popup input{accent-color:#f48dbd!important}
 #settings-popup button,#close-settings{background:linear-gradient(110deg,#e887b5,#a993d8)!important;border-color:#ffc6df!important;color:#25142f!important}
+/* This button retains a dark background from the base theme: keep its text light. */
+#settings-popup #bx-dev-button{background:#241b2f!important;border-color:#b77b9f!important;color:#ffe7f2!important}
