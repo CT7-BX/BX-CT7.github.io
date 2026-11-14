@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>BX-GTA v1.1 — Preto & Vermelho — Todas as opções</title>
+<style>
+:root{color-scheme:dark;--bg:#08090b;--sidebar:#0d0d10;--panel:#121215;--elevated:#1a1a20;--border:#2b292d;--text:#f5f3f4;--muted:#99949c;--accent:#e02d38;--accentFade:#39171d;--accentEdge:#9b2730}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid #f45b62;outline-offset:2px}
+[hidden]{display:none!important}
+.layout{max-width:1480px;min-height:100vh;margin:auto;display:grid;grid-template-columns:238px minmax(0,1fr);border-right:1px solid var(--border)}
+.sidebar{background:var(--sidebar);border-right:1px solid var(--border);padding:23px 13px;min-width:0}
+.brand{display:flex;align-items:center;gap:9px;padding:7px 9px 24px}
+.logo{width:40px;height:40px;display:grid;place-items:center;background:var(--accent);color:#fff;font-size:18px;font-weight:900;letter-spacing:-.08em;border-radius:10px}
+.brand strong{font-size:20px;letter-spacing:-.05em;white-space:nowrap}
+.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.side-label{font-size:10px;color:#77717b;letter-spacing:.13em;font-weight:800;margin:18px 12px 8px}
+.nav{display:flex;width:100%;align-items:center;justify-content:space-between;text-align:left;border:0;border-radius:9px;padding:10px 12px;background:transparent;color:#b1a9b2;gap:10px}
+.nav:hover{background:#19171b;color:var(--text)}.nav.selected{color:#fff;background:var(--accentFade);box-shadow:inset 3px 0 var(--accent);font-weight:650}
+.navcount{color:#817c85;font-size:11px;font-variant-numeric:tabular-nums}
+.sidefooter{color:#706b74;font-size:11px;margin-top:30px;border-top:1px solid var(--border);padding:18px 10px}
+.page{padding:30px clamp(18px,3.5vw,55px);min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:30px;flex-wrap:wrap}
+.crumb{color:var(--accent);font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:800}
+.version{border:1px solid #47333a;border-radius:30px;padding:5px 11px;font-size:11px;color:#c4a9ae}
+h1{font-size:clamp(24px,3vw,34px);letter-spacing:-.04em;line-height:1.15;margin:0 0 10px;font-weight:760}
+.desc{color:var(--muted);font-size:13px;max-width:750px;margin:0 0 23px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-bottom:23px}
+.metric{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:15px 18px}
+.metric strong{font-size:24px;display:block;font-variant-numeric:tabular-nums}.metric span{color:var(--muted);font-size:11px}
+.metric em{color:var(--accent);font-style:normal}
+.searchrow{display:flex;gap:10px;margin:20px 0;flex-wrap:wrap}
+.search{flex:1 1 220px;min-width:0;background:var(--panel);color:var(--text);padding:12px 14px;border-radius:9px;border:1px solid var(--border)}
+.search:focus{border-color:var(--accent);outline:none}
+.btn{color:#bfb8c0;background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:10px 14px}
+.btn.on,.btn:hover{color:#fff;border-color:var(--accentEdge);background:var(--accentFade)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:650}
+.sectionhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+.sectionhead h2{font-size:17px;margin:0}.sectionhead span{color:var(--muted);font-size:11px}
+.group-tabs{display:flex;gap:8px;overflow:auto;padding-bottom:12px;margin-bottom:4px}
+.group-tabs .btn{white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.item{display:flex;align-items:flex-start;gap:6px;padding:14px;border:1px solid var(--border);border-radius:11px;background:var(--panel);min-width:0}
+.item:hover{border-color:#6b2932;background:#191519}
+.itemmain{background:none;border:0;color:var(--text);text-align:left;padding:0;min-width:0;flex:1}
+.itemmain strong{font-size:13px;font-weight:670;display:block;line-height:1.4}
+.itemmain span{color:var(--muted);display:block;font-size:11px;margin-top:4px}
+.status{font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:750;display:inline-block;padding:3px 6px;border:1px solid #3d3237;border-radius:4px;color:#a69ca3;margin-top:9px}
+.status.ready{color:#ee9da4;border-color:#70303a}
+.status.catalog{color:#e7b1b7;border-color:#63303a}
+.star{background:none;border:0;color:#756b74;font-size:22px;padding:0 2px;line-height:1.1}
+.star.active{color:var(--accent)}
+.empty{border:1px dashed #50383d;padding:30px;text-align:center;color:var(--muted);border-radius:12px;grid-column:1/-1}
+.catalogGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.catalogCard{background:var(--panel);border:1px solid var(--border);color:var(--text);text-align:left;border-radius:10px;padding:16px}
+.catalogCard:hover{border-color:var(--accent)}
+.catalogCard strong{font-size:24px;display:block}
+.catalogCard span{color:var(--muted);font-size:11px}
+.catRow{background:var(--panel);padding:12px 14px;display:flex;justify-content:space-between;border:1px solid var(--border);border-radius:9px;margin-bottom:8px;gap:12px}
+.catRow span:last-child{color:var(--muted);font-size:11px}
+.modalShade{position:fixed;inset:0;background:#000c;display:grid;place-items:center;padding:15px;z-index:10}
+.modal{background:#151115;color:var(--text);border:1px solid #622a33;border-radius:16px;padding:25px;max-width:520px;width:100%;box-shadow:0 30px 100px #000a}
+.modal h2{font-size:20px;margin:0 0 12px}.modal p{color:#baaeb3;margin:0 0 17px}
+.modalbuttons{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.notice{border-top:1px solid var(--border);padding-top:22px;margin-top:32px;font-size:11px;line-height:1.6;color:#999097}
+.succ{color:#e898a1}
+.infoLine{color:#afa5ac;font-size:12px;padding:13px 0}
+@media(max-width:950px){.grid{grid-template-columns:1fr}.layout{grid-template-columns:200px minmax(0,1fr)}}
+@media(max-width:670px){.layout{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid var(--border);padding:11px}.brand{padding:4px 3px 10px}.sidebar nav{display:flex;overflow:auto;gap:4px}.side-label,.sidefooter{display:none}.nav{width:auto;white-space:nowrap;flex:0 0 auto;padding:8px 12px}.navcount{font-size:10px}.page{padding:19px}.topbar{margin-bottom:18px}.metrics{gap:6px}.metric{padding:11px}.metric strong{font-size:20px}.metric span{font-size:10px}.catalogGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div class="layout">
+ <aside class="sidebar">
+  <div class="brand"><div class="logo">BX</div><div><strong>BX–GTA</strong><small>menu 1.1 • ps4</small></div></div>
+  <div class="side-label">Navegação</div><nav id="nav" aria-label="Seções"></nav>
+  <div class="sidefooter">L1 + Direita: abrir<br>Setas: navegar<br>X: selecionar • O: voltar<br>L1 + Esquerda: favorito<br><br>Prévia do navegador • não executa GTA V.</div>
+ </aside>
+ <main class="page">
+  <div class="topbar"><span class="crumb" id="breadcrumb">BX-GTA / TODAS AS OPÇÕES</span><span class="version">PRETO / VERMELHO • PRÉVIA INTERATIVA</span></div>
+  <h1 id="heading">Todas as funções</h1>
+  <p class="desc" id="intro">Explore a nova organização completa. Itens pendentes aparecem como pendentes, sem fingir que executam ações no GTA.</p>
+  <div class="metrics" id="metrics">
+   <div class="metric"><strong id="metricOptions">190</strong><span>Opções organizadas</span></div>
+   <div class="metric"><strong id="metricGroups">33</strong><span>Submenus</span></div>
+   <div class="metric"><strong>10<em>×</em></strong><span>Seções principais</span></div>
+  </div>
+  <div class="searchrow">
+   <input class="search" id="search" placeholder="Buscar em todas as funções... (ex.: rodas, modelo, câmera)" aria-label="Buscar funções">
+   <button class="btn on" id="filterAll">Todas</button>
+   <button class="btn" id="filterReady">Núcleo</button>
+   <button class="btn" id="filterFav">★ Favoritos</button>
+  </div>
+  <div id="content"></div>
+  <div class="notice">
+   Esta é a <strong>prévia navegável do projeto</strong>. As funções de núcleo (perfis, diagnósticos, busca e favoritos) estão implementadas na base; ações do GTA V exibidas como PLANEJADAS exigem integração. O plugin PS4 atual utiliza notificações GoldHEN e não aplica cores às notificações. O catálogo do Synapse serve de referência de organização.
+  </div>
+ </main>
+</div>
+<div id="modalShade" class="modalShade" hidden role="dialog" aria-modal="true" aria-label="Detalhes">
+ <section class="modal"><h2 id="modalTitle">Detalhe</h2><p id="modalText"></p><div class="modalbuttons" id="modalButtons"></div></section>
+</div>
+<script type="application/json" id="menu-data">{"schema":"bx-gta/menu-taxonomy-v2","version":"1.1.0","theme":"black-red","sections":[{"name":"Início","groups":[{"name":"Acesso rápido","items":[{"title":"Resumo","type":"action","action":"SUMMARY","feature":5},{"title":"Pesquisar funções","type":"action","action":"SEARCH","feature":15},{"title":"Favoritos","type":"action","action":"FAVORITES","feature":16},{"title":"Últimas opções","type":"action","action":"RECENT","feature":16},{"title":"Diagnóstico rápido","type":"action","action":"GOLDHEN","feature":5}]},{"name":"Biblioteca rápida","items":[{"title":"Veículos","type":"catalog","library":"VEHICLES","feature":-1},{"title":"Personagens","type":"catalog","library":"MODELS","feature":-1},{"title":"Objetos","type":"catalog","library":"OBJECTS","feature":-1},{"title":"Animações","type":"catalog","library":"ANIMATIONS","feature":-1},{"title":"Cenários","type":"catalog","library":"SCENARIOS","feature":-1},{"title":"Partículas","type":"catalog","library":"PARTICLES","feature":-1}]},{"name":"Atalhos","items":[{"title":"Trocar perfil","type":"action","action":"PROFILE","feature":20},{"title":"Tema preto/vermelho","type":"action","action":"THEME","feature":1},{"title":"Salvar preferências","type":"action","action":"SAVE","feature":17},{"title":"Ver CUSA","type":"action","action":"CUSA","feature":6}]}]},{"name":"Jogador","groups":[{"name":"Aparência e roupas","items":[{"title":"Conjuntos de roupa","type":"planned","feature":2},{"title":"Camisas e jaquetas","type":"planned","feature":2},{"title":"Calças e bermudas","type":"planned","feature":2},{"title":"Sapatos","type":"planned","feature":2},{"title":"Chapéus e bonés","type":"planned","feature":2},{"title":"Óculos","type":"planned","feature":2},{"title":"Máscaras","type":"planned","feature":2},{"title":"Acessórios","type":"planned","feature":2},{"title":"Salvar aparência","type":"planned","feature":12},{"title":"Carregar aparência","type":"planned","feature":12}]},{"name":"Modelos","items":[{"title":"Catálogo de personagens","type":"catalog","library":"MODELS","feature":-1},{"title":"Trocar personagem","type":"planned","feature":14},{"title":"Restaurar personagem original","type":"planned","feature":14},{"title":"Modelos favoritos","type":"planned","feature":14},{"title":"Compatibilidade de modelos","type":"planned","feature":14}]},{"name":"Animações e gestos","items":[{"title":"Catálogo de animações","type":"catalog","library":"ANIMATIONS","feature":-1},{"title":"Cenários de animação","type":"catalog","library":"SCENARIOS","feature":-1},{"title":"Gestos rápidos","type":"planned","feature":13},{"title":"Animações favoritas","type":"planned","feature":13},{"title":"Interromper animação","type":"planned","feature":13},{"title":"Prévia de animação","type":"planned","feature":13}]},{"name":"Movimento","items":[{"title":"Velocidade de caminhada","type":"planned","feature":13},{"title":"Velocidade de corrida","type":"planned","feature":13},{"title":"Altura do salto","type":"planned","feature":13},{"title":"Estilo de caminhada","type":"planned","feature":13},{"title":"Ações contextuais","type":"planned","feature":13},{"title":"Restaurar movimento","type":"planned","feature":13}]}]},{"name":"Veículos","groups":[{"name":"Catálogo e seleção","items":[{"title":"Todos os veículos","type":"catalog","library":"VEHICLES","feature":-1},{"title":"Pesquisar veículo","type":"planned","feature":3},{"title":"Veículos recentes","type":"planned","feature":3},{"title":"Veículos favoritos","type":"planned","feature":10},{"title":"Selecionar veículo","type":"planned","feature":3}]},{"name":"Oficina e pintura","items":[{"title":"Cor primária","type":"planned","feature":8},{"title":"Cor secundária","type":"planned","feature":8},{"title":"Acabamento da pintura","type":"planned","feature":8},{"title":"Rodas","type":"planned","feature":8},{"title":"Cor das rodas","type":"planned","feature":8},{"title":"Pneus","type":"planned","feature":8},{"title":"Vidros","type":"planned","feature":8},{"title":"Faróis","type":"planned","feature":8},{"title":"Luzes decorativas","type":"planned","feature":8},{"title":"Placa","type":"planned","feature":8},{"title":"Buzina","type":"planned","feature":8}]},{"name":"Desempenho","items":[{"title":"Motor","type":"planned","feature":8},{"title":"Freios","type":"planned","feature":8},{"title":"Transmissão","type":"planned","feature":8},{"title":"Suspensão","type":"planned","feature":8},{"title":"Turbo","type":"planned","feature":8},{"title":"Aderência","type":"planned","feature":8},{"title":"Restaurar desempenho","type":"planned","feature":8}]},{"name":"Utilidades","items":[{"title":"Reparar veículo","type":"planned","feature":9},{"title":"Limpar veículo","type":"planned","feature":9},{"title":"Colocar veículo no chão","type":"planned","feature":9},{"title":"Ligar/desligar motor","type":"planned","feature":9},{"title":"Trancar/destrancar portas","type":"planned","feature":9},{"title":"Abrir/fechar portas","type":"planned","feature":9},{"title":"Velocímetro","type":"planned","feature":11}]},{"name":"Garagem","items":[{"title":"Salvar veículo","type":"planned","feature":10},{"title":"Carregar veículo","type":"planned","feature":10},{"title":"Garagem por categoria","type":"planned","feature":10},{"title":"Favoritos da garagem","type":"planned","feature":10},{"title":"Presets de personalização","type":"planned","feature":10},{"title":"Excluir preset","type":"planned","feature":10}]}]},{"name":"Mapa","groups":[{"name":"Teleporte","items":[{"title":"Ir ao marcador","type":"planned","feature":4},{"title":"Ir a coordenadas","type":"planned","feature":4},{"title":"Voltar à posição anterior","type":"planned","feature":4},{"title":"Locais predefinidos","type":"planned","feature":4},{"title":"Locais favoritos","type":"planned","feature":25},{"title":"Salvar local atual","type":"planned","feature":25}]},{"name":"Marcadores","items":[{"title":"Criar marcador","type":"planned","feature":27},{"title":"Renomear marcador","type":"planned","feature":27},{"title":"Excluir marcador","type":"planned","feature":27},{"title":"Mostrar marcadores","type":"planned","feature":27},{"title":"Organizar favoritos","type":"planned","feature":25}]},{"name":"Rotas e pontos","items":[{"title":"Salvar rota","type":"planned","feature":25},{"title":"Carregar rota","type":"planned","feature":25},{"title":"Ponto inicial","type":"planned","feature":27},{"title":"Ponto final","type":"planned","feature":27},{"title":"Restaurar mapa","type":"planned","feature":27}]}]},{"name":"Mundo","groups":[{"name":"Clima e horário","items":[{"title":"Ensolarado","type":"planned","feature":26},{"title":"Nublado","type":"planned","feature":26},{"title":"Chuva","type":"planned","feature":26},{"title":"Nevoeiro","type":"planned","feature":26},{"title":"Hora do dia","type":"planned","feature":26},{"title":"Hora da noite","type":"planned","feature":26},{"title":"Congelar horário","type":"planned","feature":26},{"title":"Restaurar clima","type":"planned","feature":26}]},{"name":"Ambiente","items":[{"title":"Densidade de tráfego","type":"planned","feature":26},{"title":"Densidade de pedestres","type":"planned","feature":26},{"title":"Iluminação ambiente","type":"planned","feature":26},{"title":"Gravidade ambiente","type":"planned","feature":26},{"title":"Ondas do mar","type":"planned","feature":26},{"title":"Restaurar ambiente","type":"planned","feature":26}]},{"name":"Objetos e efeitos","items":[{"title":"Catálogo de objetos","type":"catalog","library":"OBJECTS","feature":-1},{"title":"Partículas e efeitos","type":"catalog","library":"PARTICLES","feature":-1},{"title":"Gerenciar objetos","type":"planned","feature":26},{"title":"Limpar objetos de sessão","type":"planned","feature":26},{"title":"Presets de cenário","type":"planned","feature":26}]}]},{"name":"Câmera e visual","groups":[{"name":"Câmera livre","items":[{"title":"Ativar câmera livre","type":"planned","feature":24},{"title":"Velocidade da câmera","type":"planned","feature":24},{"title":"Campo de visão (FOV)","type":"planned","feature":24},{"title":"Altura e distância","type":"planned","feature":24},{"title":"Salvar posição","type":"planned","feature":24},{"title":"Restaurar câmera","type":"planned","feature":24}]},{"name":"Cinematografia","items":[{"title":"Preset cinematográfico","type":"planned","feature":21},{"title":"Movimento suave","type":"planned","feature":21},{"title":"Enquadramento","type":"planned","feature":21},{"title":"Transições","type":"planned","feature":21},{"title":"Salvar preset","type":"planned","feature":21},{"title":"Carregar preset","type":"planned","feature":21}]},{"name":"Filtros","items":[{"title":"Filtro neutro","type":"planned","feature":22},{"title":"Filtro cinematográfico","type":"planned","feature":22},{"title":"Contraste","type":"planned","feature":22},{"title":"Saturação","type":"planned","feature":22},{"title":"Brilho","type":"planned","feature":22},{"title":"Restaurar filtros","type":"planned","feature":22}]},{"name":"HUD e painel","items":[{"title":"Ocultar HUD","type":"planned","feature":23},{"title":"Restaurar HUD","type":"planned","feature":23},{"title":"Elementos da tela","type":"planned","feature":23},{"title":"Painel gráfico integrado","type":"planned","feature":0},{"title":"Posição do painel","type":"planned","feature":0},{"title":"Escala do painel","type":"planned","feature":0}]}]},{"name":"Biblioteca","groups":[{"name":"Catálogos","items":[{"title":"Veículos (20 categorias)","type":"catalog","library":"VEHICLES","feature":-1},{"title":"Personagens (7 grupos)","type":"catalog","library":"MODELS","feature":-1},{"title":"Objetos (13 grupos)","type":"catalog","library":"OBJECTS","feature":-1},{"title":"Animações","type":"catalog","library":"ANIMATIONS","feature":-1},{"title":"Cenários","type":"catalog","library":"SCENARIOS","feature":-1},{"title":"Partículas","type":"catalog","library":"PARTICLES","feature":-1}]},{"name":"Organização","items":[{"title":"Pesquisa no catálogo","type":"action","action":"SEARCH","feature":15},{"title":"Favoritos","type":"action","action":"FAVORITES","feature":16},{"title":"Histórico","type":"action","action":"RECENT","feature":16},{"title":"Importar presets","type":"planned","feature":17},{"title":"Exportar presets","type":"planned","feature":17}]}]},{"name":"Configurações","groups":[{"name":"Aparência do menu","items":[{"title":"Tema preto e vermelho","type":"action","action":"THEME","feature":1},{"title":"Tom de vermelho","type":"action","action":"ACCENT","feature":1},{"title":"Transparência do painel","type":"planned","feature":0},{"title":"Tamanho da fonte","type":"planned","feature":0},{"title":"Tamanho do painel","type":"planned","feature":0},{"title":"Posição na tela","type":"planned","feature":0},{"title":"Efeito de entrada","type":"planned","feature":0}]},{"name":"Perfis","items":[{"title":"Alternar perfil","type":"action","action":"PROFILE","feature":20},{"title":"Salvar configuração","type":"action","action":"SAVE","feature":17},{"title":"Recarregar configuração","type":"action","action":"LOAD","feature":17},{"title":"Renomear perfil","type":"planned","feature":20},{"title":"Duplicar perfil","type":"planned","feature":20},{"title":"Restaurar padrão","type":"planned","feature":20}]},{"name":"Navegação","items":[{"title":"Mostrar controles","type":"action","action":"HELP","feature":15},{"title":"Personalizar atalho","type":"planned","feature":15},{"title":"Velocidade de rolagem","type":"planned","feature":15},{"title":"Som de seleção","type":"planned","feature":15},{"title":"Favoritos automáticos","type":"planned","feature":16}]},{"name":"Extensões","items":[{"title":"Scripts Lua","type":"planned","feature":19},{"title":"Gerenciador de scripts","type":"planned","feature":19},{"title":"Permissões do servidor","type":"planned","feature":18},{"title":"Verificar compatibilidade externa","type":"planned","feature":18}]}]},{"name":"Diagnóstico","groups":[{"name":"Estado do sistema","items":[{"title":"Status GoldHEN","type":"action","action":"GOLDHEN","feature":5},{"title":"Identificar CUSA e versão","type":"action","action":"CUSA","feature":6},{"title":"Resumo do plugin","type":"action","action":"SUMMARY","feature":5},{"title":"Teste de notificações","type":"action","action":"NOTIFY","feature":5}]},{"name":"Logs e testes","items":[{"title":"Registrar teste no log","type":"action","action":"LOG","feature":7},{"title":"Mostrar controles","type":"action","action":"HELP","feature":15},{"title":"Relatório completo","type":"planned","feature":7},{"title":"Exportar diagnóstico","type":"planned","feature":7}]},{"name":"Manutenção","items":[{"title":"Salvar preferências","type":"action","action":"SAVE","feature":17},{"title":"Recarregar preferências","type":"action","action":"LOAD","feature":17},{"title":"Teste de painel gráfico","type":"planned","feature":0},{"title":"Verificar adaptador GTA","type":"planned","feature":0}]}]},{"name":"Servidor privado","groups":[{"name":"Informações","items":[{"title":"Estado da conexão","type":"planned","feature":18},{"title":"Permissões disponíveis","type":"planned","feature":18},{"title":"Identificar servidor","type":"planned","feature":18},{"title":"Modos autorizados","type":"planned","feature":18}]},{"name":"Integração autorizada","items":[{"title":"API do servidor","type":"planned","feature":18},{"title":"Solicitar permissão","type":"planned","feature":18},{"title":"Logs de permissões","type":"planned","feature":18},{"title":"Desativar integração","type":"planned","feature":18}]}]}]}</script>
+<script>
+'use strict';
+const data=JSON.parse(document.getElementById("menu-data").textContent);
+const sections=data.sections;
+const state={section:-1,group:-1,search:"",filter:"all",favorites:new Set(),recent:[],profile:0,shade:0,catalog:null};
+const redShades=["#e02d38","#cf2637","#f34b54","#ae1826","#eb5860","#ff747d"];
+const catalogs={
+ VEHICLES:{name:"Veículos",groups:[["Super",71],["Esportivos",98],["Clássicos",47],["Muscle",76],["Sedãs",43],["Coupés",15],["Compactos",23],["SUV",48],["Off-road",57],["Vans",32],["Emergência",21],["Serviço",29],["Militares",22],["Motos",58],["Bicicletas",7],["Comerciais",43],["Helicópteros",28],["Aviões",40],["Barcos",26],["Trailers",28]]},
+ MODELS:{name:"Personagens",groups:[["História",98],["Ambiente",67],["Gangues",23],["Serviços",33],["Únicos",22],["Animais",30],["Multiplayer",2]]},
+ OBJECTS:{name:"Objetos",groups:[["Rampas",16],["Acrobacias",23],["Skate",7],["Arena",6],["Barreiras",21],["Pneus",4],["Containers",13],["Itens",12],["Cenografia",7],["Lazer",12],["Móveis",23],["Máquinas",21],["Diversos",7]]},
+ ANIMATIONS:{name:"Animações",groups:[["Animações",204]]},SCENARIOS:{name:"Cenários",groups:[["Cenários",134]]},PARTICLES:{name:"Partículas",groups:[["Partículas",197]]}
+};
+const $=id=>document.getElementById(id);
+const elem=(tag,cls,value)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(value!==undefined)e.textContent=value;return e};
+const esc=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const all=()=>sections.flatMap((s,si)=>s.groups.flatMap((g,gi)=>g.items.map((item,index)=>({...item,si,gi,index,key:si+":"+gi+":"+index,section:s.name,group:g.name}))));
+const optionList=all();
+function modal(title,text,controls){
+ $("modalTitle").textContent=title;$("modalText").textContent=text;
+ const buttons=$("modalButtons");buttons.replaceChildren();
+ if(controls)for(const c of controls)buttons.append(button(c[0],c[1]));
+ buttons.append(button("Fechar",closeModal));$("modalShade").hidden=false;
+}
+function closeModal(){$("modalShade").hidden=true}
+$("modalShade").addEventListener("click",e=>{if(e.target===$("modalShade"))closeModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+function button(label,fn,cls){const b=elem("button",cls||"btn",label);b.type="button";b.onclick=fn;return b}
+function showSection(index){state.section=index;state.group=-1;state.catalog=null;state.search="";$("search").value="";refresh()}
+function nav(){
+ const n=$("nav");n.replaceChildren();
+ const names=["Todas as funções",...sections.map(s=>s.name)];
+ for(let i=0;i<names.length;i++){
+  const idx=i-1,b=button(names[i],()=>showSection(idx),"nav"+(state.section===idx?" selected":""));
+  b.append(elem("span","navcount",i===0?String(optionList.length):String(sections[idx].groups.reduce((v,g)=>v+g.items.length,0))));
+  n.append(b);
+ }
+}
+function clickItem(item){
+ state.recent=[item.key,...state.recent.filter(x=>x!==item.key)].slice(0,8);
+ if(item.type==="catalog"){
+  state.catalog=item.library;refresh();return;
+ }
+ if(item.type==="planned"){
+  modal(item.title,"Essa opção está organizada no menu, mas ainda não tem um adaptador funcional de GTA V 1.57 (CUSA00419). Nenhuma mudança será realizada no jogo.");
+  return;
+ }
+ const action=item.action;
+ if(action==="THEME"){state.shade=(state.shade+1)%redShades.length;document.documentElement.style.setProperty("--accent",redShades[state.shade]);modal(item.title,"Nova variação de vermelho selecionada para esta prévia. O plugin PS4 ainda usa notificações do GoldHEN.");return}
+ if(action==="ACCENT"){state.shade=(state.shade+1)%redShades.length;document.documentElement.style.setProperty("--accent",redShades[state.shade]);modal(item.title,"Tom vermelho alterado para esta prévia.");return}
+ if(action==="PROFILE"){state.profile=(state.profile+1)%3;modal(item.title,"Perfil da prévia: "+(state.profile+1)+" de 3. Configuração do PS4 é independente.");return}
+ if(action==="SEARCH"){$("search").focus();$("search").scrollIntoView({block:"center",behavior:"smooth"});return}
+ if(action==="FAVORITES"){state.section=-1;state.filter="favorites";refresh();return}
+ if(action==="RECENT"){state.section=-1;state.filter="recent";refresh();return}
+ if(action==="SAVE"){
+  try{localStorage.setItem("bx-gta-v11",JSON.stringify({favorites:[...state.favorites],shade:state.shade,profile:state.profile}));modal("Preferências salvas","Dados da prévia salvos apenas neste navegador, não no PS4.");}
+  catch{modal("Erro","O navegador bloqueou o armazenamento local.")}
+  return;
+ }
+ if(action==="LOAD"){
+  try{const v=JSON.parse(localStorage.getItem("bx-gta-v11"));if(v){state.favorites=new Set(v.favorites||[]);state.shade=Number(v.shade||0)%redShades.length;state.profile=Number(v.profile||0)%3;document.documentElement.style.setProperty("--accent",redShades[state.shade]);refresh();modal("Configuração carregada","Preferências da prévia recuperadas.");}else modal("Sem dados","Nenhum perfil salvo nesta prévia.");}catch{modal("Erro","Não foi possível abrir as configurações salvas.")}
+  return;
+ }
+ const descriptions={
+ SUMMARY:"O projeto possui 10 seções, 33 submenus e 190 entradas. Ações de jogo ainda requerem integração.",
+ CUSA:"O plugin verifica CUSA00419 e GTA V 1.57/01.57 no carregamento.",
+ GOLDHEN:"O plugin contém diagnósticos de carregamento. A versão exata do GoldHEN não é verificada.",
+ LOG:"O plugin utiliza /data/GoldHEN/BXGTA/error.log para registrar eventos.",
+ HELP:"L1 + Direita abre; setas navegam; X confirma; O volta; L1 + Esquerda marca favoritos.",
+ NOTIFY:"Teste visual nesta prévia. O plugin mostra notificações pelo sistema do PS4."
+ };
+ modal(item.title,descriptions[action]||"Função disponível apenas no protótipo do menu.");
+}
+function itemCard(item){
+ const root=elem("div","item"), main=button(" ",()=>clickItem(item),"itemmain");
+ main.replaceChildren();main.append(elem("strong","",item.title),elem("span","",item.section+" / "+item.group));
+ const status=elem("span","status"+(item.type==="action"?" ready":item.type==="catalog"?" catalog":""),item.type==="action"?"NÚCLEO":item.type==="catalog"?"CATÁLOGO":"PLANEJADO");
+ main.append(status);
+ const fav=button(state.favorites.has(item.key)?"★":"☆",()=>{state.favorites.has(item.key)?state.favorites.delete(item.key):state.favorites.add(item.key);refresh()},"star"+(state.favorites.has(item.key)?" active":""));
+ fav.setAttribute("aria-label","Favoritar "+item.title);
+ root.append(main,fav);return root;
+}
+function renderCatalog(){
+ const c=catalogs[state.catalog];if(!c){state.catalog=null;refresh();return}
+ $("heading").textContent="Biblioteca / "+c.name;
+ const wrapper=$("content");wrapper.replaceChildren();wrapper.append(button("← Voltar",()=>{state.catalog=null;refresh()},"btn"));
+ const line=elem("p","infoLine",c.groups.length+" grupos • "+c.groups.reduce((n,g)=>n+g[1],0)+" referências do Synapse. Não executa ações no GTA.");wrapper.append(line);
+ const grid=elem("div","catalogGrid");c.groups.forEach(([title,count])=>{
+  const card=button("",()=>modal(title,count+" referências catalogadas no arquivo fornecido. Selecionar este grupo não modifica o jogo."),"catalogCard");
+  card.append(elem("span","",title),elem("strong","",String(count)),elem("span","","nomes cadastrados"));grid.append(card);
+ });wrapper.append(grid);
+}
+function refresh(){
+ nav();
+ $("metrics").hidden=state.section!==-1;
+ $("heading").textContent=state.section===-1?"Todas as funções":sections[state.section].name;
+ $("breadcrumb").textContent="BX-GTA / "+(state.section===-1?"TODAS AS OPÇÕES":sections[state.section].name.toUpperCase());
+ const groupRow=$("content");groupRow.replaceChildren();
+ if(state.catalog){renderCatalog();return}
+ const q=esc(state.search);
+ let pool=optionList.filter(it=>state.section===-1||it.si===state.section);
+ if(state.section>=0 && !q && state.group>=0)pool=pool.filter(it=>it.gi===state.group);
+ if(q)pool=pool.filter(it=>esc([it.title,it.group,it.section].join(" ")).includes(q));
+ if(state.filter==="ready")pool=pool.filter(it=>it.type==="action");
+ if(state.filter==="favorites")pool=pool.filter(it=>state.favorites.has(it.key));
+ if(state.filter==="recent")pool=pool.filter(it=>state.recent.includes(it.key));
+ $("filterAll").classList.toggle("on",state.filter==="all");
+ $("filterReady").classList.toggle("on",state.filter==="ready");
+ $("filterFav").classList.toggle("on",state.filter==="favorites");
+ if(state.section>=0 && !q){
+  const tabs=elem("div","group-tabs");
+  tabs.append(button("Todas",()=>{state.group=-1;refresh()},"btn"+(state.group===-1?" on":"")));
+  sections[state.section].groups.forEach((g,gi)=>tabs.append(button(g.name+" · "+g.items.length,()=>{state.group=gi;refresh()},"btn"+(state.group===gi?" on":""))));
+  groupRow.append(tabs);
+ }
+ const head=elem("div","sectionhead");head.append(elem("h2","","Funções e opções"),elem("span","",pool.length+" de "+optionList.length+" entradas"));groupRow.append(head);
+ const grid=elem("div","grid");pool.forEach(it=>grid.append(itemCard(it)));if(!pool.length)grid.append(elem("div","empty","Nenhuma opção encontrada. Experimente outra busca ou filtro."));groupRow.append(grid);
+}
+$("search").addEventListener("input",e=>{state.search=e.target.value;state.group=-1;refresh()});
+$("filterAll").onclick=()=>{state.filter="all";refresh()};
+$("filterReady").onclick=()=>{state.filter="ready";refresh()};
+$("filterFav").onclick=()=>{state.filter="favorites";refresh()};
+$("metricOptions").textContent=optionList.length;
+$("metricGroups").textContent=sections.reduce((n,s)=>n+s.groups.length,0);
+refresh();
+</script>
+</body>
+</html>
