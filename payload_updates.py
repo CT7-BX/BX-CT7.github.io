@@ -77,3 +77,9 @@ function loadAndSend(url, onDone, name, args) {
 
 '''
     target.write_text(text[:start] + elf + text[end:])
+
+    recovery = 'includes/js/host-return.js'
+    (root / recovery).write_bytes((Path(__file__).parent / 'overrides/host-return.js').read_bytes())
+    update('index.html', '</body>', '<script src="./includes/js/host-return.js"></script>\n</body>')
+    for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
+        manifest.write_text(manifest.read_text().replace('CACHE:', 'CACHE:\n../../../' + recovery, 1))

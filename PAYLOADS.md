@@ -43,3 +43,13 @@ falha de envio, timeout, cancelamento e resposta tardia. Também conferem
 seleção por firmware, retorno à versão 13, hashes e presença offline.
 Respostas HTTP de sucesso confirmam transporte, não a execução do payload.
 Não houve teste físico nem comprovação de desbloqueio no PS4.
+
+## Retorno à interface
+
+A conclusão mantém o processamento original e restaura as seções escondidas
+pelo controlador do host. Ao voltar pelo histórico, a rolagem é recolocada
+no início. Uma posição que ultrapassa a altura da página também é corrigida.
+Não há reenvio, nova tentativa automática ou mudança da detecção de sucesso.
+Durante uma cadeia ativa, o retorno não interfere na interface. Essa correção
+cobre o estado oculto encontrado no código; a foto não permite confirmar
+outras causas de falha de renderização do navegador do PS4.

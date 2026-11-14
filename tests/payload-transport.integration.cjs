@@ -53,3 +53,9 @@ test('new binary matches pinned source and every existing GoldHEN cache includes
   const text=fs.readFileSync('dist/includes/caches/manifest/'+file,'utf8');if(text.includes('goldhen_v2.4b18.13'))assert.match(text,/goldhen_v2\.4b18\.14.bin/);
  }
 });
+
+test('return recovery is included once in the page and available in all offline manifests',()=>{
+ const html=fs.readFileSync('dist/index.html','utf8');assert.equal((html.match(/src=".\/includes\/js\/host-return.js"/g)||[]).length,1);
+ assert.equal(fs.readFileSync('dist/includes/js/host-return.js','utf8'),fs.readFileSync('overrides/host-return.js','utf8'));
+ for(const name of fs.readdirSync('dist/includes/caches/manifest'))if(name.endsWith('.manifest'))assert.match(fs.readFileSync('dist/includes/caches/manifest/'+name,'utf8'),/includes\/js\/host-return.js/);
+});
