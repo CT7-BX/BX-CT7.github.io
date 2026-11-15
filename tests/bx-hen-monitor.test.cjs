@@ -191,3 +191,16 @@ test('completed XHR with status zero reports a connection failure and keeps prio
   assert.equal(env.get('bx-monitor-runs').children.length, 1);
   assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
 });
+
+test('invalid run identifiers never replace the last valid report', () => {
+  const env = environment();
+  env.requests[0].respond(200, report([run(321)]));
+  for (const invalidId of [0, -1, 1.5, '123', null]) {
+    env.refresh();
+    env.requests[env.requests.length - 1].respond(200, report([run(invalidId)]));
+    assert.equal(env.get('bx-monitor-runs').children.length, 1);
+    assert.match(env.get('bx-monitor-runs').children[0].children[0].children[0].textContent, /321/);
+    assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+    assert.match(env.get('bx-monitor-status').textContent, /Não foi possível ler/);
+  }
+});
