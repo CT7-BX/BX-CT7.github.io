@@ -170,6 +170,10 @@ def apply_gta_theme(root, source):
     data = (source / 'gta-vi.css').read_bytes()
     (root / css).write_bytes(data)
     reference = css + '?v=' + hashlib.sha256(data).hexdigest()[:16]
+    coverage = 'includes/css/theme-coverage.css'
+    coverage_data = (source / 'theme-coverage.css').read_bytes()
+    (root / coverage).write_bytes(coverage_data)
+    coverage_reference = coverage + '?v=' + hashlib.sha256(coverage_data).hexdigest()[:16]
     choice = 'includes/js/theme-choice.js'
     choice_data = (source / 'theme-choice.js').read_bytes()
     (root / choice).write_bytes(choice_data)
@@ -201,10 +205,24 @@ def apply_gta_theme(root, source):
         raise ValueError('Disabled payload option markup changed')
     html = html.replace("if (typeof setAdvancedPayloads === 'function') {", "if (document.documentElement.getAttribute('data-bx-payload-catalog') !== 'disabled' && typeof setAdvancedPayloads === 'function') {", 1)
 
-    index.write_text(html.replace('</head>', '<link rel="stylesheet" id="bx-theme-stylesheet" href="./' + reference + '">\n<script src="./' + choice_reference + '"></script>\n</head>', 1), encoding='utf-8')
+    index.write_text(html.replace('</head>', '<link rel="stylesheet" id="bx-theme-stylesheet" href="./' + reference + '">\n<link rel="stylesheet" href="./' + coverage_reference + '">\n<script src="./' + choice_reference + '"></script>\n</head>', 1), encoding='utf-8')
+    # Every host-facing page shares the same preference; unrelated BX-GTA stays independent.
+    import posixpath
+    for page_name in ('cache.html', 'exploit.html', 'bx-hen/store/index.html'):
+        page = root / page_name
+        page_html = page.read_text(encoding='utf-8')
+        if page_html.count('</head>') != 1:
+            raise ValueError('Theme page insertion point changed: ' + page_name)
+        prefix = posixpath.relpath('.', posixpath.dirname(page_name) or '.') + '/'
+        links = ('<link rel="stylesheet" id="bx-theme-stylesheet" href="' + prefix + reference + '">\n'
+                 '<link rel="stylesheet" href="' + prefix + coverage_reference + '">\n'
+                 '<script src="' + prefix + choice_reference + '"></script>\n')
+        if page_name.endswith('store/index.html'):
+            page_html = page_html.replace('<body>', '<body data-bx-page="store">', 1)
+        page.write_text(page_html.replace('</head>', links + '</head>', 1), encoding='utf-8')
     for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         text = manifest.read_text(encoding='utf-8')
         if text.count('CACHE:') != 1:
             raise ValueError('Theme cache insertion point changed')
         text = text.replace('../../../' + minimal + '\n', '../../../' + minimal_reference + '\n')
-        manifest.write_text(text.replace('CACHE:', 'CACHE:\n../../../' + reference + '\n../../../' + choice_reference, 1), encoding='utf-8')
+        manifest.write_text(text.replace('CACHE:', 'CACHE:\n../../../' + reference + '\n../../../' + coverage_reference + '\n../../../' + choice_reference, 1), encoding='utf-8')

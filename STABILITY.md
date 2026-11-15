@@ -142,3 +142,13 @@ as páginas de prévia. As opções e o atalho para a aba Avançado são ocultos
 quando o catálogo está desativado; a inicialização não força essa preferência.
 O teclado do diagnóstico continua preso apenas aos controles disponíveis.
 O relatório de escopo e os limites estão em [REVIEW.md](REVIEW.md).
+
+## Cobertura de aparência do host
+
+A preferência Original/GTA VI também cobre diagnóstico, Sobre, personalização,
+seleção de temperatura, cache, página mínima e loja. Uma folha compartilhada
+altera apenas pintura e cores, com caminhos relativos e revisão por conteúdo.
+O controlador lê a mesma preferência nas páginas conectadas, antes do corpo.
+Os manifestos incluem o novo arquivo para uso offline. Os iframes de cache são
+internos e a antiga entrada BX-HEN redireciona ao host; a prévia BX-GTA mantém
+sua identidade própria por ser um protótipo separado.

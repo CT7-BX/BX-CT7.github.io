@@ -283,6 +283,7 @@ def main():
     # The original host intentionally supports HTTP payload-server navigation.
     check_html('index.html', allow_http=True)
     check_html('cache.html')
+    check_html('exploit.html', allow_http=True)
     check_html("bx-hen/index.html")
     check_html("bx-hen/store/index.html")
     check_html("bx-gta/index.html")
