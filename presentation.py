@@ -195,6 +195,12 @@ def apply_gta_theme(root, source):
             </div>
             '''
     html = html.replace(anchor, controls + anchor, 1)
+    advanced_label = re.compile(r'(<label class=")([^"]*)(">\s*<input type="checkbox" id="advancedPayloadsInput")')
+    html, count = advanced_label.subn(lambda m: m[1] + m[2] + ' hidden' + m[3], html)
+    if count != 1:
+        raise ValueError('Disabled payload option markup changed')
+    html = html.replace("if (typeof setAdvancedPayloads === 'function') {", "if (document.documentElement.getAttribute('data-bx-payload-catalog') !== 'disabled' && typeof setAdvancedPayloads === 'function') {", 1)
+
     index.write_text(html.replace('</head>', '<link rel="stylesheet" id="bx-theme-stylesheet" href="./' + reference + '">\n<script src="./' + choice_reference + '"></script>\n</head>', 1), encoding='utf-8')
     for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
         text = manifest.read_text(encoding='utf-8')

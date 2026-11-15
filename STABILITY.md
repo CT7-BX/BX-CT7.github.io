@@ -134,3 +134,11 @@ falhar, o seletor informa a falha e usa Original temporariamente sem apagar
 a preferência salva. Uma opção que não carregou não é anunciada como aplicada.
 Eventos de armazenamento da sessão não alteram a preferência de aparência.
 A troca de tema não executa navegação nem altera foco, rolagem, HEN ou firmware.
+
+## Auditoria de todos os fontes
+
+A verificação abrange os arquivos versionados, os scripts gerados do host e
+as páginas de prévia. As opções e o atalho para a aba Avançado são ocultos
+quando o catálogo está desativado; a inicialização não força essa preferência.
+O teclado do diagnóstico continua preso apenas aos controles disponíveis.
+O relatório de escopo e os limites estão em [REVIEW.md](REVIEW.md).

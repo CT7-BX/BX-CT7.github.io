@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-function environment() {
+function environment(options = {}) {
   function node(tag) {
     return { tag, children: [], textContent: '', style: {},
       appendChild(n) { this.children.push(n); return n; },
@@ -18,7 +18,7 @@ function environment() {
   body.appendChild(state); body.appendChild(log);
   const all = (n = body) => [n, ...n.children.flatMap(c => all(c))];
   const listeners = {};
-  const document = { addEventListener(name, fn) { listeners[name] = fn; }, readyState: 'complete', body, createElement: node,
+  const document = { documentElement: { getAttribute() { return options.catalogDisabled ? 'disabled' : null; } }, addEventListener(name, fn) { listeners[name] = fn; }, readyState: 'complete', body, createElement: node,
     getElementById(id) { return all().find(n => n.id === id) || null; }, execCommand() { return false; } };
   const window = { localStorage: { getItem() { return null; } } };
   const context = { window, document, localStorage: window.localStorage,
@@ -90,4 +90,12 @@ test('dialog restores scrolling and resets stale copy announcements when reopene
   env.window.bxOpenDiagnostics(); // Opening twice must preserve original overflow.
   assert.match(env.document.getElementById('bx-dev-note').textContent,/Nada é enviado/);
   env.window.bxCloseDiagnostics();assert.equal(env.body.style.overflow,'auto');
+});
+
+test('disabled catalog has no dead Advanced shortcut and keyboard focus stays in the diagnostic dialog',()=>{
+ const e=environment({catalogDisabled:true});e.window.bxOpenDiagnostics();
+ assert.equal(e.all().some(n=>n.textContent==='Abrir aba Avançado'),false);
+ const close=e.all().find(n=>n.textContent==='Fechar ✕'),copy=e.all().find(n=>n.textContent==='Copiar diagnóstico');
+ e.document.activeElement=close;e.listeners.keydown({keyCode:9,shiftKey:true,preventDefault(){}});assert.equal(e.document.activeElement,copy);
+ e.listeners.keydown({keyCode:9,shiftKey:false,preventDefault(){}});assert.equal(e.document.activeElement,close);
 });

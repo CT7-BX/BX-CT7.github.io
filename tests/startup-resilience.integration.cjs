@@ -47,3 +47,9 @@ test('malformed URL input cannot abort startup or accidentally activate test mod
 test('popup close buttons announce their actual action',()=>{
  for(const id of ['close-settings','close-about'])assert.match(html,new RegExp('<button aria-label="Fechar"[^>]*id="'+id+'"'));
 });
+
+test('hidden catalog option is not exposed or forcibly enabled during startup',()=>{
+ const html=fs.readFileSync('dist/index.html','utf8');
+ assert.match(html,/<label class="[^"]*hidden[^\"]*">\s*<input type="checkbox" id="advancedPayloadsInput"/);
+ assert.match(html,/if \(document\.documentElement\.getAttribute\('data-bx-payload-catalog'\) !== 'disabled' && typeof setAdvancedPayloads/);
+});

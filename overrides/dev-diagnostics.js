@@ -113,7 +113,7 @@
         fill();
         var report = el('bx-dev-report');
         if (report) { report.value = ''; report.style.display = 'none'; }
-        txt(el('bx-dev-note'), 'Se o nexHEN não concluir, copie o diagnóstico após a falha. Nada é enviado automaticamente.');
+        txt(el('bx-dev-note'), 'Se o processo não concluir, copie o diagnóstico após a falha. Nada é enviado automaticamente.');
         panel.setAttribute('aria-hidden', 'false');
         panel.style.display = 'flex';
         if (closeControl) closeControl.focus();
@@ -174,7 +174,8 @@
             var screen = el('exploit-main-screen');
             if (screen && screen.scrollIntoView) screen.scrollIntoView();
         };
-        actions.appendChild(advanced);
+        var catalogDisabled = document.documentElement && document.documentElement.getAttribute('data-bx-payload-catalog') === 'disabled';
+        if (!catalogDisabled) actions.appendChild(advanced);
         card.appendChild(actions);
         var report = document.createElement('textarea');
         report.id = 'bx-dev-report';
@@ -186,7 +187,7 @@
         note.className = 'bx-dev-warning';
         note.setAttribute('role', 'status');
         note.setAttribute('aria-live', 'polite');
-        txt(note, 'Se o nexHEN não concluir, copie o diagnóstico após a falha. Nada é enviado automaticamente.');
+        txt(note, 'Se o processo não concluir, copie o diagnóstico após a falha. Nada é enviado automaticamente.');
         card.appendChild(note);
         overlay.appendChild(card);
         overlay.onclick = function (event) { if (event.target === overlay) window.bxCloseDiagnostics(); };
@@ -196,7 +197,7 @@
             var key = event.keyCode || event.which;
             if (key === 27) { event.preventDefault(); window.bxCloseDiagnostics(); return; }
             if (key !== 9) return;
-            var first = close, last = report.style.display === 'block' ? report : advanced;
+            var first = close, last = report.style.display === 'block' ? report : (catalogDisabled ? copy : advanced);
             if (event.shiftKey && document.activeElement === first) {
                 event.preventDefault(); last.focus();
             } else if (!event.shiftKey && document.activeElement === last) {

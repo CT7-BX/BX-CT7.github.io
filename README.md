@@ -104,14 +104,15 @@ Se o processo não terminar, abra Configurações → Diagnóstico do Host /
 Desenvolvedor → Copiar diagnóstico. O relatório local inclui payload selecionado,
 estado e as últimas mensagens do host, sem enviar dados automaticamente.
 Revise o relatório antes de compartilhar. Após atualizar o site, use Atualizar
-cache com a rede disponível para receber a correção do cache do nexHEN.
+agora com a rede disponível para receber a correção do cache do nexHEN.
 
 
 ## Integração nativa e atualizações do WebKitty
 
 O firmware 14.00 usa a cadeia Slopkit Afterglow integrada ao WebKitty na própria
-interface BX-CT7. A construção não baixa mais o repositório Afterglow separado
-nem redireciona para outra página de entrada. O nome e os créditos da técnica
+interface BX-CT7. Para 14.00, a construção usa a cópia fixada no WebKitty e não redireciona
+para outra página de entrada. O perfil 14.02 importa componentes separados
+e revisados, conforme [FW1402.md](FW1402.md). O nome e os créditos da técnica
 continuam preservados; esta integração não representa um exploit independente.
 A revisão integrada mantém 13.52 em Relapse, conforme o upstream.
 
@@ -180,3 +181,11 @@ O suporte foi acrescentado como perfil isolado, sem atualização geral da base
 nem mudança do visual. Veja [FW1402.md](FW1402.md) para componentes, hashes,
 cache e limites dos testes. Os 167 arquivos originais de exploração e payloads
 permanecem intactos; o novo firmware usa cópias separadas e revisadas.
+
+## Revisão completa dos arquivos
+
+Veja [REVIEW.md](REVIEW.md) para o escopo da auditoria atual, as correções,
+os componentes preservados e os limites dos testes. As configurações atuais
+oferecem Original e GTA VI; a área inferior de payloads permanece desativada.
+Os comandos e notas de integrações anteriores acima são históricos e não
+comprovam execução física ou compatibilidade de todos os payloads.

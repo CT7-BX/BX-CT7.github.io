@@ -3,6 +3,7 @@
 
 Local syntax/integrity checks are not proof of PS4 compatibility.
 """
+import ast
 import hashlib
 import json
 import pathlib
@@ -65,6 +66,9 @@ class PageInspector(HTMLParser):
         self.scripts = []
         self.in_script = False
         self.script_buffer = []
+        self.script_type = ""
+        self.json_scripts = []
+        self.module_scripts = set()
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -77,6 +81,7 @@ class PageInspector(HTMLParser):
         if tag == "script" and not attrs.get("src"):
             self.in_script = True
             self.script_buffer = []
+            self.script_type = attrs.get("type", "").strip().lower()
 
     def handle_data(self, data):
         if self.in_script:
@@ -84,7 +89,13 @@ class PageInspector(HTMLParser):
 
     def handle_endtag(self, tag):
         if tag == "script" and self.in_script:
-            self.scripts.append("".join(self.script_buffer))
+            source = "".join(self.script_buffer)
+            if self.script_type == 'application/json' or self.script_type.endswith('+json'):
+                self.json_scripts.append(source)
+            elif self.script_type in ('', 'module', 'text/javascript', 'application/javascript', 'text/ecmascript', 'application/ecmascript'):
+                if self.script_type == 'module':
+                    self.module_scripts.add(len(self.scripts))
+                self.scripts.append(source)
             self.in_script = False
 
 
@@ -100,13 +111,15 @@ def check_html(rel, allow_http=False):
             check(url.scheme == "https" or (allow_http and url.scheme == "http"),
                   "Non-HTTPS external link in " + rel + ": " + ref)
             continue
-        dest = (path.parent / url.path).resolve()
+        dest = (path.parent / unquote(url.path)).resolve()
         check(dest == SITE.resolve() or SITE.resolve() in dest.parents, "Reference escapes site: " + ref)
         check(dest.is_file() or (dest.is_dir() and (dest / "index.html").is_file()),
               "Missing local reference " + ref + " in " + rel)
-    for script in parsed.scripts:
+    for data in parsed.json_scripts:
+        json.loads(data)
+    for position, script in enumerate(parsed.scripts):
         if script.strip():
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".js", encoding="utf-8") as tmp:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".mjs" if position in parsed.module_scripts else ".js", encoding="utf-8") as tmp:
                 tmp.write(script)
                 tmp.flush()
                 subprocess.run(["node", "--check", tmp.name], check=True, capture_output=True, text=True)
@@ -222,7 +235,42 @@ def check_upstream_integrity():
               'Protected file checksum mismatch: ' + name)
 
 
+
+def check_repository_sources():
+    """Check every tracked text source without running application or payload code."""
+    result = subprocess.run(['git', 'ls-files', '-z'], cwd=ROOT, check=True, capture_output=True)
+    files = [pathlib.Path(name.decode('utf-8')) for name in result.stdout.split(b'\0') if name]
+    # Include newly added sources before the first commit too.
+    extra = subprocess.run(['git', 'ls-files', '--others', '--exclude-standard', '-z'], cwd=ROOT, check=True, capture_output=True)
+    files += [pathlib.Path(name.decode('utf-8')) for name in extra.stdout.split(b'\0') if name]
+    count = 0
+    for rel in sorted(set(files)):
+        path = ROOT / rel
+        if not path.is_file():
+            continue
+        source = path.read_text(encoding='utf-8')
+        if path.suffix == '.py':
+            ast.parse(source, filename=str(rel))
+        elif path.suffix in ('.js', '.cjs', '.mjs'):
+            subprocess.run(['node', '--check', str(path)], check=True, capture_output=True, text=True)
+        elif path.suffix == '.json':
+            json.loads(source)
+        elif path.suffix == '.html':
+            parsed = PageInspector()
+            parsed.feed(source)
+            for data in parsed.json_scripts:
+                json.loads(data)
+            for position, script in enumerate(parsed.scripts):
+                if script.strip():
+                    with tempfile.NamedTemporaryFile(mode='w', suffix='.mjs' if position in parsed.module_scripts else '.js', encoding='utf-8') as tmp:
+                        tmp.write(script); tmp.flush()
+                        subprocess.run(['node', '--check', tmp.name], check=True, capture_output=True, text=True)
+        count += 1
+    print('Repository text sources inspected:', count)
+
+
 def main():
+    check_repository_sources()
     for rel in CHECK_FILES + JS_ASSETS:
         path = ROOT / rel
         check(path.is_file(), "Missing " + rel)
@@ -237,8 +285,12 @@ def main():
     check_html('cache.html')
     check_html("bx-hen/index.html")
     check_html("bx-hen/store/index.html")
-    for rel in JS_ASSETS:
-        subprocess.run(["node", "--check", str(ROOT / rel)], check=True, capture_output=True, text=True)
+    check_html("bx-gta/index.html")
+    check_html("bx-gta/preview-v2.html")
+    generated_scripts = {ROOT / rel for rel in JS_ASSETS}
+    generated_scripts.update((SITE / "includes/js").rglob("*.js"))
+    for script_path in sorted(generated_scripts):
+        subprocess.run(["node", "--check", str(script_path)], check=True, capture_output=True, text=True)
     check_catalog()
     check_upstream_integrity()
     print("BX-HEN verification: syntax, UTF-8, LF line breaks, references and catalog OK")
@@ -250,4 +302,6 @@ if __name__ == "__main__":
         main()
     except (OSError, ValueError, subprocess.CalledProcessError) as exc:
         print("BX-HEN verification failed:", exc, file=sys.stderr)
+        if isinstance(exc, subprocess.CalledProcessError) and exc.stderr:
+            print(exc.stderr[-2000:], file=sys.stderr)
         sys.exit(1)
