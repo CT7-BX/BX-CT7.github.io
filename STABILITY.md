@@ -126,3 +126,11 @@ A preferência é salva localmente; bloqueio do armazenamento informa a falha
 sem impedir a troca. Mudanças são sincronizadas entre abas do mesmo navegador.
 A folha GTA e o controlador estão disponíveis no cache offline com revisão
 por conteúdo. A troca não muda layout, firmware, HEN ou payload selecionado.
+
+## Robustez dos temas
+
+As configurações informam o nome do tema ativo ao reabrir. Se a folha GTA VI
+falhar, o seletor informa a falha e usa Original temporariamente sem apagar
+a preferência salva. Uma opção que não carregou não é anunciada como aplicada.
+Eventos de armazenamento da sessão não alteram a preferência de aparência.
+A troca de tema não executa navegação nem altera foco, rolagem, HEN ou firmware.

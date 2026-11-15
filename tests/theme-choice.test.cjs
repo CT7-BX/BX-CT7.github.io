@@ -1,6 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 function env(options={}){
- const events={},windowEvents={},attributes={},sheet={},feedback={textContent:''},values={};
+ const events={},windowEvents={},attributes={},sheet=options.missingSheet?{sheet:null}:{},feedback={textContent:''},values={};
  if(options.saved!==undefined)values['bx-appearance-v1']=options.saved;
  const radios=[{name:'bx-appearance',value:'original'},{name:'bx-appearance',value:'gta'}];
  const document={readyState:options.loading?'loading':'complete',documentElement:{setAttribute(k,v){attributes[k]=v;}},
@@ -29,4 +29,23 @@ test('invalid preferences and unrelated controls cannot affect the theme',()=>{
 test('storage changes synchronize other tabs without saving back',()=>{
  const e=env({writeBlocked:true});e.windowEvents.storage({key:'bx-appearance-v1',newValue:'original'});assert.equal(e.sheet.media,'not all');
  e.windowEvents.storage({key:'other',newValue:'gta'});assert.equal(e.sheet.media,'not all');e.windowEvents.storage({key:null,newValue:null});assert.equal(e.sheet.media,'all');
+});
+
+test('current theme is announced by name when reopening',()=>{
+ const e=env({saved:'original'});assert.equal(e.feedback.textContent,'Tema atual: Original.');
+ e.choose('gta');assert.match(e.feedback.textContent,/GTA VI aplicado e salvo/);
+});
+test('failed GTA stylesheet falls back honestly without overwriting the saved preference',()=>{
+ const e=env({saved:'gta'});e.sheet.onerror();assert.equal(e.sheet.media,'not all');assert.equal(e.radios[0].checked,true);
+ assert.match(e.feedback.textContent,/não carregou/);assert.equal(e.values['bx-appearance-v1'],'gta');
+ e.choose('gta');assert.equal(e.sheet.media,'not all');assert.equal(e.radios[0].checked,true);assert.doesNotMatch(e.feedback.textContent,/aplicado e salvo/);
+ e.choose('original');assert.match(e.feedback.textContent,/Original aplicado e salvo/);
+});
+test('early stylesheet failure survives DOM initialization and session-storage events are ignored',()=>{
+ const e=env({loading:true,saved:'gta'});e.sheet.onerror();e.events.DOMContentLoaded();assert.match(e.feedback.textContent,/não carregou/);
+ e.windowEvents.storage({key:null,newValue:null,storageArea:{}});assert.equal(e.sheet.media,'not all');
+});
+
+test('already-failed stylesheet is detected even when its error fired before the script loaded',()=>{
+ const e=env({saved:'gta',missingSheet:true});assert.equal(e.sheet.media,'not all');assert.equal(e.radios[0].checked,true);assert.match(e.feedback.textContent,/não carregou/);
 });
