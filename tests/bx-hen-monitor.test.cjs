@@ -204,3 +204,21 @@ test('invalid run identifiers never replace the last valid report', () => {
     assert.match(env.get('bx-monitor-status').textContent, /Não foi possível ler/);
   }
 });
+
+
+test('oversized and non-array reports cannot replace the last valid history', () => {
+  const env = environment();
+  env.requests[0].respond(200, report([run(321)]));
+  const invalidReports = [
+    JSON.stringify({ runs: Array.from({ length: 31 }, (_, i) => run(i + 1)) }),
+    JSON.stringify({ runs: { 0: run(123), length: 1 } }),
+  ];
+  for (const invalidReport of invalidReports) {
+    env.refresh();
+    env.requests[env.requests.length - 1].respond(200, invalidReport);
+    assert.equal(env.get('bx-monitor-runs').children.length, 1);
+    assert.match(env.get('bx-monitor-runs').children[0].children[0].children[0].textContent, /321/);
+    assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+    assert.match(env.get('bx-monitor-status').textContent, /Não foi possível ler/);
+  }
+});
