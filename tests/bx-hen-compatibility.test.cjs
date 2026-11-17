@@ -88,3 +88,11 @@ test('compatibility report accepts canonical two-digit PS4 versions only', () =>
     if(expected === '14.02')assert.equal(report['Alvo 13.53'], 'não confirmado');
   }
 });
+
+
+test('WebGL is unavailable rather than blocked when an old browser lacks canvas getContext', () => {
+  const storage={getItem(){return null;},setItem(){},removeItem(){}};
+  const result=values(testPage(storage));
+  assert.equal(result.WebGL,'indisponível');
+  assert.equal(result['Canvas 2D'],'indisponível');
+});

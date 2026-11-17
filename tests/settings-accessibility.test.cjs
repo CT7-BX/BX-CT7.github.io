@@ -36,3 +36,11 @@ test('empty settings controls keep Tab focus inside the dialog',()=>{
  let prevented=false;e.events.keydown({keyCode:9,preventDefault(){prevented=true;}});
  assert.equal(prevented,true);assert.equal(e.document.activeElement,e.panel);
 });
+
+
+test('diagnostic controls maintain controller-friendly touch targets and keyboard focus',()=>{
+ const css=fs.readFileSync('overrides/bx-hen-site/extras.css','utf8');
+ assert.match(css,/\.bx-mini\s*\{min-height:44px;min-width:44px\}/);
+ assert.match(css,/\.bx-mini:focus/);
+ assert.match(css,/outline:2px solid #4af0ff/);
+});

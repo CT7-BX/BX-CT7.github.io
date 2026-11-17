@@ -20,7 +20,7 @@
    catch(e){return 'bloqueado';}
  }
  function testWebGL() {
-   try{var c=document.createElement('canvas');return (c.getContext('webgl')||c.getContext('experimental-webgl'))?'disponível':'indisponível';}
+   try{var c=document.createElement('canvas');if(typeof c.getContext!=='function')return 'indisponível';return (c.getContext('webgl')||c.getContext('experimental-webgl'))?'disponível':'indisponível';}
    catch(e){return 'bloqueado';}
  }
  function run() {

@@ -182,3 +182,20 @@ test('invalid live and cached catalogs terminate without repeating requests', ()
   assert.equal(env.timers.size, 0);
   assert.match(env.nodes.status.textContent, /interpretado/);
 });
+
+
+test('catalog search input and fragment parameters are bounded for old WebKit', () => {
+  assert.match(html,/id="search" type="search" maxlength="160"/);
+  const env=environment({hash:'#q='+'x'.repeat(4000)});
+  assert.equal(env.nodes.search.value.length,160);
+  env.requests[0].respond(catalog([item({title:'Not a match'})]));
+  assert.equal(env.nodes.items.children.length,1);
+  assert.match(env.nodes.items.children[0].textContent,/Nenhum aplicativo/);
+});
+
+test('normal encoded search fragments still work with bounded decoding', () => {
+  const env=environment({hash:'#q=Hello%20world'});
+  assert.equal(env.nodes.search.value,'Hello world');
+  env.requests[0].respond(catalog([item({title:'Hello world'})]));
+  assert.equal(env.nodes.items.children[0].children[0].textContent,'Hello world');
+});
