@@ -271,3 +271,18 @@ Não há alterações de host, firmware, payload, kernel ou GoldHEN.
   ignora respostas antigas e mantém o último relatório válido diante de falhas.
 - O resumo do monitor usa singular e plural corretos, com testes para as duas
   formas. Nenhum payload, carregador ou componente do kernel foi modificado.
+
+
+## Rodada adicional de resiliência de interface (PS4 WebKit)
+
+- A consulta de release.json rejeita respostas acima de 16 KiB antes de
+  analisar o JSON e ignora notificações duplicadas de rede enquanto já existe
+  uma verificação pendente. Um erro não aciona atualização automaticamente.
+- A página de progresso de cache cancela o redirecionamento automático ao
+  sair da página, evitando um retorno tardio inesperado após a navegação ou
+  restauração pelo histórico. A conclusão fica disponível e o usuário pode
+  selecionar Voltar ao site manualmente.
+- Os cards Homebrew limitam descrição, URL e licença para evitar criar DOM
+  excessivo ou apresentar metadados malformados como downloads confirmados.
+- Regressões simuladas verificam os limites, eventos de navegação e resposta
+  atrasada. Testes locais/CI não substituem execução física no console.
