@@ -186,3 +186,16 @@ O workflow pode concluir a **verificação** com êxito mesmo quando a proposta
 conflitos exige revisão manual de bytes, hashes e compatibilidade, sem desligar
 as proteções de sobrescrita. Candidatos sem colisão continuam sujeitos a
 reconstrução, testes, verificação de integridade e revisão humana.
+
+
+
+## Limite de tempo independente para o monitor
+
+O histórico do GitHub Actions usa tanto o timeout nativo do XHR quanto um
+temporizador independente de 12 segundos. Caso o WebKit antigo não dispare
+`ontimeout`, a interface interrompe a consulta, libera o estado de carregamento
+e preserva o último histórico válido. Atualizações manuais cancelam a requisição
+e o temporizador antigos; retornos tardios não substituem resultados recentes.
+Os testes automatizados cobrem tempo esgotado, respostas tardias, falha HTTP,
+erro de rede e exceção ao enviar a consulta. Isso não envolve payloads nem
+teste de desbloqueio no PS4.
