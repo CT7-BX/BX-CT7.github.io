@@ -7,10 +7,11 @@
  function add(p,t,c) { var x=document.createElement(t); if(c)x.className=c;p.appendChild(x);return x; }
  function set(x,t) { if(x)x.textContent=String(t); }
  function testStorage(kind) {
-   var s;try { s=window[kind]; if(!s)return 'indisponível';
-     var k='bx-hen-compatibility-probe';s.setItem(k,'ok');var good=s.getItem(k)==='ok';s.removeItem(k);
+   var s,k='bx-hen-compatibility-probe-'+new Date().getTime()+'-'+Math.random().toString(36).slice(2);
+   try {s=window[kind];if(!s)return 'indisponível';
+     s.setItem(k,'ok');var good=s.getItem(k)==='ok';s.removeItem(k);
      return good?'operacional':'falhou';
-   } catch(e) {return 'bloqueado';}
+   } catch(e) {if(s){try{s.removeItem(k);}catch(ignore){}}return 'bloqueado';}
  }
  function testCanvas() {
    try{var c=document.createElement('canvas');return typeof c.getContext==='function'&&!!c.getContext('2d')?'operacional':'indisponível';}

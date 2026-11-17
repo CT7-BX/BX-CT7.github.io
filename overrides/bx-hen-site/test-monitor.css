@@ -17,3 +17,8 @@
 /* Larger touch targets and visible keyboard focus for PS4 controller and phones. */
 .bx-monitor-summary button,.bx-monitor-row a{min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:8px 12px}
 .bx-monitor-row a:focus,.bx-monitor-summary button:focus{outline:2px solid #4af0ff;outline-offset:2px}
+
+/* Keyboard/PS4 D-pad access to the scrollable history; reset h2 default spacing. */
+.bx-monitor>.box-title{margin:0}
+.bx-monitor-list:focus{outline:2px solid #4af0ff;outline-offset:2px}
+.bx-monitor-description small{word-wrap:break-word}

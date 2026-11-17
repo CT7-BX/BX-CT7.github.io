@@ -152,3 +152,20 @@ O controlador lê a mesma preferência nas páginas conectadas, antes do corpo.
 Os manifestos incluem o novo arquivo para uso offline. Os iframes de cache são
 internos e a antiga entrada BX-HEN redireciona ao host; a prévia BX-GTA mantém
 sua identidade própria por ser um protótipo separado.
+
+## Robustez do monitor e acessibilidade no navegador
+
+O Test Monitor é apenas um visor de relatórios públicos do GitHub Actions:
+não executa jailbreak, não se comunica com o kernel e não confirma HEN ativo.
+A lista de execuções pode receber foco para rolagem por teclado/controle,
+anuncia quando uma consulta está em andamento e preserva o histórico válido
+quando a rede falha ou os dados recebidos são inválidos. Respostas maiores
+que 128 Ki caracteres e campos de metadados excessivos são rejeitados antes
+da atualização visual, reduzindo o risco de travamento no WebKit antigo.
+
+No Centro de Compatibilidade, os controles têm área mínima de 44 px e foco
+visível. Os testes de armazenamento usam chaves temporárias distintas e
+removem suas próprias chaves; não devem substituir dados preexistentes.
+Os testes automatizados simulam essas condições em navegador fictício.
+A usabilidade física com DualShock e a permanência do cache no PS4 ainda
+precisam de confirmação no console real.

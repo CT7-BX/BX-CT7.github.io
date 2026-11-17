@@ -222,3 +222,46 @@ test('oversized and non-array reports cannot replace the last valid history', ()
     assert.match(env.get('bx-monitor-status').textContent, /Não foi possível ler/);
   }
 });
+
+
+test('history is a focusable, labelled region and announces pending requests', () => {
+  const env = environment();
+  const monitor = env.get('bx-monitor');
+  const history = env.get('bx-monitor-runs');
+  assert.equal(monitor.children[0].tagName, 'h2');
+  assert.equal(monitor.attributes['aria-labelledby'], 'bx-monitor-heading');
+  assert.equal(history.attributes.role, 'region');
+  assert.equal(history.attributes.tabindex, '0');
+  assert.match(history.attributes['aria-label'], /Histórico/);
+  assert.equal(history.attributes['aria-busy'], 'true');
+  env.requests[0].respond(200, report([run(123)]));
+  assert.equal(history.attributes['aria-busy'], 'false');
+  env.refresh();
+  assert.equal(history.attributes['aria-busy'], 'true');
+  env.requests[1].respond(503, '');
+  assert.equal(history.attributes['aria-busy'], 'false');
+  assert.equal(history.children.length, 1);
+});
+
+test('oversized responses cannot freeze or overwrite a previously valid history', () => {
+  const env = environment();
+  env.requests[0].respond(200, report([run(321)]));
+  env.refresh();
+  env.requests[1].respond(200, 'x'.repeat(131073));
+  assert.match(env.get('bx-monitor-status').textContent, /maior que o limite/);
+  assert.equal(env.get('bx-monitor-runs').attributes['aria-busy'], 'false');
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+});
+
+test('unreasonably long CI fields are rejected without losing prior results', () => {
+  const env = environment();
+  env.requests[0].respond(200, report([run(321)]));
+  const bad = run(999);
+  bad.commit = 'a'.repeat(129);
+  env.refresh();
+  env.requests[1].respond(200, report([bad]));
+  assert.match(env.get('bx-monitor-status').textContent, /Não foi possível ler/);
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+});
