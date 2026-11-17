@@ -112,3 +112,34 @@ test('experimental browser diagnostic tolerates denied storage without removing 
   assert.equal(runBrowserDiagnostic(storage), 'Bloqueado pelo navegador');
   assert.equal(removals, 0);
 });
+
+
+function detectBrowserFirmware(ua) {
+  const window = {};
+  const document = {readyState:'loading',addEventListener() {}};
+  vm.runInNewContext(browserDiagnostic, {window,document,Date,Math,navigator:{userAgent:ua}},
+    {filename:'bx-hen-browser.js',timeout:1000});
+  return window.bxHen01.detect(ua);
+}
+
+test('browser diagnostics accept exact PS4 version format without claiming jailbreak', () => {
+  for(const [ua, fw, target] of [
+    ['Mozilla (PlayStation 4/13.53) WebKit','13.53',true],
+    ['Mozilla (PlayStation 4/14.00) WebKit','14.00',false],
+    ['Mozilla (PlayStation 4/14.02) WebKit','14.02',false],
+    ['Mozilla (PlayStation 4/15.00) WebKit','15.00',false],
+  ]) {
+    const result = detectBrowserFirmware(ua);
+    assert.equal(result.detected,true,ua);
+    assert.equal(result.firmware,fw);
+    assert.equal(result.target,target);
+  }
+});
+test('browser diagnostics reject truncated, overlong or non-PS4 firmware strings', () => {
+  for(const ua of [
+    'PlayStation 4/13.5', 'PlayStation 4/14.0',
+    'PlayStation 4/14.002', 'PlayStation 4/14.02x', 'Firefox/14.02',
+  ]) {
+    assert.equal(detectBrowserFirmware(ua).detected,false,ua);
+  }
+});
