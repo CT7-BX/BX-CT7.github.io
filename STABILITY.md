@@ -169,3 +169,20 @@ removem suas próprias chaves; não devem substituir dados preexistentes.
 Os testes automatizados simulam essas condições em navegador fictício.
 A usabilidade física com DualShock e a permanência do cache no PS4 ainda
 precisam de confirmação no console real.
+
+
+## Verificação prévia de colisões nas revisões WebKitty
+
+Antes de alterar o pin de uma revisão candidata, `scripts/upstream_update.py`
+consulta a árvore completa do WebKitty e confere os caminhos reservados pelos
+componentes fixados de firmware 14.02, GoldHEN e demais adicionais. Se houver
+colisão, a proposta é marcada **BLOQUEADA**, `build.py` permanece intacto,
+nenhuma PR automática é aberta e o resumo/artefato do Actions registra os
+caminhos em conflito. Árvores incompletas ou inválidas também impedem a
+aprovação automática.
+
+O workflow pode concluir a **verificação** com êxito mesmo quando a proposta
+é bloqueada: isso NÃO significa nova versão aprovada ou publicada. Resolver
+conflitos exige revisão manual de bytes, hashes e compatibilidade, sem desligar
+as proteções de sobrescrita. Candidatos sem colisão continuam sujeitos a
+reconstrução, testes, verificação de integridade e revisão humana.

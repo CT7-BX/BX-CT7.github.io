@@ -25,7 +25,7 @@ class UpstreamPinTests(unittest.TestCase):
                 module.replace_pin(value, 'b'*40)
 
 
-    def run_candidate(self, latest, comparison=None):
+    def run_candidate(self, latest, comparison=None, tree=None):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
@@ -34,6 +34,8 @@ class UpstreamPinTests(unittest.TestCase):
         replies = [{'sha': latest}]
         if comparison is not None:
             replies.append(comparison)
+            if comparison.get('status') == 'ahead' and len(comparison.get('files', [])) < 300:
+                replies.append(tree if tree is not None else {'truncated': False, 'tree': []})
         with mock.patch.object(module, 'ROOT', root), mock.patch.object(module, 'fetch', side_effect=replies), \
              mock.patch('sys.argv', ['upstream_update.py']), mock.patch.dict(module.os.environ, {'GITHUB_OUTPUT':str(root/'output')}):
             module.main()
@@ -57,3 +59,38 @@ class UpstreamPinTests(unittest.TestCase):
         for comparison in [{'status':'diverged','files':[]}, {'status':'ahead','files':[{}]*300}]:
             with self.assertRaises(ValueError):
                 self.run_candidate('b'*40, comparison)
+
+    def test_pinned_targets_include_current_goldhen_and_isolated_fw1402(self):
+        targets = module.addon_targets()
+        self.assertIn('includes/payloads/HEN/goldhen_v2.4b18.14.bin', targets)
+        self.assertIn('includes/payloads/HEN/PS4HEN_fw1402.bin', targets)
+        self.assertIn('src/kpatches/1402.bin', targets)
+
+    def test_existing_upstream_component_blocks_candidate_before_mutating_build(self):
+        path = 'includes/payloads/HEN/goldhen_v2.4b18.14.bin'
+        comparison = {'status': 'ahead', 'files': [{'filename': path, 'status': 'added'}]}
+        tree = {'truncated': False, 'tree': [{'path': path, 'type': 'blob'}]}
+        root, original = self.run_candidate('b'*40, comparison, tree)
+        self.assertEqual((root/'build.py').read_text(), original)
+        self.assertIn('changed=false', (root/'output').read_text())
+        self.assertIn('blocked=true', (root/'output').read_text())
+        report = (root/'upstream-review.md').read_text()
+        self.assertIn('BLOQUEADO', report)
+        self.assertIn(path, report)
+        self.assertIn('NÃO foi aplicada', report)
+        self.assertEqual((root/'upstream-candidate.txt').read_text(), 'b'*40+'\n')
+
+    def test_incomplete_upstream_tree_fails_closed(self):
+        comparison = {'status': 'ahead', 'files': [{'filename': 'README.md'}]}
+        for tree in ({'truncated': True, 'tree': []}, {'tree': []},
+                     {'truncated': False, 'tree': [{'bad': 'entry'}]}):
+            with self.assertRaises(ValueError):
+                self.run_candidate('b'*40, comparison, tree)
+
+    def test_nonconflicting_candidate_still_runs_full_validation(self):
+        comparison = {'status': 'ahead', 'files': [{'filename': 'README.md'}]}
+        tree = {'truncated': False, 'tree': [{'path': 'README.md', 'type': 'blob'}]}
+        root, original = self.run_candidate('b'*40, comparison, tree)
+        self.assertNotEqual((root/'build.py').read_text(), original)
+        self.assertIn('changed=true', (root/'output').read_text())
+        self.assertIn('blocked=false', (root/'output').read_text())
