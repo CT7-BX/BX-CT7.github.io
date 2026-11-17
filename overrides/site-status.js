@@ -1,5 +1,5 @@
-/* ES5 release check on opening and every 10 seconds, including hidden tabs.
- * Background timer delivery remains subject to browser throttling.
+/* ES5 release check on opening and every 10 seconds while the page is visible.
+ * Hidden pages suspend checks to save resources on the PS4 WebKit.
  * Updates only after an explicit button click.
  * Never executes payloads or changes the original PS4 cache implementation. */
 (function () {
@@ -21,7 +21,7 @@
             if (active) { try { active.abort(); } catch (ignore) {} active = null; }
         }
         function start() {
-            if (timer !== null || updating) return;
+            if (timer !== null || updating || document.hidden) return;
             stopped = false;
             check();
             timer = window.setInterval(check, 10000);
@@ -39,7 +39,7 @@
                  navigator.onLine === true ? 'Conexão informada: online' : 'Rede não informada');
         }
         function check() {
-            if (stopped || updating) return;
+            if (stopped || updating || document.hidden) return;
             var current = ++serial, done = false;
             clearWatchdog();
             if (active) { try { active.abort(); } catch (ignore) {} }
@@ -127,6 +127,10 @@
                 timer = window.setInterval(check, 10000);
             }
         };
+        window.addEventListener('visibilitychange', function () {
+            if (document.hidden) stop();
+            else if (!updating) start();
+        }, false);
         window.addEventListener('online', check, false);
         window.addEventListener('offline', check, false);
         window.addEventListener('pagehide', stop, false);
