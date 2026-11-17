@@ -20,7 +20,7 @@
     if (pos < 0) return out;
     out.isPS4 = true;
     var text = ua.substring(pos + 'PlayStation 4'.length);
-    var m = text.match(/^[\/ ]([0-9]{1,2})\.([0-9]{1,2})(?=$|[); \/])/);
+    var m = text.match(/^[\/ ]([0-9]{1,2})\.([0-9]{2})(?=$|[); \/])/);
     if (!m) return out;
     var major = Number(m[1]), minor = Number(m[2]);
     out.detected = true;
