@@ -102,11 +102,11 @@ test('connection loss before click prevents update and missing PS4 cache target 
   assert.equal(missing.reloads, 0);
 });
 
-test('checks immediately and on each 10-second tick without resetting visible status', () => {
+test('checks immediately and on each 30-second tick without resetting visible status', () => {
   const env = environment();
   assert.equal(env.requests.length, 1);
   assert.equal(env.intervals.length, 1);
-  assert.equal(env.intervals[0].delay, 10000);
+  assert.equal(env.intervals[0].delay, 30000);
   current(env); const message = env.message();
   env.tick(); assert.equal(env.requests.length, 2);
   assert.equal(env.title(), 'Versão mais recente');
@@ -203,7 +203,7 @@ test('starting update stops polling even if the browser has not navigated yet', 
   assert.equal(env.cacheClicks, 1);
 });
 
-test('unchanged results do not rewrite live-region text every 10 seconds', () => {
+test('unchanged results do not rewrite live-region text every 30 seconds', () => {
   const env = environment(); current(env);
   const node = env.nodes['bx-site-message'];
   let value = node.textContent, writes = 0;
@@ -224,7 +224,7 @@ test('failed update navigation restores polling and offers a manual retry', () =
   }
 });
 
-test('browser history restore after an update resumes the 10-second checks once', () => {
+test('browser history restore after an update resumes the 30-second checks once', () => {
   const env=environment({ps4:true});newer(env);env.update();env.events.pagehide();
   assert.equal(env.intervals.filter(t=>!t.cleared).length,0);
   env.events.pageshow({persisted:true});
