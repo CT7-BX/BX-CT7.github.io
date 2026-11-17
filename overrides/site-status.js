@@ -1,4 +1,4 @@
-/* ES5 release check on opening and every 10 seconds while the page is visible.
+/* ES5 release check on opening and every 30 seconds while the page is visible.
  * Hidden pages suspend checks to save resources on the PS4 WebKit.
  * Updates only after an explicit button click.
  * Never executes payloads or changes the original PS4 cache implementation. */
@@ -24,7 +24,7 @@
             if (timer !== null || updating || document.hidden) return;
             stopped = false;
             check();
-            timer = window.setInterval(check, 10000);
+            timer = window.setInterval(check, 30000);
         }
         function state(name, title, detail) {
             available = name === 'available';
@@ -124,7 +124,7 @@
                 state('available', 'Não foi possível iniciar a atualização',
                       'A atualização continua disponível. Tente novamente.');
                 // Restore polling without immediately replacing the useful error.
-                timer = window.setInterval(check, 10000);
+                timer = window.setInterval(check, 30000);
             }
         };
         document.addEventListener('visibilitychange', function () {
