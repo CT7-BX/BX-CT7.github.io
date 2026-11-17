@@ -106,3 +106,27 @@ test('navigation and real errors cancel the idle deadline; history resumes waiti
  e.send({type:'CACHE_ERROR'});assert.equal(e.idleTimers[1].cleared,true);
  const message=e.nodes.cacheStatus.textContent;e.idleTimers[1].fn();assert.equal(e.nodes.cacheStatus.textContent,message);
 });
+
+
+test('out-of-order cache progress never reverses the percentage or aria state', () => {
+  const e=environment();e.send({type:'CACHE_PROGRESS',percent:79});
+  const notice=e.nodes.cacheStatus.textContent;
+  e.send({type:'CACHE_PROGRESS',percent:34});
+  assert.equal(e.nodes.progressFill.style.width,'79%');
+  assert.equal(e.nodes['bx-cache-progress'].attributes['aria-valuenow'],'79');
+  assert.equal(e.nodes.cacheStatus.textContent,notice);
+  e.send({type:'CACHE_PROGRESS',percent:91});
+  assert.equal(e.nodes.progressFill.style.width,'91%');
+  assert.equal(e.nodes['bx-cache-progress'].attributes['aria-valuenow'],'91');
+});
+
+test('100 percent download progress never reports completed offline cache before confirmation', () => {
+  const e=environment();
+  e.send({type:'CACHE_PROGRESS',percent:100});
+  assert.equal(e.nodes.progressFill.style.width,'100%');
+  assert.equal(e.timers.length,0);
+  assert.doesNotMatch(e.nodes.cacheStatus.textContent,/Cache atualizado/);
+  e.send({type:'CACHE_COMPLETE'});
+  assert.match(e.nodes.cacheStatus.textContent,/Cache atualizado/);
+  assert.equal(e.timers.length,1);
+});
