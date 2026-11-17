@@ -258,3 +258,16 @@ Não há alterações de host, firmware, payload, kernel ou GoldHEN.
   do cache, que exige evento específico da página controlada.
 - Testes de regressão simulam instabilidade, respostas grandes, atualização
   de catálogo e eventos atrasados, sem execução de payloads ou kernel.
+
+
+## Monitor de histórico e identificação de firmware
+
+- O diagnóstico de firmware do navegador e o Centro de Compatibilidade passam
+  a exigir dois dígitos após o ponto no User-Agent do PS4. Versões como
+  `14.0` ou `13.005` não são apresentadas como versões canônicas; detectar
+  `14.02` não significa afirmar que o desbloqueio funcione no console.
+- O monitor de CI cancela consulta e temporizador ao sair da página. Ao voltar
+  pelo histórico do navegador com a página restaurada, ele consulta uma vez,
+  ignora respostas antigas e mantém o último relatório válido diante de falhas.
+- O resumo do monitor usa singular e plural corretos, com testes para as duas
+  formas. Nenhum payload, carregador ou componente do kernel foi modificado.
