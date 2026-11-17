@@ -104,3 +104,23 @@ test('catalog ignores unreasonably long item titles', () => {
   e.requests[0].respond({schema_version:1,items:[{id:'java',title:'x'.repeat(161)}]});
   assert.equal(e.container.children.length,2);
 });
+
+
+test('oversized card descriptions are rejected instead of freezing the PS4 browser', () => {
+  const e=environment();e.render();
+  e.requests[0].respond({schema_version:1,items:[{id:'java',title:'Java',description:'x'.repeat(601)}]});
+  assert.equal(e.container.children.length,2);
+  assert.ok(e.all().some(n=>n.textContent==='PKG ainda não disponibilizado — sem instalador'));
+});
+
+test('available badge requires reasonably bounded download and license metadata', () => {
+  for (const field of ['download_url','license']) {
+    const e=environment();e.render();
+    const record={id:'java',title:'Java',description:'Valid',status:'available',
+      download_url:'https://example.test/program.pkg',sha256:'a'.repeat(64),license:'MIT'};
+    record[field]=field==='license'?'x'.repeat(81):'https://example.test/'+'x'.repeat(2100);
+    e.requests[0].respond({schema_version:1,items:[record]});
+    assert.equal(e.container.children.length,1);
+    assert.ok(e.all().some(n=>n.textContent==='PKG ainda não disponibilizado — sem instalador'));
+  }
+});
