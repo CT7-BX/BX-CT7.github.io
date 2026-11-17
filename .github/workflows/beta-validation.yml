@@ -28,6 +28,8 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Build pinned public upstream
         run: python3 build.py
+      - name: Inventory offline assets without running AppCache
+        run: python3 diagnostics/cache_inventory.py
       - name: Verify routing, offline files and browser integration
         run: node --test tests/*.integration.cjs
       - name: Verify generated static site
