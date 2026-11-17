@@ -6,6 +6,11 @@ on:
     paths:
       - 'bx-hen/**'
       - '.github/workflows/bx-hen-checks.yml'
+  pull_request:
+    branches: [bx-hen-01353]
+    paths:
+      - 'bx-hen/**'
+      - '.github/workflows/bx-hen-checks.yml'
 permissions:
   contents: read
 jobs:

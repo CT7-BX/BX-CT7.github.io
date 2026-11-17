@@ -35,7 +35,8 @@ bool bx_parse_ps4_firmware(const char *user_agent, bx_firmware_info *out) {
     ++p;
     if (!parse_decimal(&p, &major) || *p != '.') return false;
     ++p;
-    if (!parse_decimal(&p, &minor)) return false;
+    const char *minor_start = p;
+    if (!parse_decimal(&p, &minor) || (size_t)(p - minor_start) != 2u) return false;
     if (isdigit((unsigned char)*p) || *p == '.') return false;
     if (*p && *p != ')' && *p != ';' && *p != ' ' && *p != '/') return false;
     /* Firmware minor revisions in PS4 UA are two decimal digits. */

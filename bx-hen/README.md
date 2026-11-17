@@ -32,3 +32,12 @@ A ferramenta é executada no computador e **analisa a string fornecida**, sem co
 O projeto **não executa** no kernel do PS4 e não usa APIs privadas do console. Versões de firmware só são declaradas detectadas se identificadas explicitamente na entrada. O alvo de estudo é 13.53, não uma alegação de suporte de jailbreak.
 
 Foi mantido na branch `bx-hen-01353` para não alterar o BX-CT7 Host publicado até que os módulos sejam validados.
+
+
+## Precisão do analisador de firmware
+
+O firmware informado no User-Agent deve ter exatamente dois dígitos
+depois do ponto (por exemplo, `13.53` ou `14.02`). Valores como
+`13.5` e `13.005` são rejeitados, evitando normalizações ambíguas.
+Os testes são executados por CI em pushes e Pull Requests da branch
+experimental; isto não representa suporte a jailbreak no PS4 13.53.
