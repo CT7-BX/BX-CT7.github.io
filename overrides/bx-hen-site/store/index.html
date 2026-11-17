@@ -52,7 +52,8 @@ code{color:#8ae9d7}footer{text-align:center;color:#83abc5;padding:22px}
 <script>
 (function(){
 'use strict';
-var entries=[],activeRequest=null,requestId=0,savedCatalog=false;
+var entries=[],activeRequest=null,requestId=0,savedCatalog=false,activeTimer=null;
+function clearTimer(){if(activeTimer!==null){clearTimeout(activeTimer);activeTimer=null;}}
 function id(x){return document.getElementById(x);}
 function node(tag,parent,value,cls){var x=document.createElement(tag);if(typeof value==='string')x.textContent=value;if(cls)x.className=cls;parent.appendChild(x);return x;}
 function safeUrl(u){return typeof u==='string'&&/^https:\/\/[A-Za-z0-9.-]+(?::443)?(?:\/|$)/.test(u)&&u.indexOf('@')===-1;}
@@ -87,19 +88,22 @@ id('status').textContent=count+(count===1?' item exibido.':' itens exibidos.')+(
 }
 function load(useCache){
 var current=++requestId,done=false;
+clearTimer();
 if(activeRequest){try{activeRequest.abort();}catch(ignore){}}
 activeRequest=null;id('status').textContent='Consultando catálogo...';
-function error(message,trySaved){if(current!==requestId||done)return;done=true;activeRequest=null;if(trySaved&&!useCache&&!entries.length){load(true);return;}id('status').textContent=message+(entries.length?' O último catálogo continua disponível.':'');}
+function finish(){done=true;activeRequest=null;clearTimer();}
+function error(message,trySaved){if(current!==requestId||done)return;finish();if(trySaved&&!useCache&&!entries.length){load(true);return;}id('status').textContent=message+(entries.length?' O último catálogo continua disponível.':'');}
 try{
 var x=new XMLHttpRequest();activeRequest=x;x.open('GET','./catalog.json'+(useCache?'':'?v='+new Date().getTime()),true);x.timeout=12000;
 x.onreadystatechange=function(){if(x.readyState!==4||current!==requestId||done)return;
 if(x.status===0)return;
 if(x.status<200||x.status>=300){error('Catálogo indisponível (HTTP '+x.status+').',true);return;}
-try{var next=validate(JSON.parse(x.responseText));entries=next;savedCatalog=!!useCache;show();done=true;activeRequest=null;}
+try{if(typeof x.responseText!=='string'||x.responseText.length>262144)throw Error('oversized catalog');var next=validate(JSON.parse(x.responseText));entries=next;savedCatalog=!!useCache;show();finish();}
 catch(e){error('O catálogo não pôde ser interpretado.');}
 };
 x.onerror=function(){error('Falha ao carregar o catálogo.',true);};
 x.ontimeout=function(){error('Tempo de consulta esgotado.',true);};
+activeTimer=setTimeout(function(){if(current!==requestId||done)return;error('Tempo de consulta esgotado.',true);try{x.abort();}catch(ignore){}},12000);
 x.send(null);
 }catch(e){error('Não foi possível consultar o catálogo.',true);}
 }
