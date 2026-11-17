@@ -4,6 +4,8 @@
 (function () {
     'use strict';
     var previousFocus = null, closeControl = null, previousOverflow = null;
+    // Replaced with the validated public matrix during build; source remains safe to test.
+    var supportMatrix = /* BX_SUPPORT_MATRIX */ null;
     function el(id) { return document.getElementById(id); }
     function txt(node, value) { if (node) node.textContent = String(value); }
     function fmt(value) { return value === undefined || value === null || value === '' ? 'Indisponível' : String(value); }
@@ -89,13 +91,58 @@
             table.appendChild(row);
         }
     }
+    function supportRecord(version) {
+        var rows = supportMatrix && supportMatrix.entries;
+        if (!rows || !version) return null;
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].firmware === version) return rows[i];
+        }
+        return null;
+    }
+    function reportLanguage() {
+        var locale = (typeof navigator !== 'undefined' && navigator.language || 'pt-BR').toLowerCase();
+        if (locale.indexOf('es') === 0) return {
+            heading:'Compatibilidad documentada (no es prueba de desbloqueo):',
+            configured:'Perfil configurado; solo pruebas automáticas estáticas.',
+            absent:'Perfil no configurado en este host.',
+            unknown:'Firmware fuera de la lista auditada.',
+            physical:'Prueba física en consola: no verificada.'
+        };
+        if (locale.indexOf('en') === 0) return {
+            heading:'Documented compatibility (not proof of jailbreak):',
+            configured:'Profile configured; static automated tests only.',
+            absent:'Profile not configured in this host.',
+            unknown:'Firmware not included in the audited list.',
+            physical:'Physical console test: not verified.'
+        };
+        return {
+            heading:'Compatibilidade documentada (não comprova desbloqueio):',
+            configured:'Perfil configurado; apenas testes automáticos estáticos.',
+            absent:'Perfil não configurado neste host.',
+            unknown:'Firmware fora da lista auditada.',
+            physical:'Teste físico no console: não verificado.'
+        };
+    }
+    function redact(text) {
+        // A report is exported locally only after user action; avoid leaking common secrets.
+        return String(text)
+            .replace(/(authorization:\\s*bearer\\s+)[^\\s]+/gi, '$1[oculto]')
+            .replace(/([?&]?(?:token|api[_-]?key|secret|password)\\s*[=:]\\s*)[^\\s&;]+/gi, '$1[oculto]')
+            .replace(/\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b/g, '[IP oculto]');
+    }
     function copyReport() {
         var rows = details(), lines = ['BX-CT7 PS4 Host - diagnóstico'];
         for (var i = 0; i < rows.length; i++) lines.push(rows[i][0] + ': ' + rows[i][1]);
+        var labels = reportLanguage(), record = supportRecord(fw());
+        lines.push('', labels.heading, record ?
+            (record.host_profile === 'configured' ? labels.configured : labels.absent) :
+            labels.unknown, labels.physical,
+            'Canal publicado: estável; beta é somente validação, sem publicação automática.',
+            'Cache: estado indicado pelo navegador, não verificação de integridade física.');
         lines.push('', 'Últimas mensagens do host (até 12000 caracteres):',
                    hostText('console', 12000) || 'Nenhuma mensagem disponível.',
                    '', 'Relatório local. Revise o conteúdo antes de compartilhar.');
-        var str = lines.join('\n'), input = el('bx-dev-report');
+        var str = redact(lines.join('\n')), input = el('bx-dev-report');
         input.value = str; input.style.display = 'block'; input.focus(); input.select();
         var copied = false;
         try { copied = document.execCommand('copy'); } catch (e) {}
