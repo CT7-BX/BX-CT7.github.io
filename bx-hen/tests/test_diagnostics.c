@@ -24,6 +24,12 @@ int main(void) {
     check("PlayStation 4 13.530", false, false);
     check("PlayStation 4 13.53.1", false, false);
     check("PlayStation 4 13.5a", false, false);
+    check("PlayStation 4 13.5", false, false);
+    check("PlayStation 4 13.005", false, false);
+    check("PlayStation 4 13.053", false, false);
+    check("PlayStation 4 14.02", true, false);
+    check("PlayStation 4 13.05", true, false);
+    check("PlayStation 4 13.00", true, false);
     check("PlayStation 4 999999999999.53", false, false);
     check("PlayStation 4", false, false);
     assert(!bx_parse_ps4_firmware("PlayStation 4 13.53", NULL));
