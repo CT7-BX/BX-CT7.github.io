@@ -13,11 +13,12 @@
   }
   function secureDownload(item) {
     return item && item.status === 'available' &&
-      typeof item.download_url === 'string' &&
+      typeof item.download_url === 'string' && item.download_url.length <= 2048 &&
       /^https:\/\/[A-Za-z0-9.-]+(?::443)?(?:\/|$)/.test(item.download_url) &&
       item.download_url.indexOf('@') === -1 &&
       typeof item.sha256 === 'string' && /^[a-fA-F0-9]{64}$/.test(item.sha256) &&
-      typeof item.license === 'string' && item.license.replace(/\s/g, '').length > 1 && item.license !== 'A confirmar';
+      typeof item.license === 'string' && item.license.length <= 80 &&
+      item.license.replace(/\s/g, '').length > 1 && item.license !== 'A confirmar';
   }
   function addItem(container, item) {
     if (!item || typeof item.title !== 'string' || !item.title.replace(/\s/g, '') ||
@@ -98,7 +99,9 @@
         for (var i = 0; i < body.items.length; i++) {
           var item = body.items[i];
           if (item && (item.id === 'java' || item.id === 'minecraft-online-manager') &&
-              typeof item.title === 'string' && item.title.length <= 160 && item.title.replace(/\s/g, '')) accepted.push(item);
+              typeof item.title === 'string' && item.title.length <= 160 && item.title.replace(/\s/g, '') &&
+              (item.description === undefined || (typeof item.description === 'string' && item.description.length <= 600)))
+            accepted.push(item);
         }
         if (!accepted.length) { fallback(); return; }
         cachedItems = accepted; cachedAt = new Date().getTime();
