@@ -126,9 +126,9 @@
     function redact(text) {
         // A report is exported locally only after user action; avoid leaking common secrets.
         return String(text)
-            .replace(/(authorization:\\s*bearer\\s+)[^\\s]+/gi, '$1[oculto]')
-            .replace(/([?&]?(?:token|api[_-]?key|secret|password)\\s*[=:]\\s*)[^\\s&;]+/gi, '$1[oculto]')
-            .replace(/\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b/g, '[IP oculto]');
+            .replace(/(authorization:\s*bearer\s+)[^\s]+/gi, '$1[oculto]')
+            .replace(/([?&]?(?:token|api[_-]?key|secret|password)\s*[=:]\s*)[^\s&;]+/gi, '$1[oculto]')
+            .replace(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g, '[IP oculto]');
     }
     function copyReport() {
         var rows = details(), lines = ['BX-CT7 PS4 Host - diagnóstico'];
