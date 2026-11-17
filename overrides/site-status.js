@@ -74,6 +74,9 @@
                         failure('O servidor não respondeu à consulta. Tente abrir o site novamente mais tarde.'); return;
                     }
                     try {
+                        // Small release metadata must never require large JSON parsing on PS4 WebKit.
+                        if (typeof request.responseText !== 'string' || request.responseText.length > 16384)
+                            throw new Error('Invalid release response size');
                         var data = JSON.parse(request.responseText);
                         if (!data || data.schema_version !== 1 || typeof data.revision !== 'string' ||
                             !/^[a-f0-9]{40}$/.test(data.revision)) throw new Error('Invalid release');
@@ -131,7 +134,11 @@
             if (document.hidden) stop();
             else if (!updating) start();
         }, false);
-        window.addEventListener('online', check, false);
+        window.addEventListener('online', function () {
+            network();
+            // Bursts of online events must not restart an already pending query.
+            if (!active) check();
+        }, false);
         window.addEventListener('offline', check, false);
         window.addEventListener('pagehide', stop, false);
         window.addEventListener('pageshow', function (event) {
