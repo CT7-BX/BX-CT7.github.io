@@ -49,6 +49,10 @@ for name, digest in protected.items():
 from presentation import stamp_manifests, apply_gta_theme
 apply_gta_theme(dest, root / "overrides")
 (dest/'.nojekyll').touch()
+# Read-only firmware evidence: embed a validated matrix into the existing
+# diagnostic report. This must not change the page layout or jailbreak logic.
+from diagnostics.compatibility_matrix import publish as publish_compatibility_matrix
+publish_compatibility_matrix(dest)
 # Publish the standalone browser preview independently of PS4 payloads.
 preview_dir = dest / 'bx-gta'
 preview_dir.mkdir(parents=True, exist_ok=True)
