@@ -229,3 +229,17 @@ tela durante indisponibilidade temporária. O catálogo de PKGs também tenta
 uma cópia já armazenada em cache se receber um JSON inválido do servidor,
 limitando a tentativa a uma única consulta extra, sem repetir requisições
 indefinidamente. Testes automatizados cobrem recuperação e falha dupla.
+
+
+## Ajustes de confiabilidade — visibilidade e armazenamento
+
+O verificador de versões agora escuta `visibilitychange` em `document`,
+conforme o comportamento do navegador. Isso permite suspender corretamente
+as verificações com a aba oculta e retomá-las quando ela voltar a ficar
+visível, com testes de regressão que despacham eventos pelo documento.
+
+O módulo experimental de diagnóstico no navegador usa uma chave temporária
+única para verificar `localStorage`, confirma que a chave não existe antes
+de gravar e remove apenas o valor que criou, mesmo diante de erros. Os
+valores anteriores (inclusive `bx-hen-diagnostic-test`) permanecem intactos.
+Não há alterações de host, firmware, payload, kernel ou GoldHEN.
