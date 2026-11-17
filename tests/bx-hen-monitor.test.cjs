@@ -19,10 +19,18 @@ function environment(options = {}) {
   const main = element('main');
   const byId = (id, node = main) => node.id === id ? node : node.children.map(child => byId(id, child)).find(Boolean);
   const requests = [];
+  const timers = new Map();
+  let nextTimerId = 1;
+  const schedule = (callback, ms) => {
+    const id = nextTimerId++;
+    timers.set(id, { callback, ms });
+    return id;
+  };
+  const cancel = id => timers.delete(id);
   class FakeXHR {
     constructor() { if(options.constructorFails)throw Error('blocked');requests.push(this); this.readyState = 0; this.status = 0; this.aborted = false; }
     open(method, url, async) { if(options.openFails)throw Error('blocked');this.method = method; this.url = url; this.async = async; }
-    send() { this.sent = true; }
+    send() { if(options.sendFails)throw Error('blocked');this.sent = true; }
     abort() { this.aborted = true; }
     respond(status, body) {
       this.readyState = 4; this.status = status; this.responseText = body;
@@ -34,10 +42,21 @@ function environment(options = {}) {
     getElementById: byId,
     querySelector: selector => selector === 'main.main' ? main : null,
   };
-  vm.runInNewContext(source, { document, XMLHttpRequest: FakeXHR, Date, JSON }, { filename: 'test-monitor.js', timeout: 1000 });
+  vm.runInNewContext(source, { document, XMLHttpRequest: FakeXHR, Date, JSON, setTimeout: schedule, clearTimeout: cancel }, { filename: 'test-monitor.js', timeout: 1000 });
   const get = id => byId(id);
   const refresh = () => get('bx-monitor').children[1].children[1].children[2].onclick();
-  return { get, requests, refresh };
+  return {
+    get, requests, refresh,
+    pendingTimers: () => timers.size,
+    peekTimeout: () => [...timers.values()][0]?.callback,
+    fireTimeout: () => {
+      const entry = [...timers.entries()][0];
+      assert.ok(entry, 'expected a pending timeout');
+      assert.equal(entry[1].ms, 12000);
+      timers.delete(entry[0]);
+      entry[1].callback();
+    },
+  };
 }
 
 function report(runs) {
@@ -264,4 +283,55 @@ test('unreasonably long CI fields are rejected without losing prior results', ()
   assert.match(env.get('bx-monitor-status').textContent, /Não foi possível ler/);
   assert.equal(env.get('bx-monitor-runs').children.length, 1);
   assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+});
+
+
+
+test('fallback timeout aborts stalled XHR and preserves the last valid report', () => {
+  const env = environment();
+  assert.equal(env.pendingTimers(), 1);
+  env.requests[0].respond(200, report([run(321)]));
+  assert.equal(env.pendingTimers(), 0);
+  env.refresh();
+  const stalled = env.requests[1];
+  assert.equal(env.pendingTimers(), 1);
+  env.fireTimeout();
+  assert.equal(stalled.aborted, true);
+  assert.equal(env.pendingTimers(), 0);
+  assert.match(env.get('bx-monitor-status').textContent, /Tempo de consulta esgotado/);
+  assert.equal(env.get('bx-monitor-runs').attributes['aria-busy'], 'false');
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+  stalled.respond(200, report([run(999)]));
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+  assert.match(env.get('bx-monitor-runs').children[0].children[0].children[0].textContent, /321/);
+});
+
+test('refresh cancels the old timer and ignores a late timeout callback', () => {
+  const env = environment();
+  const oldTimeout = env.peekTimeout();
+  env.refresh();
+  assert.equal(env.requests[0].aborted, true);
+  assert.equal(env.pendingTimers(), 1);
+  env.requests[1].respond(200, report([run(456)]));
+  assert.equal(env.pendingTimers(), 0);
+  oldTimeout();
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+  assert.match(env.get('bx-monitor-status').textContent, /1 execuções concluídas/);
+  assert.equal(env.get('bx-monitor-runs').attributes['aria-busy'], 'false');
+});
+
+test('network and HTTP errors release the fallback timer', () => {
+  const env = environment();
+  env.requests[0].onerror();
+  assert.equal(env.pendingTimers(), 0);
+  env.refresh();
+  env.requests[1].respond(503, '');
+  assert.equal(env.pendingTimers(), 0);
+  env.refresh();
+  env.requests[2].ontimeout();
+  assert.equal(env.pendingTimers(), 0);
+  const failedSend = environment({sendFails: true});
+  assert.equal(failedSend.pendingTimers(), 0);
+  assert.match(failedSend.get('bx-monitor-status').textContent, /não é suportada/);
 });

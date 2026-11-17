@@ -4,14 +4,17 @@
 'use strict';
 function find(id){return document.getElementById(id);}
 function add(parent,tag,text,cls){var n=document.createElement(tag);if(cls)n.className=cls;if(typeof text==='string')n.textContent=text;parent.appendChild(n);return n;}
-var requestId=0,activeRequest=null;
+var requestId=0,activeRequest=null,activeTimer=null;
+function stopTimer(){if(activeTimer!==null){clearTimeout(activeTimer);activeTimer=null;}}
 function busy(value){var n=find('bx-monitor-runs');if(n)n.setAttribute('aria-busy',value?'true':'false');}
 function load(){
  var current=++requestId,done=false;
+ stopTimer();
  if(activeRequest){try{activeRequest.abort();}catch(ignore){}}
  activeRequest=null;
  status('Consultando histórico...');busy(true);
- function fail(message){if(current!==requestId||done)return;done=true;activeRequest=null;busy(false);status(message);}
+ function finish(){done=true;activeRequest=null;stopTimer();busy(false);}
+ function fail(message){if(current!==requestId||done)return;finish();status(message);}
  try{
  var x=new XMLHttpRequest(),url='./test-history.json?v='+new Date().getTime();
  activeRequest=x;
@@ -22,10 +25,15 @@ function load(){
   if(x.status===0){fail('Falha de conexão ao consultar os relatórios.');return;}
   if(x.status<200||x.status>=300){fail('Histórico indisponível (HTTP '+x.status+').');return;}
   if(typeof x.responseText!=='string'||x.responseText.length>131072){fail('Relatório maior que o limite permitido.');return;}
-  try{render(JSON.parse(x.responseText));done=true;activeRequest=null;busy(false);}catch(e){fail('Não foi possível ler o histórico.');}
+  try{render(JSON.parse(x.responseText));finish();}catch(e){fail('Não foi possível ler o histórico.');}
  };
  x.onerror=function(){fail('Falha de conexão ao consultar os relatórios.');};
  x.ontimeout=function(){fail('Tempo de consulta esgotado.');};
+ activeTimer=setTimeout(function(){
+  if(current!==requestId||done)return;
+  fail('Tempo de consulta esgotado.');
+  try{x.abort();}catch(ignore){}
+ },12000);
  x.send(null);
  }catch(e){fail('A consulta não é suportada neste navegador.');}
 }
