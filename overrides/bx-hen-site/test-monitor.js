@@ -4,7 +4,7 @@
 'use strict';
 function find(id){return document.getElementById(id);}
 function add(parent,tag,text,cls){var n=document.createElement(tag);if(cls)n.className=cls;if(typeof text==='string')n.textContent=text;parent.appendChild(n);return n;}
-var requestId=0,activeRequest=null,activeTimer=null;
+var requestId=0,activeRequest=null,activeTimer=null,hasVisibleReport=false;
 function stopTimer(){if(activeTimer!==null){clearTimeout(activeTimer);activeTimer=null;}}
 function busy(value){var n=find('bx-monitor-runs');if(n)n.setAttribute('aria-busy',value?'true':'false');}
 function load(){
@@ -43,6 +43,10 @@ function render(data){
  if(!data||!Array.isArray(data.runs)||data.runs.length>30||
     (data.generated_at_utc!==undefined&&(typeof data.generated_at_utc!=='string'||data.generated_at_utc.length>64)))throw Error('Invalid report');
  if(data.collection_status==='unavailable'){
+  if(!hasVisibleReport){
+   var unavailableCount=find('bx-monitor-count');if(unavailableCount)unavailableCount.textContent='Histórico indisponível';
+   var unavailableDate=find('bx-monitor-date');if(unavailableDate)unavailableDate.textContent=(data.generated_at_utc||'').replace('T',' ').replace('+00:00',' UTC');
+  }
   status('O histórico não pôde ser coletado nesta publicação. Os resultados anteriores, se houver, continuam visíveis.');return;
  }
  for(var k=0;k<data.runs.length;k++){
@@ -52,6 +56,7 @@ function render(data){
   var fields=['created_at','event','commit'];
   for(var j=0;j<fields.length;j++)if(entry[fields[j]]!==undefined&&(typeof entry[fields[j]]!=='string'||entry[fields[j]].length>128))throw Error('Invalid run field');
  }
+ hasVisibleReport=true;
  while(target.firstChild)target.removeChild(target.firstChild);
  if(!data||!data.runs||!data.runs.length){
   var count=find('bx-monitor-count');if(count)count.textContent='0 registros';
