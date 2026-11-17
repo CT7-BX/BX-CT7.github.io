@@ -41,6 +41,8 @@ jobs:
         run: python3 diagnostics/release_policy.py
       - name: Test browser regressions
         run: node --test tests/*.test.cjs
+      - name: Test native preview behavior statically (no PKG execution)
+        run: node --test native-bxhen/native-bxhen.test.cjs
       - name: Test presentation and cache regressions
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Rebuild pinned upstream
