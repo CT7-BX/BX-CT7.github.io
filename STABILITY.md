@@ -286,3 +286,16 @@ Não há alterações de host, firmware, payload, kernel ou GoldHEN.
   excessivo ou apresentar metadados malformados como downloads confirmados.
 - Regressões simuladas verificam os limites, eventos de navegação e resposta
   atrasada. Testes locais/CI não substituem execução física no console.
+
+
+## Consoles antigos: busca, controles e WebGL
+
+- A busca da loja limita a consulta recebida na URL e no campo de pesquisa,
+  reduzindo custo de filtragem e evitando parâmetros enormes após navegar
+  por links. Buscas normais e termos com espaços continuam funcionando.
+- O Centro de Compatibilidade classifica WebGL como indisponível (e não
+  bloqueado) quando o navegador não tem sequer a função getContext.
+- Botões pequenos do painel de diagnóstico oferecem área mínima de 44 px e
+  foco visível para controle, teclado e tela sensível ao toque.
+- Incluídos testes estáticos e simulações para preservar comportamento
+  ES5, sem modificar o host de desbloqueio.
