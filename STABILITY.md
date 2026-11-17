@@ -299,3 +299,22 @@ Não há alterações de host, firmware, payload, kernel ou GoldHEN.
   foco visível para controle, teclado e tela sensível ao toque.
 - Incluídos testes estáticos e simulações para preservar comportamento
   ES5, sem modificar o host de desbloqueio.
+
+
+## Firmware evidence, diagnostics and staged releases (November 2026)
+
+The existing copy-only diagnostic report now includes the reviewed firmware
+support matrix without adding rows, menus or visual controls. The published
+matrix distinguishes static host routing from physical PS4 tests. Copied
+reports redact common network addresses and secret parameters and localize
+extra compatibility messages to Portuguese, English or Spanish when possible.
+Nothing is uploaded by the site.
+
+The new AppCache inventory validates generated local references and publishes
+a machine-readable report as a GitHub Actions artifact. It does **not** reset
+the browser cache or guarantee that offline loading works on the console.
+
+The `beta` branch is a verification channel that builds and tests without
+Pages deployment; `main` remains the stable published channel. The owner
+retains the current layout, colors and buttons. No GoldHEN files, kernel
+components, payload bytes or unlocking chains are changed.
