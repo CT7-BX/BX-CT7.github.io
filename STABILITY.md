@@ -243,3 +243,18 @@ O módulo experimental de diagnóstico no navegador usa uma chave temporária
 de gravar e remove apenas o valor que criou, mesmo diante de erros. Os
 valores anteriores (inclusive `bx-hen-diagnostic-test`) permanecem intactos.
 Não há alterações de host, firmware, payload, kernel ou GoldHEN.
+
+
+## Otimização de tráfego, catálogo e progresso
+
+- O verificador da revisão publicada agora consulta a cada 30 segundos com a
+  página visível (antes 10 segundos), mantendo verificação imediata ao abrir
+  ou voltar ao site e nenhuma atualização automática do cache.
+- O catálogo Homebrew limita o tamanho da resposta JSON a 256 KiB, evita
+  títulos excessivos e preserva temporariamente o último catálogo validado
+  quando uma nova consulta falha, mesmo após expirar o intervalo de frescor.
+- O indicador do cache ignora porcentagens recebidas fora de ordem para não
+  retroceder visualmente; 100% de download não é confundido com conclusão
+  do cache, que exige evento específico da página controlada.
+- Testes de regressão simulam instabilidade, respostas grandes, atualização
+  de catálogo e eventos atrasados, sem execução de payloads ou kernel.
