@@ -5,9 +5,13 @@
     var frame = document.getElementById('cacheFrame'), retry = document.getElementById('bx-cache-retry');
     var back = document.getElementById('bx-cache-back'), progress = document.getElementById('bx-cache-progress');
     if (!status || !fill || !frame || !retry || !back) return;
-    var finished = false, failed = false, idleTimer = null, warned = false, lastPercent = 0;
+    var finished = false, failed = false, idleTimer = null, returnTimer = null, returnCancelled = false, warned = false, lastPercent = 0;
     function stopIdle() {
         if (idleTimer !== null) { window.clearTimeout(idleTimer); idleTimer = null; }
+    }
+    function stopReturn() {
+        returnCancelled = true;
+        if (returnTimer !== null) { window.clearTimeout(returnTimer); returnTimer = null; }
     }
     function activity() {
         stopIdle();
@@ -48,7 +52,9 @@
             fill.style.width = '100%';
             if (progress) progress.setAttribute('aria-valuenow', '100');
             status.textContent = 'Cache atualizado. Voltando ao site...';
-            window.setTimeout(function () {
+            returnTimer = window.setTimeout(function () {
+                returnTimer = null;
+                if (returnCancelled) return;
                 try { window.location.replace(destination); }
                 catch (e) {
                     status.textContent = 'Cache atualizado. Não foi possível voltar automaticamente. Use Voltar ao site.';
@@ -76,8 +82,14 @@
             status.textContent = 'Salvando arquivos para uso offline...';
         }
     }, false);
-    window.addEventListener('pagehide', stopIdle, false);
-    window.addEventListener('pageshow', function (event) { if (event && event.persisted) activity(); }, false);
+    window.addEventListener('pagehide', function () {
+        stopIdle(); stopReturn();
+    }, false);
+    window.addEventListener('pageshow', function (event) {
+        if (!event || !event.persisted) return;
+        if (finished) status.textContent = 'Cache atualizado. Use Voltar ao site.';
+        else activity();
+    }, false);
     frame.onerror = function () { error('Não foi possível abrir a página de cache.'); };
     if (!window.applicationCache) {
         error('Este navegador não oferece o cache offline usado pelo PS4. Use Voltar ao site.');
