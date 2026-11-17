@@ -130,3 +130,22 @@ test('100 percent download progress never reports completed offline cache before
   assert.match(e.nodes.cacheStatus.textContent,/Cache atualizado/);
   assert.equal(e.timers.length,1);
 });
+
+
+test('leaving cache page cancels the pending automatic return and prevents stale navigation',()=> {
+ const e=environment();e.send({type:'CACHE_COMPLETE'});
+ assert.equal(e.timers.length,1);
+ const redirect=e.timers[0];
+ e.events.pagehide();
+ assert.equal(redirect.cleared,true);
+ redirect.fn(); // Even an already-queued legacy timer callback must be harmless.
+ assert.equal(e.replaced,null);
+ e.events.pageshow({persisted:true});
+ assert.match(e.nodes.cacheStatus.textContent,/Use Voltar ao site/);
+});
+
+test('cache success still redirects normally when the user stays on the cache page',()=> {
+ const e=environment();e.send({type:'CACHE_COMPLETE'});
+ e.timers[0].fn();
+ assert.equal(e.replaced,'./?test=0');
+});
