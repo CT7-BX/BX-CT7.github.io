@@ -21,7 +21,7 @@ function environment(options = {}) {
   const document = { documentElement: { getAttribute() { return options.catalogDisabled ? 'disabled' : null; } }, addEventListener(name, fn) { listeners[name] = fn; }, readyState: 'complete', body, createElement: node,
     getElementById(id) { return all().find(n => n.id === id) || null; }, execCommand() { return false; } };
   const window = { localStorage: { getItem() { return null; } } };
-  const context = { window, document, localStorage: window.localStorage,
+  const context = { window, document, navigator: {language: options.language || 'pt-BR'}, localStorage: window.localStorage,
     user: { currentJbFlavor: 'nexHEN', exploitChain: 7 },
     getPs4FwVersion() { return '13.52'; }, isPS4Console() { return true; },
     isFirmwareSupported() { return true; }, devMode: false,
@@ -98,4 +98,35 @@ test('disabled catalog has no dead Advanced shortcut and keyboard focus stays in
  const close=e.all().find(n=>n.textContent==='Fechar ✕'),copy=e.all().find(n=>n.textContent==='Copiar diagnóstico');
  e.document.activeElement=close;e.listeners.keydown({keyCode:9,shiftKey:true,preventDefault(){}});assert.equal(e.document.activeElement,copy);
  e.listeners.keydown({keyCode:9,shiftKey:false,preventDefault(){}});assert.equal(e.document.activeElement,close);
+});
+
+
+test('report redacts IPs and common secrets, without sending anything automatically', () => {
+ const e=environment();
+ const log=e.document.getElementById('console');
+ log.textContent='Connection 192.168.12.34 token=supersecret Authorization: Bearer abc123 api_key=xyz';
+ e.window.bxOpenDiagnostics();
+ e.all().find(n=>n.textContent==='Copiar diagnóstico').onclick();
+ const report=e.document.getElementById('bx-dev-report').value;
+ assert.match(report,/\[IP oculto\]/);
+ assert.match(report,/token=\[oculto\]/);
+ assert.match(report,/api_key=\[oculto\]/);
+ assert.match(report,/Authorization: Bearer \[oculto\]/);
+ assert.doesNotMatch(report,/supersecret|192\.168\.12\.34|abc123/);
+ assert.match(report,/Teste físico no console: não verificado/);
+});
+
+test('copied report headings support Portuguese, English and Spanish without changing the UI', () => {
+ for(const [lang,text] of [
+   ['pt-BR','Compatibilidade documentada'],
+   ['en-US','Documented compatibility'],
+   ['es-ES','Compatibilidad documentada']
+ ]) {
+   const e=environment({language:lang});
+   e.window.bxOpenDiagnostics();
+   e.all().find(n=>n.textContent==='Copiar diagnóstico').onclick();
+   const report=e.document.getElementById('bx-dev-report').value;
+   assert.match(report,new RegExp(text),lang);
+   assert.equal(e.all().some(n=>n.textContent==='Copiar diagnóstico'),true);
+ }
 });
