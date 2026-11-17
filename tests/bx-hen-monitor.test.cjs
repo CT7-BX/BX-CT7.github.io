@@ -19,6 +19,8 @@ function environment(options = {}) {
   const main = element('main');
   const byId = (id, node = main) => node.id === id ? node : node.children.map(child => byId(id, child)).find(Boolean);
   const requests = [];
+  const events = {};
+  const window = {addEventListener(name,fn){events[name]=fn;}};
   const timers = new Map();
   let nextTimerId = 1;
   const schedule = (callback, ms) => {
@@ -42,11 +44,11 @@ function environment(options = {}) {
     getElementById: byId,
     querySelector: selector => selector === 'main.main' ? main : null,
   };
-  vm.runInNewContext(source, { document, XMLHttpRequest: FakeXHR, Date, JSON, setTimeout: schedule, clearTimeout: cancel }, { filename: 'test-monitor.js', timeout: 1000 });
+  vm.runInNewContext(source, { document, window, XMLHttpRequest: FakeXHR, Date, JSON, setTimeout: schedule, clearTimeout: cancel }, { filename: 'test-monitor.js', timeout: 1000 });
   const get = id => byId(id);
   const refresh = () => get('bx-monitor').children[1].children[1].children[2].onclick();
   return {
-    get, requests, refresh,
+    get, requests, refresh, events,
     pendingTimers: () => timers.size,
     peekTimeout: () => [...timers.values()][0]?.callback,
     fireTimeout: () => {
@@ -317,7 +319,7 @@ test('refresh cancels the old timer and ignores a late timeout callback', () => 
   assert.equal(env.pendingTimers(), 0);
   oldTimeout();
   assert.equal(env.get('bx-monitor-runs').children.length, 1);
-  assert.match(env.get('bx-monitor-status').textContent, /1 execuções concluídas/);
+  assert.match(env.get('bx-monitor-status').textContent, /Última execução concluída/);
   assert.equal(env.get('bx-monitor-runs').attributes['aria-busy'], 'false');
 });
 
@@ -356,4 +358,40 @@ test('unavailable initial CI report replaces endless loading label without erasi
   env.requests[2].respond(200, JSON.stringify({collection_status: 'unavailable', runs: []}));
   assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
   assert.equal(env.get('bx-monitor-runs').children.length, 1);
+});
+
+
+test('leaving the page aborts monitor requests and cancels deadlines', () => {
+  const env=environment();const pending=env.requests[0];
+  assert.equal(typeof env.events.pagehide,'function');
+  assert.equal(typeof env.events.pageshow,'function');
+  env.events.pagehide();
+  assert.equal(pending.aborted,true);
+  assert.equal(env.pendingTimers(),0);
+  assert.equal(env.get('bx-monitor-runs').attributes['aria-busy'],'false');
+  pending.respond(200,report([run(999)]));
+  assert.equal(env.get('bx-monitor-runs').children.length,0);
+  env.events.pageshow({persisted:false});
+  assert.equal(env.requests.length,1);
+});
+
+test('returning from page history refreshes once and preserves old results on errors', () => {
+  const env=environment();
+  env.requests[0].respond(200,report([run(321)]));
+  assert.match(env.get('bx-monitor-status').textContent,/Última execução concluída/);
+  env.events.pagehide();
+  env.events.pageshow({persisted:true});
+  assert.equal(env.requests.length,2);
+  assert.equal(env.get('bx-monitor-runs').children.length,1);
+  env.requests[1].respond(503,'');
+  assert.equal(env.get('bx-monitor-runs').children.length,1);
+  assert.equal(env.get('bx-monitor-count').textContent,'1 registro');
+  env.events.pageshow({persisted:false});
+  assert.equal(env.requests.length,2);
+});
+
+test('multiple completed executions use grammatical plural status', () => {
+  const env=environment();
+  env.requests[0].respond(200,report([run(1),run(2,'failure')]));
+  assert.match(env.get('bx-monitor-status').textContent,/Últimas 2 execuções concluídas/);
 });

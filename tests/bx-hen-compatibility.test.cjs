@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync('overrides/bx-hen-site/compatibility.js', 'utf8');
 
-function testPage(storage) {
+function testPage(storage, ua) {
   function element(tag) {
     return {tagName: tag, children: [], textContent: '', attributes: {}, style: {},
       appendChild(x) { x.parentNode = this; this.children.push(x); return x; },
@@ -23,7 +23,7 @@ function testPage(storage) {
     querySelector(selector) {return selector==='main.main'?main:selector==='.sidebar'?sidebar:null;},
   };
   const window = {localStorage:storage,sessionStorage:storage,screen:{width:1920,height:1080},devicePixelRatio:1};
-  const navigator = {userAgent:'Browser test',language:'pt-BR',onLine:true};
+  const navigator = {userAgent:ua||'Browser test',language:'pt-BR',onLine:true};
   vm.runInNewContext(source, {document,window,navigator,location:{protocol:'https:'},screen:window.screen,Date,Math,JSON}, {filename:'compatibility.js',timeout:1000});
   const section = find('bx-compat',main);
   section.children[1].children[1].children[0].onclick();
@@ -70,4 +70,21 @@ test('colliding compatibility probe never overwrites or removes existing data', 
   assert.equal(result.sessionStorage, 'bloqueado');
   assert.equal(writes, 0);
   assert.equal(deletes, 0);
+});
+
+
+test('compatibility report accepts canonical two-digit PS4 versions only', () => {
+  const storage = {getItem(){return null;},setItem(){},removeItem(){}};
+  for(const [ua, expected] of [
+    ['Mozilla (PlayStation 4/13.53) WebKit', '13.53'],
+    ['Mozilla (PlayStation 4/14.00) WebKit', '14.00'],
+    ['Mozilla (PlayStation 4/14.02) WebKit', '14.02'],
+    ['Mozilla (PlayStation 4/13.5) WebKit', 'Não informado'],
+    ['Mozilla (PlayStation 4/14.0) WebKit', 'Não informado'],
+    ['Mozilla (PlayStation 4/14.002) WebKit', 'Não informado'],
+  ]) {
+    const report = values(testPage(storage, ua));
+    assert.equal(report['Firmware informado'], expected, ua);
+    if(expected === '14.02')assert.equal(report['Alvo 13.53'], 'não confirmado');
+  }
 });

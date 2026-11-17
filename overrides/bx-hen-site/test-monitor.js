@@ -74,7 +74,8 @@ function render(data){
   add(row,'span',conclusion,'bx-monitor-state '+(r.conclusion==='success'?'pass':'other'));
   var link=add(row,'a','Ver logs');link.setAttribute('aria-label','Ver logs da execução '+String(r.id));link.href='https://github.com/CT7-BX/BX-CT7.github.io/actions/runs/'+String(r.id);link.target='_blank';link.rel='noopener noreferrer';
  }
- status('Últimas '+data.runs.length+' execuções concluídas: '+ok+' com sucesso, '+fail+' com outros resultados.');
+ var summary=data.runs.length===1?'Última execução concluída: ':'Últimas '+data.runs.length+' execuções concluídas: ';
+ status(summary+ok+' com sucesso, '+fail+' com outros resultados.');
  var count=find('bx-monitor-count');if(count)count.textContent=data.runs.length+(data.runs.length===1?' registro':' registros');
  var date=find('bx-monitor-date');if(date)date.textContent=(data.generated_at_utc||'').replace('T',' ').replace('+00:00',' UTC');
 }
@@ -92,6 +93,15 @@ function init(){
  var list=add(inner,'div',null,'bx-monitor-list');list.id='bx-monitor-runs';list.setAttribute('role','region');list.setAttribute('aria-label','Histórico de execuções do GitHub Actions');list.setAttribute('tabindex','0');
  var info=add(inner,'p','Relatório automático às 08h, 14h e 20h de Mato Grosso, sujeito à fila do GitHub. A execução atual aparece apenas após finalizar e ser coletada em uma publicação posterior.','bx-monitor-intro');
  var ref=find('diagnostics');if(ref&&ref.parentNode===main)main.insertBefore(box,ref);
+ window.addEventListener('pagehide',function(){
+  ++requestId;stopTimer();
+  var pending=activeRequest;activeRequest=null;
+  if(pending){try{pending.abort();}catch(ignore){}}
+  busy(false);
+ },false);
+ window.addEventListener('pageshow',function(event){
+  if(event&&event.persisted)load();
+ },false);
  load();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,false);else init();
