@@ -335,3 +335,25 @@ test('network and HTTP errors release the fallback timer', () => {
   assert.equal(failedSend.pendingTimers(), 0);
   assert.match(failedSend.get('bx-monitor-status').textContent, /não é suportada/);
 });
+
+
+test('unavailable initial CI report replaces endless loading label without erasing future results', () => {
+  const env = environment();
+  env.requests[0].respond(200, JSON.stringify({
+    schema_version: 1,
+    generated_at_utc: '2026-11-17T12:00:00+00:00',
+    collection_status: 'unavailable',
+    runs: [],
+  }));
+  assert.equal(env.get('bx-monitor-count').textContent, 'Histórico indisponível');
+  assert.match(env.get('bx-monitor-status').textContent, /não pôde ser coletado/);
+  assert.equal(env.get('bx-monitor-runs').attributes['aria-busy'], 'false');
+  assert.equal(env.get('bx-monitor-runs').children.length, 0);
+  env.refresh();
+  env.requests[1].respond(200, report([run(123)]));
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+  env.refresh();
+  env.requests[2].respond(200, JSON.stringify({collection_status: 'unavailable', runs: []}));
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+  assert.equal(env.get('bx-monitor-runs').children.length, 1);
+});
