@@ -127,7 +127,7 @@
                 timer = window.setInterval(check, 10000);
             }
         };
-        window.addEventListener('visibilitychange', function () {
+        document.addEventListener('visibilitychange', function () {
             if (document.hidden) stop();
             else if (!updating) start();
         }, false);

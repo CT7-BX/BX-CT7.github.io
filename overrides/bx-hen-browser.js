@@ -29,14 +29,19 @@
     return out;
   }
   function localStatus() {
+    var storage, key, written = false;
     try {
-      if (!window.localStorage) return 'Indisponível';
-      var key = 'bx-hen-diagnostic-test';
-      localStorage.setItem(key, '1');
-      var pass = localStorage.getItem(key) === '1';
-      localStorage.removeItem(key);
-      return pass ? 'Operacional' : 'Falhou';
-    } catch(e) {return 'Bloqueado pelo navegador';}
+      storage = window.localStorage;
+      if (!storage) return 'Indisponível';
+      key = 'bx-hen-diagnostic-test-' + new Date().getTime() + '-' + Math.random().toString(36).slice(2);
+      if (storage.getItem(key) !== null) return 'Bloqueado pelo navegador';
+      storage.setItem(key, '1');
+      written = true;
+      return storage.getItem(key) === '1' ? 'Operacional' : 'Falhou';
+    } catch(e) { return 'Bloqueado pelo navegador'; }
+    finally {
+      if (written) { try { storage.removeItem(key); } catch(ignore) {} }
+    }
   }
   function report() {
     var f=detect(navigator.userAgent || '');

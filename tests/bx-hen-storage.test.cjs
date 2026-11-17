@@ -70,3 +70,45 @@ test('collision with an existing temporary-looking key never writes or deletes',
   assert.equal(writes, 0);
   assert.equal(removes, 0);
 });
+
+
+const browserDiagnostic = fs.readFileSync('overrides/bx-hen-browser.js', 'utf8');
+function runBrowserDiagnostic(storage) {
+  const window = { localStorage: storage };
+  const document = {readyState: 'loading', addEventListener() {}};
+  vm.runInNewContext(browserDiagnostic, {window, document, Date, Math, navigator: {userAgent: 'PS4 test fixture'}},
+    {filename: 'bx-hen-browser.js', timeout: 1000});
+  const rows = window.bxHen01.getReport();
+  return Array.from(rows).find(row => row[0] === 'Dados locais')[1];
+}
+
+test('experimental browser diagnostic preserves settings and removes only its own key', () => {
+  const values = new Map([
+    ['bx-hen-diagnostic-test', 'previous-value'],
+    ['theme', 'neon'],
+  ]);
+  assert.equal(runBrowserDiagnostic(createStorage(values)), 'Operacional');
+  assert.equal(values.size, 2);
+  assert.equal(values.get('bx-hen-diagnostic-test'), 'previous-value');
+  assert.equal(values.get('theme'), 'neon');
+});
+test('experimental browser diagnostic detects a conflicting generated key without modifying it', () => {
+  let writes = 0, removals = 0;
+  const storage = {
+    getItem(key) {return key.startsWith('bx-hen-diagnostic-test-') ? 'owned-by-another' : null;},
+    setItem() {writes++;}, removeItem() {removals++;},
+  };
+  assert.equal(runBrowserDiagnostic(storage), 'Bloqueado pelo navegador');
+  assert.equal(writes, 0);
+  assert.equal(removals, 0);
+});
+test('experimental browser diagnostic tolerates denied storage without removing old values', () => {
+  let removals = 0;
+  const storage = {
+    getItem() {return null;},
+    setItem() {throw Error('storage disabled');},
+    removeItem() {removals++;},
+  };
+  assert.equal(runBrowserDiagnostic(storage), 'Bloqueado pelo navegador');
+  assert.equal(removals, 0);
+});

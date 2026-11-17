@@ -5,7 +5,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync('overrides/site-status.js', 'utf8');
 const revision = 'a'.repeat(40);
 function environment(options = {}) {
-  const nodes = {}, requests = [], events = {}, intervals = [], timeouts = [];
+  const nodes = {}, requests = [], events = {}, documentEvents = {}, intervals = [], timeouts = [];
   for (const id of ['bx-site-status', 'bx-site-check', 'bx-site-message', 'bx-site-network', 'bx-site-revision'])
     nodes[id] = { textContent: '', style: {}, attributes: {}, getAttribute() { return options.revision || revision; },
       setAttribute(k, v) { this.attributes[k] = v; } };
@@ -19,7 +19,10 @@ function environment(options = {}) {
     abort() { this.aborted = true; }
     respond(data, status = 200) { this.readyState = 4; this.status = status; this.responseText = JSON.stringify(data); this.onreadystatechange(); }
   }
-  const document = { readyState: 'complete', hidden: !!options.hidden, getElementById(id) { return nodes[id]; } };
+  const document = { readyState: 'complete', hidden: !!options.hidden,
+    getElementById(id) { return nodes[id]; },
+    addEventListener(name, fn) { documentEvents[name] = fn; }
+  };
   vm.runInNewContext(source, { document,
     navigator, window: { applicationCache: options.ps4 ? {} : undefined,
       location: { reload() { reloads++; if(options.reloadThrows) throw Error('blocked'); } }, addEventListener(name, fn) { events[name] = fn; },
@@ -28,7 +31,7 @@ function environment(options = {}) {
       setTimeout(fn, delay) { timeouts.push({fn, delay, cleared:false}); return timeouts.length; },
       clearTimeout(id) { timeouts[id - 1].cleared = true; } },
     isPS4Console() { return !!options.ps4; }, XMLHttpRequest: XHR });
-  return { nodes, requests, events, navigator, document, intervals, timeouts,
+  return { nodes, requests, events, documentEvents, navigator, document, intervals, timeouts,
     tick: () => intervals.filter(t => !t.cleared).forEach(t => t.fn()),
     update: () => nodes['bx-site-check'].onclick(),
     message: () => nodes['bx-site-message'].textContent, title: () => nodes['bx-site-revision'].textContent,
@@ -120,12 +123,13 @@ test('hidden startup avoids network polling until the tab becomes visible', () =
   const env = environment({ hidden: true });
   assert.equal(env.requests.length, 0);
   assert.equal(env.intervals.length, 0);
-  assert.equal(typeof env.events.visibilitychange, 'function');
+  assert.equal(typeof env.documentEvents.visibilitychange, 'function');
+  assert.equal(env.events.visibilitychange, undefined, 'visibilitychange must not be registered on window');
   env.tick();
   env.events.online();
   assert.equal(env.requests.length, 0);
   env.document.hidden = false;
-  env.events.visibilitychange();
+  env.documentEvents.visibilitychange();
   assert.equal(env.requests.length, 1);
   current(env);
   env.tick();
@@ -136,7 +140,7 @@ test('hiding cancels in-flight checks and returning resumes only once', () => {
   const env = environment();
   const pending = env.requests[0];
   env.document.hidden = true;
-  env.events.visibilitychange();
+  env.documentEvents.visibilitychange();
   assert.equal(pending.aborted, true);
   assert.equal(env.intervals[0].cleared, true);
   assert.equal(env.timeouts[0].cleared, true);
@@ -145,8 +149,8 @@ test('hiding cancels in-flight checks and returning resumes only once', () => {
   env.events.online();
   assert.equal(env.requests.length, 1);
   env.document.hidden = false;
-  env.events.visibilitychange();
-  env.events.visibilitychange();
+  env.documentEvents.visibilitychange();
+  env.documentEvents.visibilitychange();
   assert.equal(env.requests.length, 2);
   assert.equal(env.intervals.filter(x => !x.cleared).length, 1);
   current(env);
@@ -158,9 +162,9 @@ test('visibility changes never restart checks during an active cache update', ()
   newer(env);
   env.update();
   env.document.hidden = true;
-  env.events.visibilitychange();
+  env.documentEvents.visibilitychange();
   env.document.hidden = false;
-  env.events.visibilitychange();
+  env.documentEvents.visibilitychange();
   assert.equal(env.requests.length, 1);
   assert.equal(env.cacheClicks, 1);
   assert.equal(env.intervals.filter(x => !x.cleared).length, 0);
@@ -252,4 +256,18 @@ test('watchdogs are cleared on completion, supersession and navigation', () => {
   newer(env);const message=env.message();env.timeouts[1].fn();assert.equal(env.message(),message);
   env.tick();env.events.pagehide();assert.equal(env.timeouts[3].cleared,true);
   env.timeouts[3].fn();assert.equal(env.message(),message);
+});
+
+
+test('visibilitychange listener attaches to document and not window', () => {
+  const env = environment();
+  assert.equal(typeof env.documentEvents.visibilitychange, 'function');
+  assert.equal(env.events.visibilitychange, undefined);
+  const outstanding = env.requests[0];
+  env.document.hidden = true;
+  env.documentEvents.visibilitychange();
+  assert.equal(outstanding.aborted, true);
+  env.document.hidden = false;
+  env.documentEvents.visibilitychange();
+  assert.equal(env.requests.length, 2);
 });
