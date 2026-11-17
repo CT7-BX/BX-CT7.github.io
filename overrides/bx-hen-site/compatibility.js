@@ -25,7 +25,7 @@
  }
  function run() {
    var ua=navigator.userAgent||'', ps4=ua.indexOf('PlayStation 4')!==-1, fw='Não informado';
-   var m=ua.match(/PlayStation 4[\/ ]([0-9]{1,2}\.[0-9]{1,2})(?=$|[); \/])/);
+   var m=ua.match(/PlayStation 4[\/ ]([0-9]{1,2}\.[0-9]{2})(?=$|[); \/])/);
    if(m)fw=m[1];
    var items=[
      ['Plataforma',ps4?'PS4':'Navegador externo'],
