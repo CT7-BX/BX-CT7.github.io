@@ -1,0 +1,42 @@
+name: BX-HEN Beta Validation (No Publish)
+
+on:
+  push:
+    branches: [beta]
+  workflow_dispatch:
+
+concurrency:
+  group: bx-hen-beta-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-beta-only:
+    if: github.ref == 'refs/heads/beta'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout beta source
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test browser and diagnostics without console execution
+        run: node --test tests/*.test.cjs native-bxhen/native-bxhen.test.cjs
+      - name: Test Python release and compatibility policies
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Build pinned public upstream
+        run: python3 build.py
+      - name: Verify routing, offline files and browser integration
+        run: node --test tests/*.integration.cjs
+      - name: Verify generated static site
+        run: python3 diagnostics/verify_site.py
+      - name: Archive beta preview for manual review only
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: bx-hen-beta-preview-${{ github.sha }}
+          path: dist/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
