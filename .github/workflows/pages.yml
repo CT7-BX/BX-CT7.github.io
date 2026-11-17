@@ -47,6 +47,8 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Rebuild pinned upstream
         run: python3 build.py
+      - name: Inventory generated offline cache without executing it
+        run: python3 diagnostics/cache_inventory.py
       - name: Verify generated language, HEN selection and offline dependencies (no execution)
         run: node --test tests/*.integration.cjs
       - name: Verify BX-HEN dashboard assets
@@ -63,7 +65,9 @@ jobs:
         uses: actions/upload-artifact@v7.0.2
         with:
           name: bx-ct7-firmware-audit-${{ github.run_id }}
-          path: diagnostics/firmware-results.json
+          path: |
+            diagnostics/firmware-results.json
+            diagnostics/cache-inventory.json
           retention-days: 90
           if-no-files-found: warn
       - name: Generate sanitized BX-HEN test history

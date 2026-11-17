@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "project": "BX-HEN",
+  "scope": "Documented host routing only; neither successful jailbreak nor actual console validation",
+  "publication_channel": "stable",
+  "physical_ps4_tested": false,
+  "jailbreak_validated": false,
+  "entries": [
+    {
+      "firmware": "13.52",
+      "host_profile": "configured",
+      "automatic_checks": "static_routing_only",
+      "console_test": "not_verified"
+    },
+    {
+      "firmware": "13.53",
+      "host_profile": "not_configured",
+      "automatic_checks": "none",
+      "console_test": "not_verified"
+    },
+    {
+      "firmware": "14.00",
+      "host_profile": "configured",
+      "automatic_checks": "static_routing_only",
+      "console_test": "not_verified"
+    },
+    {
+      "firmware": "14.01",
+      "host_profile": "not_configured",
+      "automatic_checks": "none",
+      "console_test": "not_verified"
+    },
+    {
+      "firmware": "14.02",
+      "host_profile": "configured",
+      "automatic_checks": "static_routing_only",
+      "console_test": "not_verified"
+    },
+    {
+      "firmware": "14.03",
+      "host_profile": "not_configured",
+      "automatic_checks": "none",
+      "console_test": "not_verified"
+    },
+    {
+      "firmware": "14.04",
+      "host_profile": "not_configured",
+      "automatic_checks": "none",
+      "console_test": "not_verified"
+    }
+  ]
+}
