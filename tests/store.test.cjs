@@ -155,3 +155,30 @@ test('an excessively large catalog response cannot replace the last valid list',
   assert.equal(env.nodes.items.children[0].children[0].textContent, 'Valid');
   assert.match(env.nodes.status.textContent, /interpretado/);
 });
+
+
+test('invalid fresh catalog retries a previously cached copy once', () => {
+  const env = environment();
+  const original = env.requests[0];
+  original.respond({schema_version:1,items:[null]});
+  assert.equal(env.requests.length, 2);
+  assert.equal(env.requests[1].url, './catalog.json');
+  env.requests[1].respond(catalog([item({title:'Previously cached'})]));
+  assert.equal(env.requests.length, 2);
+  assert.equal(env.timers.size, 0);
+  assert.equal(env.nodes.items.children[0].children[0].textContent, 'Previously cached');
+  assert.match(env.nodes.status.textContent, /Catálogo salvo/);
+  original.onerror();
+  assert.equal(env.nodes.items.children[0].children[0].textContent, 'Previously cached');
+});
+
+test('invalid live and cached catalogs terminate without repeating requests', () => {
+  const env = environment();
+  const invalid = {schema_version:1,items:[null]};
+  env.requests[0].respond(invalid);
+  assert.equal(env.requests.length, 2);
+  env.requests[1].respond(invalid);
+  assert.equal(env.requests.length, 2);
+  assert.equal(env.timers.size, 0);
+  assert.match(env.nodes.status.textContent, /interpretado/);
+});

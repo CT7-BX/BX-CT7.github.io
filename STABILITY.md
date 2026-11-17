@@ -218,3 +218,14 @@ O workflow principal executa testes estáticos dos aplicativos nativos
 de demonstração. Esses testes não compilam PKG e não demonstram
 funcionamento no PS4; a compilação nativa depende de toolchains externas
 cujas revisões exigem revisão e pinagem em etapa separada.
+
+
+## Revisão adicional do monitor e da loja
+
+Quando o serviço do GitHub Actions não fornece histórico, o primeiro acesso
+ao monitor mostra **Histórico indisponível** em vez de manter indefinidamente
+"Aguardando relatório...". Se já há resultados válidos, eles permanecem na
+tela durante indisponibilidade temporária. O catálogo de PKGs também tenta
+uma cópia já armazenada em cache se receber um JSON inválido do servidor,
+limitando a tentativa a uma única consulta extra, sem repetir requisições
+indefinidamente. Testes automatizados cobrem recuperação e falha dupla.
