@@ -31,7 +31,7 @@ code{color:#8ae9d7}footer{text-align:center;color:#83abc5;padding:22px}
 <header><div><h1>▣ BX-HEN <span style="color:#49d7ff">PKG Store</span></h1><p>Catálogo de projetos e aplicativos autorizados</p></div><div><a href="../" class="action">← BX-HEN</a> <a href="../../" class="action">Host principal</a></div></header>
 <main>
 <div class="notice"><strong>Loja em desenvolvimento:</strong> esta página organiza links para arquivos PKG disponibilizados pelo autor ou detentor dos direitos; não instala aplicativos no PS4, não contorna licenças e não depende de hospedar arquivos grandes no GitHub. A publicação de um download exige um link HTTPS real e autorização de distribuição.</div>
-<div class="toolbar"><input id="search" type="search" placeholder="Buscar aplicativos e ferramentas" aria-label="Buscar PKGs"><label for="filter">Exibir:</label><select id="filter" aria-label="Filtrar disponibilidade"><option value="all">Todos</option><option value="available">Disponíveis</option><option value="planned">Em preparação</option></select><button id="refresh">Atualizar catálogo</button></div>
+<div class="toolbar"><input id="search" type="search" maxlength="160" placeholder="Buscar aplicativos e ferramentas" aria-label="Buscar PKGs"><label for="filter">Exibir:</label><select id="filter" aria-label="Filtrar disponibilidade"><option value="all">Todos</option><option value="available">Disponíveis</option><option value="planned">Em preparação</option></select><button id="refresh">Atualizar catálogo</button></div>
 <div class="store-summary" id="summary" aria-live="polite"></div>
 <p id="status" role="status" aria-live="polite" aria-atomic="true">Carregando catálogo...</p>
 <noscript><p>Ative o JavaScript para consultar o catálogo. Você pode voltar pelo link Host principal.</p></noscript>
@@ -69,7 +69,7 @@ for(var j=0;j<fields.length;j++)if(typeof e[fields[j]]!=='string'||!e[fields[j]]
 return data.items;
 }
 function show(){
-var target=id('items'),term=(id('search').value||'').toLowerCase(),filter=id('filter').value,count=0,available=0,planned=0;
+var target=id('items'),term=(id('search').value||'').slice(0,160).toLowerCase(),filter=id('filter').value,count=0,available=0,planned=0;
 while(target.firstChild)target.removeChild(target.firstChild);
 for(var i=0;i<entries.length;i++){var e=entries[i];if(ready(e))available++;else planned++;if((filter==='available'&&!ready(e))||(filter==='planned'&&ready(e)))continue;if((e.title+' '+e.description+' '+e.category).toLowerCase().indexOf(term)<0)continue;
 count++;
@@ -107,7 +107,7 @@ activeTimer=setTimeout(function(){if(current!==requestId||done)return;error('Tem
 x.send(null);
 }catch(e){error('Não foi possível consultar o catálogo.',true);}
 }
-var query=(location.hash||location.search||'').match(/[#?&]q=([^&]*)/);if(query){try{id('search').value=decodeURIComponent(query[1].replace(/\+/g,' '));}catch(e){}}
+var query=(location.hash||location.search||'').slice(0,512).match(/[#?&]q=([^&]*)/);if(query){try{id('search').value=decodeURIComponent(query[1].replace(/\+/g,' ')).slice(0,160);}catch(e){}}
 id('search').oninput=show;id('filter').onchange=show;id('refresh').onclick=function(){load(false);};load(false);
 })();
 </script>
