@@ -36,11 +36,22 @@ else if(/Safari\//i.test(ua))browser='Safari / WebKit';
 else if(/PlayStation/i.test(ua))browser='Navegador PlayStation';
 return {os:os,device:device,version:version,browser:browser,platform:platform||'Não informada'};
 }
+function testStorage(){
+ var s,k,wrote=false;
+ try{
+   s=window.localStorage;
+   if(!s)return false;
+   k='bx-hen-health-temp-'+new Date().getTime()+'-'+Math.random().toString(36).slice(2);
+   if(s.getItem(k)!==null)return false;
+   s.setItem(k,'ok');wrote=true;
+   return s.getItem(k)==='ok';
+ }catch(e){return false;}
+ finally{if(wrote){try{s.removeItem(k);}catch(ignore){}}}
+}
 function check(){var info=deviceInfo(),isps4=info.os==='PlayStation 4';
 var support=typeof window.applicationCache!=='undefined';
 var js=typeof document.addEventListener==='function';
-var store=false;
-try{localStorage.setItem('bx-hen-health-temp','ok');store=localStorage.getItem('bx-hen-health-temp')==='ok';localStorage.removeItem('bx-hen-health-temp');}catch(e){}
+var store=testStorage();
 var results=[['Sistema detectado',info.os],['Tipo de dispositivo',info.device],['Versão informada pelo navegador',info.version],['Navegador',info.browser],['Plataforma',info.platform],['Armazenamento',store?'Operacional':'Indisponível'],['Cache offline',support?'API disponível':'Não suportado'],['JavaScript',js?'Operacional':'Limitado'],['Conexão',navigator.onLine===false?'Offline':'Sem confirmação de conexão'],['Kernel / HEN','Não verificável']];
 var target=el('bx-test-results');if(target){while(target.firstChild)target.removeChild(target.firstChild);for(var i=0;i<results.length;i++){var x=make(target,'div','bx-test'),b=make(x,'b'),span=make(x,'span');text(b,results[i][0]);text(span,results[i][1]);}}
 log('Autoverificação do navegador realizada: '+info.os+'.');

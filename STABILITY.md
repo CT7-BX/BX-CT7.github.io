@@ -199,3 +199,22 @@ e o temporizador antigos; retornos tardios não substituem resultados recentes.
 Os testes automatizados cobrem tempo esgotado, respostas tardias, falha HTTP,
 erro de rede e exceção ao enviar a consulta. Isso não envolve payloads nem
 teste de desbloqueio no PS4.
+
+
+
+## Revisão 17/11/2026 — loja, armazenamento e verificações nativas
+
+A loja de PKGs encerra consultas após 12 segundos também quando o WebKit
+não entrega o evento `ontimeout`. Quando a consulta falha, preserva o
+catálogo válido anterior e tenta o recurso em cache somente uma vez. A
+interface ignora respostas tardias e rejeita corpos superiores a 256 KiB.
+
+Os diagnósticos do painel, health e compatibility preservam chaves existentes
+do armazenamento, utilizam identificadores temporários diferentes e apagam
+somente os itens criados por eles. Novos testes cobrem armazenamento
+bloqueado, colisões e preservação das preferências.
+
+O workflow principal executa testes estáticos dos aplicativos nativos
+de demonstração. Esses testes não compilam PKG e não demonstram
+funcionamento no PS4; a compilação nativa depende de toolchains externas
+cujas revisões exigem revisão e pinagem em etapa separada.
