@@ -29,6 +29,40 @@ def fetch(path):
         return json.load(response)
 
 
+def addon_targets():
+    """Return pinned add-on destinations without downloading or running anything."""
+    import sys
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from firmware_1402 import ASSETS as FW_ASSETS, AUTHOR_ASSETS
+    from payload_updates import ASSETS as GOLDHEN_ASSETS, FAN_ASSETS
+    targets = [target for group in (FW_ASSETS, AUTHOR_ASSETS, GOLDHEN_ASSETS, FAN_ASSETS)
+               for target, _digest in group.values()]
+    if len(targets) != len(set(targets)):
+        raise ValueError('Duplicate destination among pinned add-ons')
+    return set(targets)
+
+
+def detect_collisions(snapshot, reserved):
+    """Reject incomplete GitHub trees instead of assuming an update is safe."""
+    if not isinstance(snapshot, dict) or snapshot.get('truncated') is not False:
+        raise ValueError('Upstream tree unavailable or truncated; manual review required')
+    entries = snapshot.get('tree')
+    if not isinstance(entries, list) or any(
+            not isinstance(entry, dict) or not isinstance(entry.get('path'), str)
+            for entry in entries):
+        raise ValueError('Invalid upstream tree; manual review required')
+    return sorted(set(reserved).intersection(entry['path'] for entry in entries))
+
+
+def write_status(revision, changed, blocked):
+    if os.environ.get('GITHUB_OUTPUT'):
+        with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+            output.write('changed=' + str(changed).lower() + '\n')
+            output.write('blocked=' + str(blocked).lower() + '\n')
+            output.write('revision=' + revision + '\n')
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--apply', metavar='SHA')
@@ -44,10 +78,8 @@ def main():
     latest = fetch('/commits/main')['sha']
     replace_pin(original, latest)  # Validate before using it in a URL or output.
     changed = latest != current[0]
-    if os.environ.get('GITHUB_OUTPUT'):
-        with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
-            output.write('changed=' + str(changed).lower() + '\nrevision=' + latest + '\n')
     if not changed:
+        write_status(latest, changed=False, blocked=False)
         print('WebKitty pin is already current.')
         return
     comparison = fetch('/compare/' + current[0] + '...' + latest)
@@ -68,9 +100,24 @@ def main():
     if os.environ.get('GITHUB_RUN_ID'):
         report += ('\nValidação: ' + os.environ.get('GITHUB_SERVER_URL', 'https://github.com') + '/' +
                    os.environ.get('GITHUB_REPOSITORY', '') + '/actions/runs/' + os.environ['GITHUB_RUN_ID'] + '\n')
+    # Compare the complete upstream tree with all separately pinned destination paths.
+    # A collision must never be resolved by overwriting a protected component.
+    snapshot = fetch('/git/trees/' + latest + '?recursive=1')
+    collisions = detect_collisions(snapshot, addon_targets())
+    if collisions:
+        report += ('\n### BLOQUEADO: conflito com componentes fixados\n\n'
+                   'O upstream já fornece caminhos reservados por módulos separados. '
+                   'A atualização NÃO foi aplicada nem publicada.\n\n')
+        report += ''.join('- ' + chr(96) + path + chr(96) + '\n' for path in collisions)
+        report += ('\nRequer revisão humana de proveniência, hashes e compatibilidade. '
+                   'Não remova a proteção contra sobrescrita.\n')
     (ROOT/'upstream-review.md').write_text(report, encoding='utf-8')
     (ROOT/'upstream-candidate.txt').write_text(latest + '\n', encoding='utf-8')
-    build.write_text(replace_pin(original, latest), encoding='utf-8')
+    if collisions:
+        write_status(latest, changed=False, blocked=True)
+    else:
+        build.write_text(replace_pin(original, latest), encoding='utf-8')
+        write_status(latest, changed=True, blocked=False)
     print(report)
 
 

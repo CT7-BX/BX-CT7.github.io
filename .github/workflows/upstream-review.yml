@@ -20,6 +20,7 @@ jobs:
     timeout-minutes: 20
     outputs:
       changed: ${{ steps.candidate.outputs.changed }}
+      blocked: ${{ steps.candidate.outputs.blocked }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -38,14 +39,18 @@ jobs:
           node --test tests/*.integration.cjs
           python3 diagnostics/verify_site.py
       - name: Record review summary even if validation fails
-        if: always() && steps.candidate.outputs.changed == 'true'
+        if: always() && (steps.candidate.outputs.changed == 'true' || steps.candidate.outputs.blocked == 'true')
         run: |
           if [ -f upstream-review.md ]; then
             cat upstream-review.md >> "$GITHUB_STEP_SUMMARY"
-            printf '\nValidation result: %s\n' '${{ job.status }}' >> "$GITHUB_STEP_SUMMARY"
+            if [ "${{ steps.candidate.outputs.blocked }}" = "true" ]; then
+              printf '\n**Estado: BLOQUEADO por incompatibilidade; nenhuma atualização aplicada.**\n' >> "$GITHUB_STEP_SUMMARY"
+            else
+              printf '\nValidation result: %s\n' '${{ job.status }}' >> "$GITHUB_STEP_SUMMARY"
+            fi
           fi
       - name: Save candidate review evidence
-        if: always() && steps.candidate.outputs.changed == 'true'
+        if: always() && (steps.candidate.outputs.changed == 'true' || steps.candidate.outputs.blocked == 'true')
         uses: actions/upload-artifact@v7.0.2
         with:
           name: webkitty-proposal
