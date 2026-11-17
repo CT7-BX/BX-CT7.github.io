@@ -271,3 +271,37 @@ test('visibilitychange listener attaches to document and not window', () => {
   env.documentEvents.visibilitychange();
   assert.equal(env.requests.length, 2);
 });
+
+
+test('oversized release metadata is rejected before parsing without enabling updates', () => {
+  const env = environment();
+  env.requests[0].respond({ schema_version: 1, revision, note: 'x'.repeat(16400) });
+  assert.equal(env.title(), 'Não foi possível verificar');
+  assert.equal(env.nodes['bx-site-check'].hidden, true);
+  assert.equal(env.timeouts[0].cleared, true);
+  env.tick(); current(env);
+  assert.equal(env.title(), 'Versão mais recente');
+});
+
+test('bad release metadata preserves a previously verified update offer', () => {
+  const env = environment(); newer(env);
+  env.tick();
+  env.requests[1].respond({ schema_version: 1, revision, note: 'x'.repeat(16384) });
+  assert.equal(env.title(), 'Nova atualização disponível');
+  assert.equal(env.nodes['bx-site-check'].hidden, false);
+  assert.match(env.message(), /consulta falhou/);
+  assert.equal(env.timeouts[1].cleared, true);
+});
+
+test('repeated online notifications do not cancel an in-flight release query', () => {
+  const env = environment(), first = env.requests[0];
+  env.events.online(); env.events.online(); env.events.online();
+  assert.equal(env.requests.length, 1);
+  assert.notEqual(first.aborted, true);
+  current(env);
+  env.events.online();
+  assert.equal(env.requests.length, 2);
+  env.navigator.onLine = false;
+  env.events.offline();
+  assert.equal(env.requests[1].aborted, true);
+});
