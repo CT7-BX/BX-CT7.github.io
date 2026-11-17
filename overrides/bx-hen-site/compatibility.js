@@ -51,7 +51,7 @@
      ['Cookies (configuração)',typeof navigator.cookieEnabled==='boolean'?(navigator.cookieEnabled?'habilitados (indicativo)':'desabilitados (indicativo)'):'não informado'],
      ['Foco da janela',typeof document.hasFocus==='function'?(document.hasFocus()?'janela com foco':'janela sem foco'):'API indisponível'],
      ['Visibilidade da página',typeof document.visibilityState==='string'?(document.visibilityState==='visible'?'visível':document.visibilityState==='hidden'?'em segundo plano':'estado: '+document.visibilityState):'API indisponível'],
-     ['Preferência por movimento reduzido',(typeof window.matchMedia==='function')?(window.matchMedia('(prefers-reduced-motion: reduce)').matches?'ativada':'não ativada ou não suportada'):'API indisponível'],
+     ['Preferência por movimento reduzido',(function(){try{return typeof window.matchMedia==='function'?(window.matchMedia('(prefers-reduced-motion: reduce)').matches?'ativada':'não ativada ou não suportada'):'API indisponível';}catch(e){return 'consulta indisponível';}})()],
      ['Desbloqueio BX-HEN','não implementado'],
      ['GoldHEN ativo','não verificável pela página']
    ];
