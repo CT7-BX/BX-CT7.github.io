@@ -56,3 +56,18 @@ test('blocked storage is reported without interrupting other diagnostics', () =>
   assert.equal(results.sessionStorage,'bloqueado');
   assert.equal(results.HTTPS,'sim');
 });
+
+
+test('colliding compatibility probe never overwrites or removes existing data', () => {
+  let writes = 0, deletes = 0;
+  const storage = {
+    getItem(k) {return k.startsWith('bx-hen-compatibility-probe-') ? 'existing' : null;},
+    setItem() {writes++;},
+    removeItem() {deletes++;},
+  };
+  const result = values(testPage(storage));
+  assert.equal(result.localStorage, 'bloqueado');
+  assert.equal(result.sessionStorage, 'bloqueado');
+  assert.equal(writes, 0);
+  assert.equal(deletes, 0);
+});
