@@ -74,7 +74,9 @@
       if (done || container.getAttribute('data-bx-homebrew-render') !== renderToken) return;
       done = true; clearTimer(); container.bxCatalogRequest = null;
       if (request && request.readyState !== 4) { try { request.abort(); } catch (ignore) {} }
-      addFallback(container);
+      if (cachedItems && cachedItems.length) {
+        for (var n = 0; n < cachedItems.length; n++) addItem(container, cachedItems[n]);
+      } else addFallback(container);
     }
     try {
     request = new XMLHttpRequest();
@@ -87,6 +89,8 @@
       if (request.status === 0) return;
       if (request.status !== 200) { fallback(); return; }
       try {
+        if (typeof request.responseText !== 'string' || request.responseText.length > 262144)
+          throw Error('oversized catalog response');
         var body = JSON.parse(request.responseText);
         if (!body || body.schema_version !== 1 || !Array.isArray(body.items) || !body.items.length || body.items.length > 200)
           throw Error('invalid catalog');
@@ -94,7 +98,7 @@
         for (var i = 0; i < body.items.length; i++) {
           var item = body.items[i];
           if (item && (item.id === 'java' || item.id === 'minecraft-online-manager') &&
-              typeof item.title === 'string' && item.title.replace(/\s/g, '')) accepted.push(item);
+              typeof item.title === 'string' && item.title.length <= 160 && item.title.replace(/\s/g, '')) accepted.push(item);
         }
         if (!accepted.length) { fallback(); return; }
         cachedItems = accepted; cachedAt = new Date().getTime();

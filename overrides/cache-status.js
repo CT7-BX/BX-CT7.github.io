@@ -5,7 +5,7 @@
     var frame = document.getElementById('cacheFrame'), retry = document.getElementById('bx-cache-retry');
     var back = document.getElementById('bx-cache-back'), progress = document.getElementById('bx-cache-progress');
     if (!status || !fill || !frame || !retry || !back) return;
-    var finished = false, failed = false, idleTimer = null, warned = false;
+    var finished = false, failed = false, idleTimer = null, warned = false, lastPercent = 0;
     function stopIdle() {
         if (idleTimer !== null) { window.clearTimeout(idleTimer); idleTimer = null; }
     }
@@ -56,8 +56,10 @@
             }, 1000);
         } else if (data.type === 'CACHE_PROGRESS') {
             if (typeof data.percent === 'number' && isFinite(data.percent) && data.percent >= 0 && data.percent <= 100) {
-                activity();
                 var percent = Math.round(data.percent);
+                if (percent < lastPercent) return;
+                lastPercent = percent;
+                activity();
                 fill.style.width = percent + '%';
                 if (progress) progress.setAttribute('aria-valuenow', String(percent));
                 status.textContent = 'Baixando arquivos... ' + percent + '%';

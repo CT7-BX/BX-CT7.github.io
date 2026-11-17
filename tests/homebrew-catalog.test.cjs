@@ -68,3 +68,39 @@ test('catalog memory reuse expires after 30 seconds and fetches a fresh result',
  e.container.children=[];e.advance(30001);e.render();assert.equal(e.requests.length,2);
  assert.notEqual(e.requests[0].aborted,true);e.requests[1].respond({schema_version:1,items});assert.equal(e.container.children.length,1);
 });
+
+
+test('invalid refreshed catalog keeps the last verified cards instead of placeholders', () => {
+  const e=environment();e.render();e.requests[0].respond({schema_version:1,items});
+  e.container.children=[];e.advance(30001);e.render();
+  assert.equal(e.requests.length,2);
+  e.requests[1].respond({schema_version:2,items:[]});
+  assert.equal(e.container.children.length,1);
+  assert.equal(e.container.children[0].id,'bx-homebrew-java');
+  assert.equal(e.timers[1].cleared,true);
+});
+
+test('timeouts after cache expiry reuse verified cards but fresh results still replace them', () => {
+  const e=environment();e.render();e.requests[0].respond({schema_version:1,items});
+  e.container.children=[];e.advance(30001);e.render();e.timers[1].fn();
+  assert.equal(e.requests[1].aborted,true);
+  assert.equal(e.container.children.length,1);
+  e.container.children=[];e.render();assert.equal(e.requests.length,3);
+  e.requests[2].respond({schema_version:1,items:[{id:'java',title:'Updated Java',description:'Latest'}]});
+  assert.ok(e.all().some(n=>n.textContent==='Updated Java'));
+});
+
+test('too-large catalog response fails safely before parsing, preserving verified cards', () => {
+  const e=environment();e.render();e.requests[0].respond({schema_version:1,items});
+  e.container.children=[];e.advance(30001);e.render();
+  e.requests[1].respond({schema_version:1,items:[{id:'java',title:'x'.repeat(262200)}]});
+  assert.equal(e.container.children.length,1);
+  assert.ok(e.all().some(n=>n.textContent==='Java'));
+  assert.equal(e.timers[1].cleared,true);
+});
+
+test('catalog ignores unreasonably long item titles', () => {
+  const e=environment();e.render();
+  e.requests[0].respond({schema_version:1,items:[{id:'java',title:'x'.repeat(161)}]});
+  assert.equal(e.container.children.length,2);
+});
