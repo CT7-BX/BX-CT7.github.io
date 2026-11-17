@@ -19,3 +19,7 @@
 .bx-compact .hero{margin-bottom:9px}
 .bx-compact .main{padding-top:12px}
 @media(max-width:760px){.bx-testgrid{grid-template-columns:1fr}.bx-release{align-items:stretch}.bx-release-actions{width:100%}.bx-release-actions button{flex:1}}
+
+/* Minimum controller/touch hit area and visible focus in diagnostics. */
+.bx-mini{min-height:44px;min-width:44px}
+.bx-mini:focus,.bx-release-actions button:focus{outline:2px solid #4af0ff;outline-offset:3px}
