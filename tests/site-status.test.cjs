@@ -116,12 +116,56 @@ test('checks immediately and on each 10-second tick without resetting visible st
   assert.equal(env.reloads, 0); assert.equal(env.cacheClicks, 0);
 });
 
-test('hidden documents keep the same timer with no visibility listener', () => {
-  const env = environment({ hidden: true }); current(env);
-  assert.equal(env.events.visibilitychange, undefined);
-  env.tick(); current(env); env.tick();
-  assert.equal(env.requests.length, 3);
-  assert.equal(env.intervals[0].cleared, false);
+test('hidden startup avoids network polling until the tab becomes visible', () => {
+  const env = environment({ hidden: true });
+  assert.equal(env.requests.length, 0);
+  assert.equal(env.intervals.length, 0);
+  assert.equal(typeof env.events.visibilitychange, 'function');
+  env.tick();
+  env.events.online();
+  assert.equal(env.requests.length, 0);
+  env.document.hidden = false;
+  env.events.visibilitychange();
+  assert.equal(env.requests.length, 1);
+  current(env);
+  env.tick();
+  assert.equal(env.requests.length, 2);
+});
+
+test('hiding cancels in-flight checks and returning resumes only once', () => {
+  const env = environment();
+  const pending = env.requests[0];
+  env.document.hidden = true;
+  env.events.visibilitychange();
+  assert.equal(pending.aborted, true);
+  assert.equal(env.intervals[0].cleared, true);
+  assert.equal(env.timeouts[0].cleared, true);
+  pending.respond({ schema_version: 1, revision });
+  env.tick();
+  env.events.online();
+  assert.equal(env.requests.length, 1);
+  env.document.hidden = false;
+  env.events.visibilitychange();
+  env.events.visibilitychange();
+  assert.equal(env.requests.length, 2);
+  assert.equal(env.intervals.filter(x => !x.cleared).length, 1);
+  current(env);
+  assert.equal(env.title(), 'Versão mais recente');
+});
+
+test('visibility changes never restart checks during an active cache update', () => {
+  const env = environment({ ps4: true });
+  newer(env);
+  env.update();
+  env.document.hidden = true;
+  env.events.visibilitychange();
+  env.document.hidden = false;
+  env.events.visibilitychange();
+  assert.equal(env.requests.length, 1);
+  assert.equal(env.cacheClicks, 1);
+  assert.equal(env.intervals.filter(x => !x.cleared).length, 0);
+  env.events.pageshow({ persisted: true });
+  assert.equal(env.requests.length, 2);
 });
 
 test('poll cancels an unfinished request and ignores its late response', () => {
