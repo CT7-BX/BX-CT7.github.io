@@ -72,3 +72,27 @@ These changes do not edit page markup or CSS. Existing visual themes,
 screen layout, links, button labels and the original host controls stay
 unchanged. A reduced-effects visual theme was intentionally not added because
 the owner requested no visual changes.
+
+
+## Automatic inventory of every firmware and GoldHEN choice
+
+The previously reviewed seven firmware records are retained as **guards**,
+not used as the complete published inventory. On every build,
+`diagnostics/generate_compatibility_catalog.cjs` reads the actual generated
+firmware and GoldHEN selectors and evaluates the firmware/selection-only
+JavaScript in a sandbox with mocked browser APIs. No jailbreak, payload,
+network connection or console code is executed.
+
+The build fails when a reviewed firmware changes routing unexpectedly, a
+GoldHEN radio choice lacks a local binary, a reported path is absent, or the
+14.02 selector no longer limits itself to the reviewed 2.4b18.13/14 choices.
+The output is validated by `compatibility_matrix.py` and published as
+`compatibility-matrix.json`, with evidence for **every firmware listed**
+in the original selector and every GoldHEN version in the original radio
+menu. Additional reviewed unsupported versions remain explicitly documented.
+
+`goldhen_options_checked` means that an isolated simulated selector
+assigned a local file path. It does **not** prove compatibility or activation
+on an actual PS4. The existing layout, controls and original binaries are
+untouched. Source firmware boundaries are not widened just to advertise
+a version.
