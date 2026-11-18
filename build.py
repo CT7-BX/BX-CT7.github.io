@@ -52,7 +52,13 @@ apply_gta_theme(dest, root / "overrides")
 # Read-only firmware evidence: embed a validated matrix into the existing
 # diagnostic report. This must not change the page layout or jailbreak logic.
 from diagnostics.compatibility_matrix import publish as publish_compatibility_matrix
-publish_compatibility_matrix(dest)
+# Reconcile the published firmware/GH selectors with their read-only JS routing
+# on every build; never infer support merely from an HTML option.
+generated_matrix = dest / '.bx-compatibility-generated.json'
+subprocess.run(['node', str(root / 'diagnostics/generate_compatibility_catalog.cjs'),
+                str(dest), str(generated_matrix)], check=True)
+publish_compatibility_matrix(dest, generated_matrix)
+generated_matrix.unlink()
 # Publish the standalone browser preview independently of PS4 payloads.
 preview_dir = dest / 'bx-gta'
 preview_dir.mkdir(parents=True, exist_ok=True)
