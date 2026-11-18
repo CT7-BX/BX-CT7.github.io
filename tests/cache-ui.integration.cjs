@@ -149,3 +149,39 @@ test('cache success still redirects normally when the user stays on the cache pa
  e.timers[0].fn();
  assert.equal(e.replaced,'./?test=0');
 });
+
+
+test('cache completion after BFCache restore still returns to the original host', () => {
+ const e=environment();
+ e.send({type:'CACHE_PROGRESS',percent:40});
+ e.events.pagehide();
+ assert.equal(e.idleTimers[1].cleared,true);
+ e.events.pageshow({persisted:true});
+ e.send({type:'CACHE_COMPLETE'});
+ assert.match(e.nodes.cacheStatus.textContent,/Cache atualizado.*Voltando ao site/);
+ assert.equal(e.timers.length,1);
+ e.timers[0].fn();
+ assert.equal(e.replaced,'./?test=0');
+});
+
+test('completed cache before pagehide never auto-redirects from a stale queued timer', () => {
+ const e=environment();
+ e.send({type:'CACHE_COMPLETE'});
+ const old=e.timers[0];
+ e.events.pagehide();
+ e.events.pageshow({persisted:true});
+ old.fn();
+ assert.equal(e.replaced,null);
+ assert.match(e.nodes.cacheStatus.textContent,/Use Voltar ao site/);
+});
+
+test('cache completion while away remains manual and cannot schedule a redirect', () => {
+ const e=environment();
+ e.events.pagehide();
+ e.send({type:'CACHE_COMPLETE'});
+ assert.equal(e.timers.length,0);
+ assert.match(e.nodes.cacheStatus.textContent,/Use Voltar ao site/);
+ e.events.pageshow({persisted:true});
+ assert.equal(e.timers.length,0);
+ assert.equal(e.replaced,null);
+});
