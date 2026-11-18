@@ -174,3 +174,24 @@ test('invalid network targets and ports fail before any request is created',()=>
   const e=env();Object.assign(e.c,{user:{ip},isPS4Console:()=>false,window:{lang:{}},log(){},alert(){}});e.c.Loadpayloadlocal('/file.bin','File','File',false,port);assert.equal(e.requests.length,0);
  }
 });
+
+test('online loader switches mutually exclusive session intent without stale payload selection',()=>{
+ const e=env(),values={payload_path:'/old.bin',binloader:1};let launches=0;
+ Object.assign(e.c,{window:{},isPS4Console:()=>true,jailbreak(){launches++;},storage:{session:{set(k,v){values[k]=v;},remove(k){delete values[k];}}}});
+ assert.equal(e.c.Loadpayloadonline(undefined),true);assert.equal(values.payload_path,undefined);assert.equal(values.binloader,1);
+ e.c.Loadpayloadonline('/new.bin');assert.equal(values.binloader,undefined);assert.equal(values.payload_path,'/new.bin');assert.equal(launches,2);
+ e.c.isPS4Console=()=>false;assert.equal(e.c.Loadpayloadonline('/external.bin'),false);assert.equal(values.payload_path,'/new.bin');assert.equal(launches,2);
+});
+test('active payload lock blocks online exploit startup before mutating session state',()=>{
+ const e=env();Object.assign(e.c,{window:{},user:{ip:'127.0.0.1'},log(){},isPS4Console:()=>true,jailbreak(){throw Error('Must not run');},storage:{session:{set(){throw Error('Must not change intent');},remove(){throw Error('Must not change intent');}}}});
+ e.c.Loadpayloadlocal('/pending.bin','Pending','Pending',false);assert.equal(e.c.bxPayloadTransfersBusy(),true);assert.equal(e.c.Loadpayloadonline('/other.bin'),false);
+ e.c.bxCancelPayloadTransfers();assert.equal(e.c.bxPayloadTransfersBusy(),false);
+});
+test('ELF helper captures the selected remote console instead of always posting to localhost',()=>{
+ const e=env();Object.assign(e.c,{window:{},user:{ip:'192.168.1.50'},isPS4Console:()=>false,log(){}});
+ e.c.sendElfToElfldr('/file.elf','file.elf',e.callback);e.c.user.ip='192.168.1.60';e.requests[0].respond();assert.equal(e.requests[1].url,'http://192.168.1.50:9021/file.elf?pipe=0');e.requests[1].respond(202);assert.equal(e.calls[0][0],true);
+});
+test('custom payload URL creation failure is reported without a request or leaked operation',()=>{
+ const e=env();let alerts=0;Object.assign(e.c,{window:{},URL:{createObjectURL(){throw Error('unsupported');}},alert(){alerts++;},log(){}});
+ assert.doesNotThrow(()=>e.c.customPayload({name:'file.bin',size:4}));assert.equal(e.requests.length,0);assert.equal(e.c.bxPayloadTransfersBusy(),false);assert.equal(alerts,1);
+});

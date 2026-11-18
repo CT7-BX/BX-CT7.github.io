@@ -105,7 +105,7 @@
             } catch (error) { failure('A consulta não está disponível neste navegador.'); }
         }
         button.onclick = function () {
-            if (!available || button.disabled) return;
+            if (!available || button.disabled || (window.bxHostRuntime && window.bxHostRuntime.isBusy())) return;
             if (navigator.onLine === false) { check(); return; }
             var original = id('updateCache');
             var ps4 = typeof isPS4Console === 'function' && isPS4Console();

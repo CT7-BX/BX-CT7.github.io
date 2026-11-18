@@ -2,6 +2,16 @@
 var ELFLDR = 'http://127.0.0.1:9021';
 var needsPayloadLoader = false;
 var bxPayloadOperations = {};
+function bxPayloadTransfersBusy() {
+    for (var key in bxPayloadOperations) if (Object.prototype.hasOwnProperty.call(bxPayloadOperations,key)) return true;
+    return false;
+}
+function bxPayloadActivity() {
+    if (typeof document !== 'undefined' && document.createEvent && typeof window !== 'undefined' && window.dispatchEvent) {
+        var event = document.createEvent('Event'); event.initEvent('bx-host-state',false,false); window.dispatchEvent(event);
+    }
+}
+if (typeof window !== 'undefined') window.bxPayloadTransfersBusy = bxPayloadTransfersBusy;
 function bxPayloadWords() { return typeof window !== 'undefined' && window.lang ? window.lang : {}; }
 function bxPayloadMessage(text, color) { if (typeof log === 'function') log(text,color || 'orange'); }
 function bxPayloadNotify(text) { bxPayloadMessage(text); if (typeof alert === 'function') alert(text); }
@@ -32,7 +42,9 @@ function loadAndSend(url,onDone,name,args,endpoint) {
     });
 }
 function sendElfToElfldr(url,name,onDone,args) {
-    var endpoint = ELFLDR;
+    var endpoint;
+    try { endpoint = 'http://'+bxPayloadIP()+':9021'; }
+    catch (error) { bxPayloadNotify(error.message); if (onDone) onDone(false,error.message); return null; }
     return loadAndSend(url,function (status,text) {
         var ok = status === 200 || status === 202;
         if (ok) bxPayloadMessage('Envio aceito pelo Elf Loader. Isso não confirma a execução do payload.','green');
@@ -67,14 +79,14 @@ function Loadpayloadlocal(file,name,id,required,customPort,onComplete) {
     var target = 'http://'+ip+':'+(elf ? 9021 : Number(port));
     var operation = {cancel:function () {
         if (done) return;
-        done = true; delete bxPayloadOperations[ip];
+        done = true; delete bxPayloadOperations[ip]; bxPayloadActivity();
         if (request) { try { request.abort(); } catch (ignore) {} }
         if (onComplete) onComplete(false);
     }};
-    bxPayloadOperations[ip] = operation;
+    bxPayloadOperations[ip] = operation; bxPayloadActivity();
     function finish(ok, reason) {
         if (done) return;
-        done = true; delete bxPayloadOperations[ip];
+        done = true; delete bxPayloadOperations[ip]; bxPayloadActivity();
         if (ok) {
             var message = bxPayloadWords().payloadLoaderSendSuccess || 'Envio aceito pelo carregador: {payload}';
             bxPayloadMessage(String(message).replace('{payload}',name || getPayloadName(file)),'green');
@@ -95,15 +107,21 @@ function Loadpayloadlocal(file,name,id,required,customPort,onComplete) {
     return operation;
 }
 function Loadpayloadonline(file) {
-    if (typeof window !== 'undefined' && window.bxHostRuntime && window.bxHostRuntime.isBusy()) return false;
-    if (file === undefined || file === null) storage.session.set('binloader',1);
-    else storage.session.set('payload_path',file);
-    if (isPS4Console()) jailbreak();
+    if (bxPayloadTransfersBusy() || (typeof window !== 'undefined' && window.bxHostRuntime && window.bxHostRuntime.isBusy())) return false;
+    if (!isPS4Console()) return false;
+    if (file === undefined || file === null) {
+        storage.session.remove('payload_path'); storage.session.set('binloader',1);
+    } else {
+        storage.session.remove('binloader'); storage.session.set('payload_path',file);
+    }
+    jailbreak();
     return true;
 }
 function customPayload(file) {
     if (!file || !file.size) { bxPayloadNotify('Selecione um arquivo de payload não vazio.'); return; }
-    var url = URL.createObjectURL(file);
+    var url;
+    try { url = URL.createObjectURL(file); }
+    catch (error) { bxPayloadNotify('Este navegador não conseguiu abrir o arquivo selecionado.'); return null; }
     return Loadpayloadlocal(url,file.name,file.id,false,undefined,function () { URL.revokeObjectURL(url); });
 }
 function payloadRouter(payload) {

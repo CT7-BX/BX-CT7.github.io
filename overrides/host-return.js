@@ -12,6 +12,7 @@
             var event = document.createEvent('Event'); event.initEvent('bx-host-state',false,false); event.bxState = next; window.dispatchEvent(event);
         }
     }
+    function transferring() { return typeof window.bxPayloadTransfersBusy === 'function' && window.bxPayloadTransfersBusy(); }
     function running() { return phase === 'launching' || phase === 'running'; }
     function hideClass(active) { if (document.body) document.body.classList[active ? 'add' : 'remove']('bx-host-running'); }
     function show(element) { if (element) { element.classList.remove('hidden'); if (element.style.display === 'none') element.style.removeProperty('display'); } }
@@ -38,6 +39,7 @@
     }
     function launch(operation) {
         if (running()) return Promise.resolve(false);
+        if (transferring()) { releaseClick(); notice('Aguarde o envio do payload terminar antes de iniciar.'); return Promise.resolve(false); }
         if (!prepared || phase === 'failed' || phase === 'interrupted' || window.bxCacheEntryPending) {
             releaseClick(); notice(prepared ? 'Reabra o host para iniciar uma nova tentativa.' : 'Aguarde a preparação do host terminar antes de iniciar.'); return Promise.resolve(false);
         }
@@ -52,7 +54,7 @@
         catch (error) { fail(error,token); return Promise.resolve(false); }
     }
     var runtime = {
-        isBusy: function () { return running() || phase === 'preparing' || phase === 'cache'; },
+        isBusy: function () { return running() || transferring() || phase === 'preparing' || phase === 'cache'; },
         state: function () { return phase; },
         prepare: function (operation) {
             if (phase === 'interrupted') return Promise.resolve(false);
@@ -89,7 +91,7 @@
             var returnGeneration = generation;
             returnTimer = window.setTimeout(function () {
                 returnTimer = null;
-                if (phase !== 'completed' || returnGeneration !== generation) return;
+                if (phase !== 'completed' || returnGeneration !== generation || transferring()) return;
                 var target = typeof mainPage === 'string' ? mainPage : './';
                 var hashAt = target.indexOf('#'), hash = hashAt < 0 ? '' : target.substring(hashAt);
                 var path = hashAt < 0 ? target : target.substring(0,hashAt);

@@ -63,3 +63,9 @@ test('abandoned asynchronous initialization never re-enables a restored page',as
  const e=env();let release;const waiting=new Promise(resolve=>release=resolve);const ready=e.c.bxHostRuntime.prepare(()=>waiting);
  await Promise.resolve();e.emit('pagehide');release();assert.equal(await ready,false);assert.equal(e.c.bxHostRuntime.state(),'interrupted');
 });
+
+test('active payload transfer blocks a new chain and the scheduled return navigation',async()=>{
+ const e=env({returnAfter:true});let active=true;e.c.bxPayloadTransfersBusy=()=>active;
+ await e.c.bxHostRuntime.prepare(()=>{});assert.equal(e.c.bxHostRuntime.isBusy(),true);await e.c.jailbreak();assert.equal(e.launches,0);
+ active=false;await e.c.jailbreak();e.c.jailbreakSuccess();active=true;e.timers[0].fn();assert.equal(e.c.location.href,'unchanged');assert.equal(e.launches,1);
+});

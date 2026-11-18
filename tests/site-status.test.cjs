@@ -311,3 +311,8 @@ test('release polling cannot compete with initialization or an active host opera
  e.tick();const pending=e.requests[1];e.setBusy(true);assert.equal(pending.aborted,true);e.tick();assert.equal(e.requests.length,2);
  e.setBusy(false);assert.equal(e.requests.length,2);e.tick();assert.equal(e.requests.length,3);
 });
+
+test('a previously offered update cannot interrupt an active host operation',()=>{
+ const e=environment({ps4:true});newer(e);e.setBusy(true);e.update();assert.equal(e.cacheClicks,0);assert.equal(e.reloads,0);
+ e.setBusy(false);e.update();assert.equal(e.cacheClicks,1);
+});

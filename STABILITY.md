@@ -396,3 +396,13 @@ binários nem alegação de sucesso físico.
 ## Reconstrução do runtime do host (18/11/2026)
 
 Cache, inicialização, retorno e transporte passam a ser montados em uma camada central. Etapas de remendo antigas foram removidas. Veja [RUNTIME-REBUILD.md](RUNTIME-REBUILD.md) para a migração, os testes automatizados e o que permanece pendente no PS4 13.52. Não houve alteração de visual, kernel ou bytes dos payloads.
+
+## Proteção entre envio, atualização e retorno (18/11/2026)
+
+- Um envio de payload ativo agora participa do estado ocupado do host. Ele bloqueia nova cadeia e suspende a consulta de atualização; terminar/cancelar o envio libera o estado.
+- Clicar em uma atualização já oferecida não pode interromper uma operação ocupada. O retorno automático de conclusão não navega enquanto houver envio em andamento.
+- A opção de BinLoader remove a seleção antiga de payload; selecionar um payload remove o marcador de BinLoader. Navegação externa não grava uma intenção de execução no console.
+- O helper ELF usa o endereço do console selecionado, fixado antes do download. Arquivo personalizado com falha ao criar URL temporária recebe mensagem, sem deixar envio pendente.
+- Validação: 288 testes Node e 43 Python aprovados; 14 manifests offline verificados; 200 arquivos de kernel/payloads/estilos iguais à comparação anterior. Seis regressões novas cobrem estes conflitos e falhas.
+
+Não houve teste físico no PS4. Resposta de servidor não comprova execução do payload, e estes testes não confirmam resolução da tela preta no console.
