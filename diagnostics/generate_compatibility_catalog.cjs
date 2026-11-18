@@ -11,9 +11,10 @@ function parseOptions(html, id, label) {
   const pattern = new RegExp('<select\\b[^>]*id="' + id + '"[^>]*>[\\s\\S]*?<\\/select>', 'i');
   const part = html.match(pattern);
   if (!part) throw Error('Missing ' + label + ' selector');
-  const values = Array.from(part[0].matchAll(/<option\b[^>]*value="([0-9]{1,2}\.[0-9]{2})"/g), m => m[1]);
-  if (values.length < 50 || values.length > 130 || new Set(values).size !== values.length)
-    throw Error('Incomplete or duplicate firmware option list');
+  const raw = Array.from(part[0].matchAll(/<option\b[^>]*value="([0-9]{1,2}\.[0-9]{2})"/g), m => m[1]);
+  const values = Array.from(new Set(raw));
+  if (values.length < 50 || values.length > 130)
+    throw Error('Incomplete firmware option list: ' + values.length + ' unique of ' + raw.length + ' listed');
   return values;
 }
 function selectedGoldHEN(html) {
