@@ -42,10 +42,10 @@ test('no claim of physical jailbreak success is inferred from build metadata', (
 
 
 test('complete published firmware and GoldHEN catalogs mirror the real unchanged UI', () => {
-  const select=html.match(/<select[^>]*id="ps4FwSelect"[\\s\\S]*?<\\/select>/);
+  const select=html.match(/<select[^>]*id="ps4FwSelect"[\s\S]*?<\/select>/);
   assert.ok(select);
-  const firmware=[...new Set(Array.from(select[0].matchAll(/<option[^>]*value="([0-9]{1,2}\\.[0-9]{2})"/g),m=>m[1]))];
-  const goldhen=Array.from(html.matchAll(/<input[^>]*name="goldhen"[^>]*value="(GHv2\\.4b18\\.[0-9]{1,2})"/g),m=>m[1]);
+  const firmware=[...new Set(Array.from(select[0].matchAll(/<option[^>]*value="([0-9]{1,2}\.[0-9]{2})"/g),m=>m[1]))];
+  const goldhen=Array.from(html.matchAll(/<input[^>]*name="goldhen"[^>]*value="(GHv2\.4b18\.[0-9]{1,2})"/g),m=>m[1]);
   assert.ok(firmware.length>=50);
   assert.ok(goldhen.length>=7);
   assert.equal(data.firmware_option_count,firmware.length);
@@ -64,7 +64,7 @@ test('each documented GoldHEN option maps to an existing unchanged binary with c
   for(const option of data.goldhen_options) {
     assert.equal(option.physical_ps4_tested,false);
     assert.equal(option.verification,'file_and_menu_only');
-    assert.match(option.binary,/^includes\\/payloads\\/HEN\\/goldhen_[A-Za-z0-9._-]+\\.bin$/);
+    assert.match(option.binary,/^includes\/payloads\/HEN\/goldhen_[A-Za-z0-9._-]+\.bin$/);
     const bin=fs.readFileSync('dist/'+option.binary);
     assert.equal(crypto.createHash('sha256').update(bin).digest('hex'),option.sha256);
     assert.ok(!actualFiles.has(option.version),'duplicate version');
