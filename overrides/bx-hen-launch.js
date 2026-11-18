@@ -74,14 +74,22 @@
     if (log) log.textContent = nativeLog();
   }
 
+  function stopTicker() {
+    if (ticker !== null) { window.clearInterval(ticker); ticker = null; }
+  }
+
+  function startTicker() {
+    stopTicker();
+    ticker = window.setInterval(refresh, 800);
+  }
+
   function openPanel() {
     createPanel();
     if (!panel) return;
     formerFocus = document.activeElement;
     panel.className = 'bx-open';
     refresh();
-    if (ticker) window.clearInterval(ticker);
-    ticker = window.setInterval(refresh, 800);
+    startTicker();
     var closeButton = byId('bx-hen-close');
     if (closeButton && typeof closeButton.focus === 'function') closeButton.focus();
   }
@@ -89,8 +97,7 @@
   function closePanel() {
     if (!panel) return;
     panel.className = '';
-    if (ticker) window.clearInterval(ticker);
-    ticker = null;
+    stopTicker();
     if (formerFocus && typeof formerFocus.focus === 'function') formerFocus.focus();
     formerFocus = null;
   }
@@ -115,6 +122,15 @@
   function init() {
     createPanel();
     document.addEventListener('click', onNativeLaunch, true);
+    // Pause presentation updates while the PS4 browser is away. A BFCache
+    // restoration resumes only the visual ticker, never the native launch.
+    window.addEventListener('pagehide', stopTicker, false);
+    window.addEventListener('pageshow', function (event) {
+      if (!event || !event.persisted || !panel ||
+          panel.className.indexOf('bx-open') < 0) return;
+      refresh();
+      startTicker();
+    }, false);
     document.addEventListener('keydown', function (event) {
       if (event.keyCode === 27) closePanel();
     }, false);
