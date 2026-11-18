@@ -106,21 +106,42 @@
             configured:'Perfil configurado; solo pruebas automáticas estáticas.',
             absent:'Perfil no configurado en este host.',
             unknown:'Firmware fuera de la lista auditada.',
-            physical:'Prueba física en consola: no verificada.'
+            physical:'Prueba física en consola: no verificada.',
+            preflight:'Comprobaciones locales (solo lectura):',
+            versionAllowed:'La selección GoldHEN está registrada para este firmware: ',
+            versionMissing:'La selección GoldHEN NO está registrada para este firmware: ',
+            versionUnset:'No se encontró una preferencia GoldHEN guardada; se comprobará la opción predeterminada del host.',
+            routeMismatch:'El diagnóstico del firmware discrepa con la matriz publicada.',
+            offline:'El navegador indica conexión desconectada; no se ha confirmado el modo sin conexión.',
+            cacheMissing:'El caché del navegador no está listo u obsoleto.'
         };
         if (locale.indexOf('en') === 0) return {
             heading:'Documented compatibility (not proof of jailbreak):',
             configured:'Profile configured; static automated tests only.',
             absent:'Profile not configured in this host.',
             unknown:'Firmware not included in the audited list.',
-            physical:'Physical console test: not verified.'
+            physical:'Physical console test: not verified.',
+            preflight:'Local checks (read-only):',
+            versionAllowed:'Selected GoldHEN is listed for this firmware: ',
+            versionMissing:'Selected GoldHEN is NOT listed for this firmware: ',
+            versionUnset:'No saved GoldHEN preference; the host default is not verified in this report.',
+            routeMismatch:'Browser firmware detection disagrees with the published compatibility matrix.',
+            offline:'Browser reports offline; working offline cache has not been confirmed.',
+            cacheMissing:'Browser AppCache is missing or obsolete.'
         };
         return {
             heading:'Compatibilidade documentada (não comprova desbloqueio):',
             configured:'Perfil configurado; apenas testes automáticos estáticos.',
             absent:'Perfil não configurado neste host.',
             unknown:'Firmware fora da lista auditada.',
-            physical:'Teste físico no console: não verificado.'
+            physical:'Teste físico no console: não verificado.',
+            preflight:'Verificações locais (somente leitura):',
+            versionAllowed:'GoldHEN selecionado consta da lista deste firmware: ',
+            versionMissing:'GoldHEN selecionado NÃO consta da lista deste firmware: ',
+            versionUnset:'Não há preferência GoldHEN salva; a opção padrão não foi testada por este relatório.',
+            routeMismatch:'A detecção do firmware diverge da matriz de compatibilidade publicada.',
+            offline:'O navegador informa ausência de conexão; o cache offline não foi confirmado.',
+            cacheMissing:'O AppCache do navegador está vazio ou obsoleto.'
         };
     }
     function redact(text) {
@@ -130,14 +151,46 @@
             .replace(/([?&]?(?:token|api[_-]?key|secret|password)\s*[=:]\s*)[^\s&;]+/gi, '$1[oculto]')
             .replace(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g, '[IP oculto]');
     }
+    function preflightLines(labels, record) {
+        var result = [labels.preflight], version = fw();
+        if (!record) result.push(labels.unknown);
+        else if (record.host_profile !== 'configured') result.push(labels.absent);
+        else {
+            result.push(labels.configured);
+            try {
+                if (typeof isFirmwareSupported === 'function' && !isFirmwareSupported(version))
+                    result.push(labels.routeMismatch);
+            } catch (ignore) { result.push(labels.routeMismatch); }
+            // Version selection is evidence from the published host, not a
+            // test that GoldHEN executed on any real PS4.
+            if (typeof user !== 'undefined' && user && user.currentJbFlavor === 'GoldHEN') {
+                var chosen = stored('GHVer');
+                if (!chosen) result.push(labels.versionUnset);
+                else if (record.goldhen_options_checked &&
+                         record.goldhen_options_checked.indexOf(chosen) === -1)
+                    result.push(labels.versionMissing + chosen);
+                else if (record.goldhen_options_checked)
+                    result.push(labels.versionAllowed + chosen);
+            }
+        }
+        if (typeof navigator !== 'undefined' && navigator.onLine === false)
+            result.push(labels.offline);
+        try {
+            var cache = window.applicationCache;
+            if (cache && (cache.status === 0 || cache.status === 5))
+                result.push(labels.cacheMissing);
+        } catch (ignoreCache) { }
+        result.push(labels.physical);
+        return result;
+    }
     function copyReport() {
         var rows = details(), lines = ['BX-CT7 PS4 Host - diagnóstico'];
         for (var i = 0; i < rows.length; i++) lines.push(rows[i][0] + ': ' + rows[i][1]);
         var labels = reportLanguage(), record = supportRecord(fw());
-        lines.push('', labels.heading, record ?
-            (record.host_profile === 'configured' ? labels.configured : labels.absent) :
-            labels.unknown, labels.physical,
-            'Canal publicado: estável; beta é somente validação, sem publicação automática.',
+        lines.push('', labels.heading);
+        var inspection = preflightLines(labels, record);
+        for (var j = 0; j < inspection.length; j++) lines.push(inspection[j]);
+        lines.push('Canal publicado: estável; beta é somente validação, sem publicação automática.',
             'Cache: estado indicado pelo navegador, não verificação de integridade física.');
         lines.push('', 'Últimas mensagens do host (até 12000 caracteres):',
                    hostText('console', 12000) || 'Nenhuma mensagem disponível.',
