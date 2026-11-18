@@ -9,7 +9,7 @@ const source = fs.readFileSync(path.join(__dirname, '../overrides/bx-hen-launch.
 const style = fs.readFileSync(path.join(__dirname, '../overrides/bx-hen-launch.css'), 'utf8');
 
 function environment() {
-  const listeners = {};
+  const listeners = {}, windowListeners = {}, cancelled = new Set();
   const intervals = [];
   let panel = null, closes = 0;
   const status = { textContent: 'Exploit status' };
@@ -38,11 +38,12 @@ function environment() {
   const window = {
     abortLoading: false,
     setInterval(fn) { intervals.push(fn); return intervals.length; },
-    clearInterval() {}
+    clearInterval(id) { cancelled.add(id); },
+    addEventListener(type, fn) { windowListeners[type] = fn; }
   };
   vm.runInNewContext(source, { document, window, user });
   return {
-    listeners, intervals, user, window, status, log, shownStatus, shownLog,
+    listeners, windowListeners, intervals, cancelled, user, window, status, log, shownStatus, shownLog,
     get panel() { return panel; },
     get closeFocusCalls() { return closes; },
     click(id) {
@@ -108,4 +109,37 @@ test('visual is locally self-contained, branded RUOK999 and isolated from payloa
   assert.match(style, /#bx-hen-neon/);
   assert.doesNotMatch(source, /preventDefault\s*\(|stopPropagation\s*\(|jailbreak\s*\(|chooseHEN\s*\(/);
   assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|payload_path\s*=/);
+});
+
+
+test('page history pauses and resumes the visual ticker without launching or altering firmware', () => {
+ const e=environment();
+ e.click('exploitRun');
+ assert.equal(e.intervals.length,1);
+ e.status.textContent='Mensagem de progresso original';
+ e.windowListeners.pagehide();
+ assert.ok(e.cancelled.has(1));
+ e.windowListeners.pageshow({persisted:true});
+ assert.equal(e.intervals.length,2);
+ assert.equal(e.shownStatus.textContent,'Mensagem de progresso original');
+ e.windowListeners.pageshow({persisted:true});
+ assert.equal(e.intervals.length,3);
+ assert.ok(e.cancelled.has(2),'must cancel previous ticker before another one');
+ assert.equal(e.user.currentJbFlavor,'GoldHEN');
+ e.key(27);
+ assert.ok(e.cancelled.has(3));
+ e.windowListeners.pageshow({persisted:true});
+ assert.equal(e.intervals.length,3,'closed UI must not restart on page history');
+});
+
+test('first navigation events do not restart the launch overlay after normal opening', () => {
+ const e=environment();
+ assert.equal(e.panel.className,'');
+ e.windowListeners.pageshow({persisted:false});
+ assert.equal(e.intervals.length,0);
+ e.click('ps-logo-container');
+ e.windowListeners.pagehide();
+ e.key(27);
+ e.windowListeners.pageshow({persisted:true});
+ assert.equal(e.intervals.length,1);
 });

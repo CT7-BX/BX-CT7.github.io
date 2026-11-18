@@ -350,3 +350,21 @@ A seleção simulada de um binário indica apenas uma rota configurada no
 código; não certifica funcionamento no console. Não são modificados:
 firmware do PS4, opções visíveis do seletor, interface, HTML, CSS,
 bytes de GoldHEN, kernel, payloads ou cadeia de desbloqueio.
+
+
+## Estabilidade de navegação durante cache e acompanhamento do host
+
+- A página de atualização do cache distingue a conclusão após restaurar uma
+  aba ainda em andamento da conclusão anterior à saída. Uma operação retomada
+  pode voltar normalmente ao host; temporizadores de retorno antigos ficam
+  invalidados por token de geração, mesmo que o WebKit entregue callbacks
+  previamente enfileirados.
+- Quando o cache já estava concluído antes da navegação, a aba restaurada
+  preserva o aviso **Voltar ao site**, sem redirecionamento inesperado.
+- O acompanhamento visual BX-HEN suspende seu temporizador de leitura do
+  status original durante `pagehide` e retoma ao voltar por BFCache se o
+  painel ainda estiver aberto. Não inicia nem repete a exploração e não
+  altera a seleção de HEN.
+- Testes de regressão simulam eventos de histórico, conclusão posterior,
+  callbacks antigos, ciclos de foco e fechamento do acompanhamento.
+  O layout, as cores e o conteúdo visual continuam idênticos.
