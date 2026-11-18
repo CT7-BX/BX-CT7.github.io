@@ -137,6 +137,7 @@ test('copied report headings support Portuguese, English and Spanish without cha
 
 const sampleMatrix={entries:[
  {firmware:'14.02',host_profile:'configured',
+  offline_manifest:'includes/caches/manifest/1402.manifest',
   goldhen_options_checked:['GHv2.4b18.13','GHv2.4b18.14']},
  {firmware:'13.53',host_profile:'not_configured',goldhen_options_checked:[]}
 ]};
@@ -152,6 +153,7 @@ test('14.02 read-only preflight distinguishes documented GoldHEN choices from ac
  const a=copiedPreflight({firmware:'14.02',flavor:'GoldHEN',ghVersion:'GHv2.4b18.14'});
  assert.match(a.report,/GoldHEN selecionado consta da lista deste firmware: GHv2\.4b18\.14/);
  assert.match(a.report,/Teste físico no console: não verificado/);
+ assert.match(a.report,/Manifesto offline documentado.*1402\.manifest/);
  assert.doesNotMatch(a.report,/GoldHEN ativo no console: Sim/);
  const b=copiedPreflight({firmware:'14.02',flavor:'GoldHEN',ghVersion:'GHv2.4b18.12'});
  assert.match(b.report,/GoldHEN selecionado NÃO consta da lista deste firmware: GHv2\.4b18\.12/);
