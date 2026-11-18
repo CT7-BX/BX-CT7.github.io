@@ -124,3 +124,28 @@ test('available badge requires reasonably bounded download and license metadata'
     assert.ok(e.all().some(n=>n.textContent==='PKG ainda não disponibilizado — sem instalador'));
   }
 });
+
+
+test('successful or failed catalog requests release their cancellation closures', () => {
+ const success=environment();success.render();
+ assert.equal(typeof success.container.bxCancelCatalog,'function');
+ success.requests[0].respond({schema_version:1,items});
+ assert.equal(success.container.bxCancelCatalog,null);
+ assert.equal(success.container.bxCatalogRequest,null);
+ const failed=environment();failed.render();
+ failed.requests[0].onerror();
+ assert.equal(failed.container.bxCancelCatalog,null);
+ assert.equal(failed.container.bxCatalogRequest,null);
+});
+
+test('superseded requests clear old cancellation references and ignore late callbacks', () => {
+ const e=environment();e.render();const old=e.requests[0],firstCancel=e.container.bxCancelCatalog;
+ e.render();assert.equal(old.aborted,true);
+ assert.equal(typeof e.container.bxCancelCatalog,'function');
+ assert.notEqual(e.container.bxCancelCatalog,firstCancel);
+ firstCancel();old.respond({schema_version:1,items});
+ assert.equal(e.container.children.length,0);
+ e.requests[1].respond({schema_version:1,items});
+ assert.equal(e.container.children.length,1);
+ assert.equal(e.container.bxCancelCatalog,null);
+});

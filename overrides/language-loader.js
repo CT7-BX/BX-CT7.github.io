@@ -2,6 +2,7 @@
  * Presentation only: never starts a payload or a jailbreak. */
 var bxLanguageLoadSerial = 0;
 var bxLanguageLastCommitted = null;
+var bxLanguagePending = null;
 function loadLanguage() {
     var selected = user.currentLanguage;
     var allowed = ['en', 'es', 'fa', 'ru', 'tr', 'zh-cn', 'ar', 'pt-br'];
@@ -10,6 +11,10 @@ function loadLanguage() {
     var radio = document.querySelector('input[name="language"][value="' + selected + '"]');
     if (radio) radio.checked = true;
     var serial = ++bxLanguageLoadSerial;
+    // Supersede the prior network/timeout immediately. A detached script
+    // must not leave an old Promise pending for eight more seconds.
+    var previousCancel = bxLanguagePending;
+    if (previousCancel) previousCancel();
     return new Promise(function (resolve, reject) {
         function stale() {
             if (serial === bxLanguageLoadSerial) return false;
@@ -25,9 +30,18 @@ function loadLanguage() {
             element.id = 'langScript';
             element.src = './includes/js/languages/' + language + '.js';
             var timer = window.setTimeout(function () { finish(false); }, 8000);
+            function cancel() {
+                if (done) return;
+                done = true; window.clearTimeout(timer);
+                if (element.parentNode) element.parentNode.removeChild(element);
+                if (bxLanguagePending === cancel) bxLanguagePending = null;
+                reject(new Error('Language request superseded'));
+            }
+            bxLanguagePending = cancel;
             function finish(ok) {
                 if (done) return;
                 done = true; window.clearTimeout(timer);
+                if (bxLanguagePending === cancel) bxLanguagePending = null;
                 if (stale()) return;
                 var strings = ok && window.lang !== previousStrings && valid(window.lang) ? window.lang : null;
                 if (!ok && element.parentNode) element.parentNode.removeChild(element);

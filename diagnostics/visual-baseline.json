@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "project": "BX-HEN",
+  "description": "Byte-for-byte freeze of current visual source files; update only for an explicitly approved visual change.",
+  "files": {
+    "overrides/bx-ct7.css": "32d5c2ae42f56b2d33108afe1488820262316e63",
+    "overrides/bx-gta/preview-v2.html": "9b953f0307b7fb32e75820a8261468e186f5df98",
+    "overrides/bx-hen-launch.css": "91099991f08b201f46e726d48c7b01454fa5d02f",
+    "overrides/bx-hen-site/compatibility.css": "303c96ed234d343220aed82f1732fa08826cf3ae",
+    "overrides/bx-hen-site/extras.css": "19b45ade4ab5c598f28aa0235daa8453d86a7604",
+    "overrides/bx-hen-site/index.html": "7c0de5c15b9f28e220d34054c1c681f3231f2850",
+    "overrides/bx-hen-site/store/index.html": "aebf924fe8a2462456edb9f4c0bbb3bd3c5b5d29",
+    "overrides/bx-hen-site/test-monitor.css": "eb7fda34ccfd3dde95b8110f743c2e7394d77ee5",
+    "overrides/bx-theme-bridge.css": "77d4f167473ddab28ba265cadd1482e17f408fa1",
+    "overrides/gta-vi.css": "4bff20c1104d0074d6ff206b44f01d933063053a",
+    "overrides/layouts/neon.css": "456f94004df2e6eb3ee935c4cdf45773c02b2e78",
+    "overrides/layouts/painel.css": "8ceb8530b6ae9523a056bf6306ffca63e71994f2",
+    "overrides/minimal.css": "312f02f7022663f830fafdba3752547e0ef8d6d1",
+    "overrides/theme-coverage.css": "49dba7cdc19a0b8e15d8d30225ed31c63c1bebf4"
+  }
+}

@@ -40,3 +40,39 @@ test('translated success announces the actual language without changing it on la
  const e=environment('es'),result=e.load();e.success({...en});e.success({clickToStart:'Iniciar'});await result;
  assert.equal(e.root.lang,'es');assert.equal(e.radios['input[name="language"][value="es"]'].checked,true);
 });
+
+
+test('superseding a stalled language request clears its timer without waiting eight seconds', async () => {
+ const e=environment('pt-br');
+ const first=e.load();
+ const rejection=assert.rejects(first,/superseded/);
+ const old=e.latest();
+ assert.equal(e.timers.size,1);
+ e.user.currentLanguage='es';
+ const second=e.load();
+ assert.equal(e.timers.size,1,'old timeout must be cleared, leaving only the new one');
+ assert.equal(e.scripts.includes(old),false,'stale script must be removed');
+ e.success({...en});
+ e.success({clickToStart:'Iniciar'});
+ assert.equal((await second).clickToStart,'Iniciar');
+ await rejection;
+ assert.equal(e.timers.size,0);
+});
+
+test('cancel a superseded translation-stage request without replacing the latest locale', async () => {
+ const e=environment('es');
+ const first=e.load();
+ e.success({...en});
+ const staleTranslation=e.latest();
+ const rejection=assert.rejects(first,/superseded/);
+ e.user.currentLanguage='en';
+ const next=e.load();
+ assert.equal(e.scripts.includes(staleTranslation),false);
+ assert.equal(e.timers.size,1);
+ e.success({...en});
+ await next; await rejection;
+ e.window.lang={clickToStart:'Outdated'};
+ staleTranslation.onload();
+ assert.equal(e.window.lang.clickToStart,'Start');
+ assert.equal(e.user.currentLanguage,'en');
+});
