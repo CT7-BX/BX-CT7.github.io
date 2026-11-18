@@ -44,7 +44,7 @@ test('no claim of physical jailbreak success is inferred from build metadata', (
 test('complete published firmware and GoldHEN catalogs mirror the real unchanged UI', () => {
   const select=html.match(/<select[^>]*id="ps4FwSelect"[\\s\\S]*?<\\/select>/);
   assert.ok(select);
-  const firmware=Array.from(select[0].matchAll(/<option[^>]*value="([0-9]{1,2}\\.[0-9]{2})"/g),m=>m[1]);
+  const firmware=[...new Set(Array.from(select[0].matchAll(/<option[^>]*value="([0-9]{1,2}\\.[0-9]{2})"/g),m=>m[1]))];
   const goldhen=Array.from(html.matchAll(/<input[^>]*name="goldhen"[^>]*value="(GHv2\\.4b18\\.[0-9]{1,2})"/g),m=>m[1]);
   assert.ok(firmware.length>=50);
   assert.ok(goldhen.length>=7);
