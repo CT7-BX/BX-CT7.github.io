@@ -29,7 +29,7 @@ class VisualBaselineTests(unittest.TestCase):
         for name, expected_sha in wanted.items():
             data = (ROOT / name).read_bytes()
             blob_sha = hashlib.sha1(
-                b"blob " + str(len(data)).encode("ascii") + b"\\0" + data
+                b"blob " + str(len(data)).encode("ascii") + bytes([0]) + data
             ).hexdigest()
             with self.subTest(file=name):
                 self.assertEqual(blob_sha, expected_sha, "Visual source changed without approval")
