@@ -113,7 +113,8 @@
             versionUnset:'No se encontró una preferencia GoldHEN guardada; se comprobará la opción predeterminada del host.',
             routeMismatch:'El diagnóstico del firmware discrepa con la matriz publicada.',
             offline:'El navegador indica conexión desconectada; no se ha confirmado el modo sin conexión.',
-            cacheMissing:'El caché del navegador no está listo u obsoleto.'
+            cacheMissing:'El caché del navegador no está listo u obsoleto.',
+            cacheRoute:'Manifiesto offline documentado (no confirma instalación): '
         };
         if (locale.indexOf('en') === 0) return {
             heading:'Documented compatibility (not proof of jailbreak):',
@@ -127,7 +128,8 @@
             versionUnset:'No saved GoldHEN preference; the host default is not verified in this report.',
             routeMismatch:'Browser firmware detection disagrees with the published compatibility matrix.',
             offline:'Browser reports offline; working offline cache has not been confirmed.',
-            cacheMissing:'Browser AppCache is missing or obsolete.'
+            cacheMissing:'Browser AppCache is missing or obsolete.',
+            cacheRoute:'Documented offline manifest (not proof of installation): '
         };
         return {
             heading:'Compatibilidade documentada (não comprova desbloqueio):',
@@ -141,7 +143,8 @@
             versionUnset:'Não há preferência GoldHEN salva; a opção padrão não foi testada por este relatório.',
             routeMismatch:'A detecção do firmware diverge da matriz de compatibilidade publicada.',
             offline:'O navegador informa ausência de conexão; o cache offline não foi confirmado.',
-            cacheMissing:'O AppCache do navegador está vazio ou obsoleto.'
+            cacheMissing:'O AppCache do navegador está vazio ou obsoleto.',
+            cacheRoute:'Manifesto offline documentado (não comprova instalação): '
         };
     }
     function redact(text) {
@@ -172,6 +175,7 @@
                 else if (record.goldhen_options_checked)
                     result.push(labels.versionAllowed + chosen);
             }
+            if (record.offline_manifest) result.push(labels.cacheRoute + record.offline_manifest);
         }
         if (typeof navigator !== 'undefined' && navigator.onLine === false)
             result.push(labels.offline);
