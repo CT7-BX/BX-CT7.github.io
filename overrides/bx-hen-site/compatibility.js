@@ -38,6 +38,7 @@
      ['Cache offline',typeof window.applicationCache!=='undefined'?'API presente':'indisponível'],
      ['WebAssembly',typeof window.WebAssembly!=='undefined'?'API presente':'indisponível'],
      ['IndexedDB (API, indicativo)',(typeof window.indexedDB!=='undefined'&&window.indexedDB!==null)?'API presente (uso não testado)':'API indisponível'],
+     ['Performance (API, indicativo)',(function(){try{var p=window.performance;return p&&typeof p.now==='function'?'relógio de alta resolução disponível (não medido)':p?'API presente, sem relógio de alta resolução':'API indisponível';}catch(e){return 'consulta bloqueada';}})()],
      ['Download HTML (indicativo)',('download' in document.createElement('a'))?'atributo suportado':'atributo não detectado'],
      ['HTTPS',location.protocol==='https:'?'sim':'não'],
      ['Estado de carregamento (indicativo)',typeof document.readyState==='string'?document.readyState:'não informado'],
