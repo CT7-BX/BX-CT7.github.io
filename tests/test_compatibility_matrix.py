@@ -83,7 +83,7 @@ class CompatibilityMatrixTests(unittest.TestCase):
             lambda d: d["goldhen_options"][0].update(sha256="short"),
             lambda d: d["entries"][0].update(goldhen_options_checked=["GHv2.4b18.99"]),
             lambda d: d.update(firmware_option_count=100),
-            lambda d: d["entries"][0].update(goldhen_options_checked=["GHv2.4b18.14"]),
+            lambda d: next(x for x in d["entries"] if x["host_profile"] == "not_configured").update(goldhen_options_checked=["GHv2.4b18.14"]),
         ]:
             bad = copy.deepcopy(data)
             edit(bad)
