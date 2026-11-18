@@ -59,3 +59,33 @@ class CompatibilityMatrixTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     matrix.publish(site)
                 self.assertFalse((site/"compatibility-matrix.json").exists())
+
+
+    def test_expanded_compatibility_catalog_rejects_invented_goldhen_support(self):
+        import copy
+        original = matrix.validate(json.loads(matrix.SOURCE.read_text(encoding="utf-8")))
+        data = copy.deepcopy(original)
+        data["goldhen_options"] = [
+            {"version": "GHv2.4b18.14",
+             "binary": "includes/payloads/HEN/goldhen_v2.4b18.14.bin",
+             "sha256": "a" * 64,
+             "verification": "file_and_menu_only", "physical_ps4_tested": False}
+        ]
+        data["goldhen_option_count"] = 1
+        data["firmware_option_count"] = 1
+        for entry in data["entries"]:
+            entry["ui_listed"] = entry["firmware"] == "14.02"
+            entry["goldhen_options_checked"] = ["GHv2.4b18.14"] if entry["firmware"] == "14.02" else []
+        matrix.validate(data)
+        for edit in [
+            lambda d: d["goldhen_options"][0].update(physical_ps4_tested=True),
+            lambda d: d["goldhen_options"][0].update(binary="../untrusted.bin"),
+            lambda d: d["goldhen_options"][0].update(sha256="short"),
+            lambda d: d["entries"][0].update(goldhen_options_checked=["GHv2.4b18.99"]),
+            lambda d: d.update(firmware_option_count=100),
+            lambda d: d["entries"][0].update(goldhen_options_checked=["GHv2.4b18.14"]),
+        ]:
+            bad = copy.deepcopy(data)
+            edit(bad)
+            with self.assertRaises(ValueError):
+                matrix.validate(bad)
