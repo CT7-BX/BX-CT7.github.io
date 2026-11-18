@@ -26,12 +26,12 @@ function bxPayloadRequest(method, url, data, binary, timeoutMs, callback, plainT
     return req;
 }
 function getPayload(payloadUrl, onLoadEndCallback) {
-    bxPayloadRequest('GET', payloadUrl, null, true, 8000, function (ok, req, event) {
+    return bxPayloadRequest('GET', payloadUrl, null, true, 8000, function (ok, req, event) {
         if (onLoadEndCallback) onLoadEndCallback(ok || (req && req.status >= 400) ? req : null, event);
     });
 }
 function sendPayloadWithTimeout(url, data, timeoutMs, onResult) {
-    bxPayloadRequest('POST', url, data, false, timeoutMs, function (ok, req) {
+    return bxPayloadRequest('POST', url, data, false, timeoutMs, function (ok, req) {
         if (onResult) onResult(ok, req);
     });
 }

@@ -20,10 +20,11 @@
             if (timer !== null) { window.clearInterval(timer); timer = null; }
             if (active) { try { active.abort(); } catch (ignore) {} active = null; }
         }
-        function start() {
+        function start(immediate) {
             if (timer !== null || updating || document.hidden) return;
+            if (window.bxHostRuntime && window.bxHostRuntime.isBusy()) { stopped = true; return; }
             stopped = false;
-            check();
+            if (immediate !== false) check();
             timer = window.setInterval(check, 30000);
         }
         function state(name, title, detail) {
@@ -39,7 +40,7 @@
                  navigator.onLine === true ? 'Conexão informada: online' : 'Rede não informada');
         }
         function check() {
-            if (stopped || updating || document.hidden) return;
+            if (stopped || updating || document.hidden || (window.bxHostRuntime && window.bxHostRuntime.isBusy())) return;
             var current = ++serial, done = false;
             clearWatchdog();
             if (active) { try { active.abort(); } catch (ignore) {} }
@@ -140,6 +141,10 @@
             if (!active) check();
         }, false);
         window.addEventListener('offline', check, false);
+        window.addEventListener('bx-host-state', function () {
+            if (window.bxHostRuntime && window.bxHostRuntime.isBusy()) stop();
+            else if (!updating && !document.hidden && stopped) start(firstCheck);
+        }, false);
         window.addEventListener('pagehide', stop, false);
         window.addEventListener('pageshow', function (event) {
             // A restored page is no longer leaving for the cache update screen.

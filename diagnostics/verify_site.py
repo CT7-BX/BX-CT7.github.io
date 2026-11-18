@@ -202,7 +202,7 @@ def check_minimal_host():
           'Invalid public release metadata')
     check('data-revision="' + release['revision'] + '"' in html,
           'Loaded-page revision does not match release metadata')
-    check(html.count('src="./includes/js/site-status.js"') == 1,
+    check(len(re.findall(r'src="\./includes/js/site-status\.js\?bxv=[a-f0-9]{16}"', html)) == 1,
           'Release status script missing or duplicated')
     check("width:max-content" not in css, "Unsupported legacy width remains in minimal CSS")
     check("flex-direction:row!important" in css,
@@ -212,7 +212,7 @@ def check_minimal_host():
     for manifest in manifests:
         check("../../../includes/css/minimal.css" in manifest.read_text(encoding="utf-8"),
               "Minimal CSS missing in cache manifest: " + manifest.name)
-        check('../../../includes/js/site-status.js' in manifest.read_text(encoding='utf-8'),
+        check('../../../includes/js/site-status.js?bxv=' in manifest.read_text(encoding='utf-8'),
               'Release status script missing from offline cache')
         for asset in ('bx-hen/store/index.html', 'bx-hen/store/catalog.json'):
             check('../../../' + asset in manifest.read_text(encoding='utf-8').split('CACHE:',1)[1].split('NETWORK:',1)[0].splitlines(),
@@ -269,6 +269,32 @@ def check_repository_sources():
     print('Repository text sources inspected:', count)
 
 
+
+def check_host_runtime():
+    """Reject mixed host generations; this never executes a chain or payload."""
+    metadata = json.loads((SITE / 'host-runtime.json').read_text())
+    release = json.loads((SITE / 'release.json').read_text())
+    revision = release['revision']
+    check(metadata.get('schema_version') == 2 and metadata.get('cache_protocol') == 2, 'Unexpected host/cache protocol')
+    check(metadata.get('revision') == revision, 'Mixed host release metadata')
+    check(metadata.get('physical_ps4_tested') is False, 'Automated build must not claim physical validation')
+    for name, reference in metadata['host_assets'].items():
+        check(re.fullmatch(r'includes/js/[A-Za-z0-9_-]+\.js', name), 'Invalid host asset path')
+        digest = hashlib.sha256((SITE / name).read_bytes()).hexdigest()[:16]
+        check(reference == name + '?bxv=' + digest, 'Incorrect host resource identity: ' + name)
+    for name in ('index.html', 'exploit.html'):
+        check('data-bx-host-revision="' + revision + '"' in (SITE/name).read_text(), 'Mixed main/minimal release')
+    for page in [SITE/'cache.html'] + list((SITE/'includes/caches').glob('cache*.html')):
+        check('data-bx-cache-revision="' + revision + '"' in page.read_text(), 'Mixed cache page: ' + str(page))
+    for manifest in (SITE/'includes/caches/manifest').glob('*.manifest'):
+        entries = manifest.read_text().splitlines()
+        for name, reference in metadata['host_assets'].items():
+            check('../../../' + name not in entries, 'Unversioned critical host dependency: ' + name)
+        for name in ('host-intent.js','host-return.js'):
+            check('../../../' + metadata['host_assets']['includes/js/' + name] in entries, 'Missing host coordinator: ' + str(manifest))
+        check('../../../host-runtime.json' in entries, 'Missing host metadata')
+
+
 def main():
     check_repository_sources()
     for rel in CHECK_FILES + JS_ASSETS:
@@ -280,6 +306,7 @@ def main():
         check(raw.endswith(b"\n"), "Missing final newline: " + rel)
     check_minimal_host()
     check_cache()
+    check_host_runtime()
     # The original host intentionally supports HTTP payload-server navigation.
     check_html('index.html', allow_http=True)
     check_html('cache.html')

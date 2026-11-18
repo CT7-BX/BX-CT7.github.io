@@ -408,33 +408,6 @@ update('includes/js/testMode.js',
             if (decodeURIComponent(key) === name) return decodeURIComponent(value);
         } catch (ignore) { /* Ignore malformed URL input, keep normal mode. */ }""")
 
-# Honor an explicit return from cache.html once, without changing launch logic.
-update('includes/js/cache.js',
-       """    var isPS4User = isPS4Console();
-
-    // check for applicationCache""",
-       """    var isPS4User = isPS4Console();
-    if (getQueryParam('cacheReturn') === '1') {
-        // Remove our temporary flag where History API is available. Other URL
-        // parameters, including test mode, and the fragment remain intact.
-        try {
-            var pairs = window.location.search.substring(1).split('&'), keep = [];
-            for (var i = 0; i < pairs.length; i++) {
-                if (!pairs[i]) continue;
-                var key = pairs[i].split('=')[0], remove = false;
-                try { remove = decodeURIComponent(key) === 'cacheReturn'; } catch (ignore) {}
-                if (!remove) keep.push(pairs[i]);
-            }
-            if (window.history && window.history.replaceState) {
-                window.history.replaceState(null, '', window.location.pathname +
-                    (keep.length ? '?' + keep.join('&') : '') + window.location.hash);
-            }
-        } catch (ignore) {}
-        return;
-    }
-
-    // check for applicationCache""")
-
 # Replace only language fetching; retain upstream translation application code.
 language_path = root / 'includes/js/language.js'
 language_text = language_path.read_text(encoding='utf-8')
@@ -501,14 +474,7 @@ if cache_page.is_file():
 </head>''')
     from cache_ui import improve_cache_page
     cache_text = improve_cache_page(cache_text)
-    shutil.copy2(source / 'cache-status.js', root / 'includes/js/cache-status.js')
     cache_page.write_text(cache_text, encoding='utf-8')
-
-# A failed swap must not be reported as a completed offline update.
-if not update('includes/js/iframe_cache.js',
-              'try { appCache.swapCache(); } catch (e) {}',
-              "try { appCache.swapCache(); } catch (e) { window.parent.postMessage({type:'CACHE_ERROR', reason:'Não foi possível ativar o novo cache.'}, '*'); return; }"):
-    raise RuntimeError('Cache swap handler changed; review required')
 
 bridge_src = source / 'bx-theme-bridge.css'
 if not bridge_src.is_file():

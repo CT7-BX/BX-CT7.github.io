@@ -5,3 +5,4 @@ __pycache__/
 diagnostics/firmware-results.json
 upstream-candidate.txt
 upstream-review.md
+diagnostics/cache-inventory.json

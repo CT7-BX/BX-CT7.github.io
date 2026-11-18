@@ -48,6 +48,8 @@ for name, digest in protected.items():
 # Metadata participates in the offline content revision too.
 from presentation import stamp_manifests, apply_gta_theme
 apply_gta_theme(dest, root / "overrides")
+from host_runtime import assemble_host
+assemble_host(dest, root / "overrides")
 (dest/'.nojekyll').touch()
 # Read-only firmware evidence: embed a validated matrix into the existing
 # diagnostic report. This must not change the page layout or jailbreak logic.

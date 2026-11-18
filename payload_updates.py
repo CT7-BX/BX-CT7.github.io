@@ -64,39 +64,6 @@ def integrate(root):
         text = manifest.read_text()
         if 'goldhen_v2.4b18.13' in text:
             manifest.write_text(text.replace('CACHE:', 'CACHE:\n../../../includes/payloads/HEN/goldhen_v2.4b18.14.bin\n../../../payload-update.json', 1))
-    # Replace only the host's transfer helpers, never a kernel or loader binary.
-    target = root / 'includes/js/deliverPayload.js'
-    text = target.read_text()
-    start = text.index('function getPayload(payloadUrl, onLoadEndCallback) {')
-    end = text.index('/**\n * Sends a payload to the PS4.', start)
-    replacement = (Path(__file__).parent / 'overrides/payload-transport.js').read_text()
-    text = text[:start] + replacement + '\n\n' + text[end:]
-    # Legacy ELF transfers share the same bounded request helper.
-    start = text.index('function sendPayload(bytes, name, onDone, args) {')
-    end = text.index('/**\n * A legacy friendly way', start)
-    elf = '''function sendPayload(bytes, name, onDone, args) {
-    var query = '?pipe=0' + (args ? '&args=' + encodeURIComponent(args) : '');
-    bxPayloadRequest('POST', ELFLDR + '/' + encodeURIComponent(name || 'payload.elf') + query,
-        bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes), false, 8000,
-        function (ok, req) { if (onDone) onDone(ok ? req.status : 0, ok ? req.responseText : 'request failed'); }, true);
-}
-function loadAndSend(url, onDone, name, args) {
-    getPayload(url, function (req) {
-        if (req && (req.status === 200 || req.status === 304) && req.response && req.response.byteLength > 0) {
-            sendPayload(req.response, name || getPayloadName(url), onDone, args);
-        } else if (onDone) onDone(0, 'could not load ' + url);
-    });
-}
-
-'''
-    target.write_text(text[:start] + elf + text[end:])
-
-    recovery = 'includes/js/host-return.js'
-    (root / recovery).write_bytes((Path(__file__).parent / 'overrides/host-return.js').read_bytes())
-    update('index.html', '</body>', '<script src="./includes/js/host-return.js"></script>\n</body>')
-    for manifest in (root / 'includes/caches/manifest').glob('*.manifest'):
-        manifest.write_text(manifest.read_text().replace('CACHE:', 'CACHE:\n../../../' + recovery, 1))
-
     update('includes/js/payloadsHandler.js',
            "        id: 'FanThreshold' + temperature,",
            "        id: 'FanThreshold' + temperature,\n        needsPayloadLoader: true,")
@@ -109,64 +76,6 @@ function loadAndSend(url, onDone, name, args) {
         if 'fan-thresholds/ps4-fan-threshold' in text:
             entries = ['../../../' + target for target, digest in FAN_ASSETS.values()]
             manifest.write_text(text.replace('CACHE:', 'CACHE:\n' + '\n'.join(entries), 1))
-
-    # A missing HTTP reply is ambiguous: never start another exploit or resend
-    # an ELF automatically after a payload may already have executed.
-    transport = root / 'includes/js/deliverPayload.js'
-    text = transport.read_text()
-    start = text.index('    var handleFallback = function () {')
-    end = text.index('    // fetch payload binary and send via GoldHEN', start)
-    notice = '''    var handleFallback = function (reason) {
-        var detail = reason === 'download'
-            ? 'Não foi possível baixar o arquivo do payload. Confira a conexão e atualize o cache.'
-            : 'Não foi possível confirmar a resposta do carregador. No GoldHEN, confira Servers Settings → Enable BinLoader Server (porta 9090). Para ELF, o Elf Loader precisa estar ativo na porta 9021. A falta de resposta não confirma se o payload executou.';
-        log(detail, 'orange');
-        alert(detail);
-    };
-
-'''
-    text = text[:start] + notice + text[end:]
-    start = text.index('    if (isElf) {', text.index('function Loadpayloadlocal('))
-    end = text.index('    } else {\n        getPayload(PLfile,', start)
-    text = text[:start] + '''    if (isElf) {
-        sendElfToElfldr(PLfile, name, function (success) {
-            if (!success) handleFallback();
-        });
-''' + text[end:]
-    old = '''            if (!fetchReq || (fetchReq.status !== 200 && fetchReq.status !== 304) || !fetchReq.response) {
-                handleFallback();
-                return;
-            }'''
-    new = old.replace('handleFallback();', "handleFallback('download');")
-    if text.count(old) != 1:
-        raise ValueError('Payload download failure marker changed')
-    text = text.replace(old, new, 1)
-    transport.write_text(text)
-
-    # Resolve per-call paths without mutating the shared catalog across clicks/FW changes.
-    text = transport.read_text()
-    start = text.index('function payloadRouter(payload) {')
-    end = text.index('function requiresPayloadServer(', start)
-    router = '''function payloadRouter(payload) {
-    if (!payload || !isPayloadSupported(payload)) {
-        alert(window.lang.unsupportedFirmware + user.ps4Fw);
-        return;
-    }
-    if (payload.src == undefined && payload.legacySrc == undefined) {
-        Loadpayloadonline(undefined);
-        return;
-    }
-    var source = payload.src;
-    if (getPs4FwVersion() <= 4.74 && payload.legacySrc != undefined) source = payload.legacySrc;
-    Loadpayloadlocal(source, payload.name, payload.id, payload.needsPayloadLoader);
-    if (payload.id === 'PSVue' && typeof source === 'string') {
-        var updateSource = source.replace('base', '124');
-        if (updateSource !== source) Loadpayloadlocal(updateSource, payload.name, payload.id, payload.needsPayloadLoader);
-    }
-}
-
-'''
-    transport.write_text(text[:start] + router + text[end:])
 
     for signature in ('function renderPayloads(payloads) {', 'function loadLastTab() {', 'function loadAdvancedPayloads() {'):
         update('includes/js/payloadsHandler.js', signature, signature + "\n    if (document.documentElement && document.documentElement.getAttribute('data-bx-payload-catalog') === 'disabled') return;")
