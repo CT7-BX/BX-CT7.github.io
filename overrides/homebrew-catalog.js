@@ -65,15 +65,18 @@
     }
     var request, done = false, timer = null;
     function clearTimer() { if (timer !== null) { window.clearTimeout(timer); timer = null; } }
-    container.bxCancelCatalog = function () {
+    function cancel() {
       var pending = !done;
       done = true; clearTimer();
       if (pending && request) { try { request.abort(); } catch (ignore) {} }
       if (container.bxCatalogRequest === request) container.bxCatalogRequest = null;
-    };
+      if (container.bxCancelCatalog === cancel) container.bxCancelCatalog = null;
+    }
+    container.bxCancelCatalog = cancel;
     function fallback() {
       if (done || container.getAttribute('data-bx-homebrew-render') !== renderToken) return;
       done = true; clearTimer(); container.bxCatalogRequest = null;
+      if (container.bxCancelCatalog === cancel) container.bxCancelCatalog = null;
       if (request && request.readyState !== 4) { try { request.abort(); } catch (ignore) {} }
       if (cachedItems && cachedItems.length) {
         for (var n = 0; n < cachedItems.length; n++) addItem(container, cachedItems[n]);
@@ -107,6 +110,7 @@
         cachedItems = accepted; cachedAt = new Date().getTime();
         for (var j = 0; j < accepted.length; j++) addItem(container, accepted[j]);
         done = true; clearTimer(); container.bxCatalogRequest = null;
+        if (container.bxCancelCatalog === cancel) container.bxCancelCatalog = null;
       } catch (error) { fallback(); }
     };
     request.onerror = fallback;
