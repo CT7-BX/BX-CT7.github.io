@@ -80,6 +80,30 @@ function generate(root, curated) {
     const previous=declared.get(fw);
     if (previous && (previous.host_profile==='configured')!==supported)
       throw Error('Reviewed firmware support changed unexpectedly: '+fw);
+    // A supported firmware must also have a static offline cache page and
+    // a manifest available inside this exact generated build.
+    var cachePage = null, offlineManifest = null;
+    if (supported) {
+      const selectedPage=probe.ctx.getCachePage(fw);
+      if (typeof selectedPage!=='string' ||
+          !/^\.\/includes\/caches\/[A-Za-z0-9._-]+\.html$/.test(selectedPage))
+        throw Error('Invalid offline cache route: '+fw);
+      const localPage=path.resolve(root,selectedPage);
+      const cacheRoot=path.resolve(root,'includes/caches')+path.sep;
+      if (!localPage.startsWith(cacheRoot)) throw Error('Cache page outside build: '+fw);
+      const page=fs.readFileSync(localPage,'utf8');
+      const match=page.match(/\bmanifest="([^"]+)"/);
+      if (!match) throw Error('Offline cache manifest missing in page: '+fw);
+      const localManifest=path.resolve(path.dirname(localPage),match[1]);
+      const manifestRoot=path.resolve(root,'includes/caches/manifest')+path.sep;
+      if (!localManifest.startsWith(manifestRoot)) throw Error('Manifest outside build: '+fw);
+      const manifestData=fs.readFileSync(localManifest,'utf8');
+      if (!manifestData.startsWith('CACHE MANIFEST\n') ||
+          !manifestData.includes('CACHE:') || !manifestData.includes('NETWORK:'))
+        throw Error('Malformed offline cache manifest: '+fw);
+      cachePage=path.relative(root,localPage).split(path.sep).join('/');
+      offlineManifest=path.relative(root,localManifest).split(path.sep).join('/');
+    }
     const verifiedVersions=[];
     if(supported) for(const id of goldhen) {
       const trial=contextFor(fw,firmware,hen);
@@ -102,6 +126,9 @@ function generate(root, curated) {
       console_test:'not_verified',
       ui_listed:listed.has(fw),
       default_chain_id:supported?selected:null,
+      cache_page:cachePage,
+      offline_manifest:offlineManifest,
+      offline_evidence:'generated_files_only',
       goldhen_options_checked:verifiedVersions
     };
   });
