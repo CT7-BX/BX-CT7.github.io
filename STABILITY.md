@@ -318,3 +318,21 @@ The `beta` branch is a verification channel that builds and tests without
 Pages deployment; `main` remains the stable published channel. The owner
 retains the current layout, colors and buttons. No GoldHEN files, kernel
 components, payload bytes or unlocking chains are changed.
+
+
+## Estabilidade de sessões longas e preservação do visual
+
+- Ao trocar de idioma rapidamente, a solicitação anterior de script agora é
+  cancelada imediatamente: temporizador e nó pendente são descartados sem
+  aguardar oito segundos, e a seleção mais recente prevalece.
+- Os cartões Homebrew liberam as referências do XHR, do temporizador e da
+  função de cancelamento assim que uma consulta termina ou falha; respostas
+  atrasadas continuam ignoradas. Isso reduz retenção desnecessária de memória.
+- O teste `test_visual_baseline.py` compara as 14 fontes HTML/CSS existentes
+  com o inventário Git revisado em `diagnostics/visual-baseline.json`.
+  Mudanças futuras de aparência exigem uma atualização explícita da
+  referência, permitindo identificar regressões visuais involuntárias.
+- Essas alterações não mudam o layout, a interface visível, o GoldHEN,
+  os payloads, a lógica do firmware ou as rotinas de desbloqueio.
+- Testes no GitHub Actions verificam a implementação e os recursos estáticos;
+  a estabilidade física no WebKit PS4 e em sessões offline requer teste real.
