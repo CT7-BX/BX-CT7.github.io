@@ -37,7 +37,7 @@ Este é um backup de recuperação. Não é necessariamente idêntico, arquivo p
 
 ### Atualizações e diagnóstico
 
-A página principal confere a publicação ao abrir, a cada 10 segundos e quando a
+A página principal confere a publicação ao abrir, a cada 30 segundos enquanto visível e quando a
 conexão retorna. A aplicação não pausa a contagem em abas ocultas; o navegador
 pode atrasar ou suspender timers em segundo plano. Não há contador nem novos
 controles. Consultas seguintes preservam o texto enquanto aguardam resposta,
@@ -189,3 +189,7 @@ os componentes preservados e os limites dos testes. As configurações atuais
 oferecem Original e GTA VI; a área inferior de payloads permanece desativada.
 Os comandos e notas de integrações anteriores acima são históricos e não
 comprovam execução física ou compatibilidade de todos os payloads.
+
+## Reconstrução do cache e dos carregadores
+
+A camada do host usa inicialização coordenada, cache vinculado à revisão e transporte sem envios concorrentes. Detalhes, validação e limites: [RUNTIME-REBUILD.md](RUNTIME-REBUILD.md). O visual e os binários de desbloqueio foram preservados; a validação física no PS4 permanece pendente.

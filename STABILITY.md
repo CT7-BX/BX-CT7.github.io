@@ -10,7 +10,7 @@ isolado 14.02 está descrito em [FW1402.md](FW1402.md).
 - O endereço curto `https://ct7-bx.github.io` abre o host publicado em
   `https://ct7-bx.github.io/BX-CT7.github.io/`.
 - O layout principal e a janela preta de configurações permanecem.
-- O site consulta a publicação ao abrir e a cada 10 segundos. O navegador pode
+- O site consulta a publicação ao abrir e a cada 30 segundos enquanto visível. O navegador pode
   atrasar os temporizadores em segundo plano; não existe como garantir o
   intervalo quando o próprio navegador suspende a página.
 - Uma atualização só começa após clicar em Atualizar agora. Uma consulta que
@@ -392,3 +392,7 @@ de pré-verificação, localização, caminhos fora do diretório do build e
 concordância dos manifestos. HTML, CSS, visual neon e bytes de payloads
 permanecem intactos. Não há retry de exploração, reenvio automático de
 binários nem alegação de sucesso físico.
+
+## Reconstrução do runtime do host (18/11/2026)
+
+Cache, inicialização, retorno e transporte passam a ser montados em uma camada central. Etapas de remendo antigas foram removidas. Veja [RUNTIME-REBUILD.md](RUNTIME-REBUILD.md) para a migração, os testes automatizados e o que permanece pendente no PS4 13.52. Não houve alteração de visual, kernel ou bytes dos payloads.

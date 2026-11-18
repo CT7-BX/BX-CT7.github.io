@@ -55,7 +55,7 @@ test('new binary matches pinned source and every existing GoldHEN cache includes
 });
 
 test('return recovery is included once in the page and available in all offline manifests',()=>{
- const html=fs.readFileSync('dist/index.html','utf8');assert.equal((html.match(/src=".\/includes\/js\/host-return.js"/g)||[]).length,1);
+ const html=fs.readFileSync('dist/index.html','utf8');assert.equal((html.match(/src=".\/includes\/js\/host-return.js\?bxv=[a-f0-9]{16}"/g)||[]).length,1);
  assert.equal(fs.readFileSync('dist/includes/js/host-return.js','utf8'),fs.readFileSync('overrides/host-return.js','utf8'));
  for(const name of fs.readdirSync('dist/includes/caches/manifest'))if(name.endsWith('.manifest'))assert.match(fs.readFileSync('dist/includes/caches/manifest/'+name,'utf8'),/includes\/js\/host-return.js/);
 });
@@ -133,7 +133,7 @@ test('legacy selection never mutates the catalog when changing firmware',()=>{
  assert.deepEqual(sent.map(x=>x[0]),['/legacy.bin','/modern.bin','/legacy.bin']);assert.equal(payload.src,'/modern.bin');assert.equal(sent[0][3],true);
 });
 test('repeated PSVue selection preserves its base URL and selects base plus update each time',()=>{
- const e=env(),sent=[];Object.assign(e.c,{isPayloadSupported:()=>true,getPs4FwVersion:()=> '13.52',Loadpayloadlocal(path){sent.push(path);}});
+ const e=env(),sent=[];Object.assign(e.c,{isPayloadSupported:()=>true,getPs4FwVersion:()=> '13.52',Loadpayloadlocal(path,name,id,required,port,complete){sent.push(path);if(complete)complete(true);}});
  const payload=Object.freeze({id:'PSVue',name:'PSVue',src:'/psvue-base.pkg'});
  e.c.payloadRouter(payload);e.c.payloadRouter(payload);
  assert.deepEqual(sent,['/psvue-base.pkg','/psvue-124.pkg','/psvue-base.pkg','/psvue-124.pkg']);assert.equal(payload.src,'/psvue-base.pkg');
@@ -152,4 +152,25 @@ test('disabled lower catalog creates no cards or requests during startup',()=>{
  vm.runInContext(fs.readFileSync('dist/includes/js/payloadsHandler.js','utf8'),e.c);
  assert.doesNotThrow(()=>{e.c.renderPayloads([{category:'homebrew'}]);e.c.loadLastTab();e.c.loadAdvancedPayloads();});assert.equal(e.requests.length,0);
  assert.match(fs.readFileSync('dist/index.html','utf8'),/data-bx-payload-catalog="disabled"/);
+});
+
+test('one PS4 cannot receive concurrent payloads and the target remains captured until completion',()=>{
+ const e=env();let alerts=0;Object.assign(e.c,{user:{ip:'192.168.1.50'},isPS4Console:()=>false,alert(){alerts++;},log(){},window:{lang:{}}});
+ e.c.Loadpayloadlocal('/one.bin','One','One',false);e.c.Loadpayloadlocal('/two.bin','Two','Two',false);assert.equal(e.requests.length,1);assert.equal(alerts,1);
+ e.c.user.ip='192.168.1.60';e.requests[0].respond();assert.equal(e.requests[1].url,'http://192.168.1.50:9090/');e.requests[1].respond(202);
+ e.c.Loadpayloadlocal('/two.bin','Two','Two',false);assert.equal(e.requests.length,3);
+});
+test('cancelled transfers cannot POST later and release the per-console operation lock',()=>{
+ const e=env();let callbacks=0;Object.assign(e.c,{user:{ip:'127.0.0.1'},alert(){throw Error('Cancel must be silent');},log(){},window:{lang:{}}});
+ e.c.Loadpayloadlocal('/one.bin','One','One',false,undefined,()=>callbacks++);e.c.bxCancelPayloadTransfers();e.requests[0].respond();assert.equal(e.requests.length,1);assert.equal(callbacks,1);
+ e.c.Loadpayloadlocal('/two.bin','Two','Two',false);assert.equal(e.requests.length,2);
+});
+test('custom blob URLs are revoked exactly once after cancellation',()=>{
+ const e=env(),revoked=[];Object.assign(e.c,{user:{ip:'127.0.0.1'},window:{lang:{}},log(){},URL:{createObjectURL(){return 'blob:example';},revokeObjectURL(url){revoked.push(url);}}});
+ const operation=e.c.customPayload({name:'file.bin',size:4});operation.cancel();e.requests[0].onerror({});assert.deepEqual(revoked,['blob:example']);
+});
+test('invalid network targets and ports fail before any request is created',()=>{
+ for(const [ip,port] of [['bad/target',9090],['127.0.0.1',0],['127.0.0.1',65536],['127.0.0.1','9090/path']]){
+  const e=env();Object.assign(e.c,{user:{ip},isPS4Console:()=>false,window:{lang:{}},log(){},alert(){}});e.c.Loadpayloadlocal('/file.bin','File','File',false,port);assert.equal(e.requests.length,0);
+ }
 });

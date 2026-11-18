@@ -13,10 +13,10 @@ function environment(options={}){
     location:{protocol:'https:',host:'example.test',reload(){reloads++;},replace(url){if(options.replaceThrows)throw Error('blocked');replaced=url;}},
     addEventListener(name,fn){events[name]=fn;},setTimeout(fn,ms){const t={fn,ms,cleared:false};allTimers.push(t);(ms===90000?idleTimers:timers).push(t);return allTimers.length;},clearTimeout(id){allTimers[id-1].cleared=true;}};
   vm.runInNewContext(fs.readFileSync('dist/includes/js/cache-status.js','utf8'),{
-    window,document:{getElementById(id){return nodes[id];}},mainPage:'./?test=0',
+    window,document:{documentElement:{getAttribute(){return 'a'.repeat(40);}},getElementById(id){return nodes[id];}},mainPage:'./?test=0',
     getPs4FwVersion(){if(options.firmwareThrows)throw Error('failed');return '13.52';},getCachePage(fw){assert.equal(fw,'13.52');return './includes/caches/cache1302-1352.html';}
   });
-  return {nodes,timers,idleTimers,events,send(data,extra={}){events.message({source:nodes.cacheFrame.contentWindow,origin:'https://example.test',data,...extra});},
+  return {nodes,timers,idleTimers,events,send(data,extra={}){events.message({source:nodes.cacheFrame.contentWindow,origin:'https://example.test',data:{protocol:2,revision:'a'.repeat(40),...data},...extra});},
     get reloads(){return reloads;},get replaced(){return replaced;}};
 }
 
@@ -24,7 +24,7 @@ test('generated cache page has accessible progress, retry, back link and control
   const html=fs.readFileSync('dist/cache.html','utf8');
   assert.match(html,/id="bx-cache-progress" role="progressbar"/);
   assert.match(html,/id="cacheStatus" role="status"/);
-  assert.match(html,/src="\.\/includes\/js\/cache-status.js"/);
+  assert.match(html,/src="\.\/includes\/js\/cache-status.js\?bxv=[a-f0-9]{16}"/);
   assert.doesNotMatch(html,/maximum-scale=1/);
 });
 test('accepts progress only from selected same-origin iframe',()=>{
@@ -47,7 +47,7 @@ test('cache error remains visible with retry and cannot trigger an automatic ret
 test('successful completion returns once through the original test-mode destination',()=>{
   const env=environment();env.send({type:'CACHE_COMPLETE'});env.send({type:'CACHE_EXISTS'});
   assert.equal(env.timers.length,1);assert.equal(env.timers[0].ms,1000);
-  env.timers[0].fn();assert.equal(env.replaced,'./?test=0');
+  env.timers[0].fn();assert.equal(env.replaced,'./?test=0&cacheReturn=1');
 });
 test('unsupported browsers show a readable explanation without starting the iframe',()=>{
   const env=environment({unsupported:true});
@@ -58,7 +58,7 @@ test('failed cache swap emits error and never reports completion',()=>{
   const events={},messages=[];
   const appCache={addEventListener(name,fn){events[name]=fn;},swapCache(){throw Error('failed');}};
   vm.runInNewContext(fs.readFileSync('dist/includes/js/iframe_cache.js','utf8'),{
-    window:{applicationCache:appCache,parent:{postMessage(data){messages.push(data);}}}
+    document:{documentElement:{getAttribute(){return 'a'.repeat(40);}}},window:{applicationCache:appCache,location:{protocol:'https:',host:'example.test'},addEventListener(){},parent:{postMessage(data){messages.push(data);}}}
   });
   events.updateready();assert.equal(messages.length,1);assert.equal(messages[0].type,'CACHE_ERROR');
 });
@@ -78,7 +78,7 @@ test('explicit back link skips automatic cache once while completion uses normal
   const env=environment();
   assert.equal(env.nodes['bx-cache-back'].href,'./?test=0&cacheReturn=1');
   env.send({type:'CACHE_COMPLETE'});env.timers[0].fn();
-  assert.equal(env.replaced,'./?test=0');
+  assert.equal(env.replaced,'./?test=0&cacheReturn=1');
 });
 
 test('blocked return keeps successful cache status and offers the existing back link',()=>{
@@ -147,7 +147,7 @@ test('leaving cache page cancels the pending automatic return and prevents stale
 test('cache success still redirects normally when the user stays on the cache page',()=> {
  const e=environment();e.send({type:'CACHE_COMPLETE'});
  e.timers[0].fn();
- assert.equal(e.replaced,'./?test=0');
+ assert.equal(e.replaced,'./?test=0&cacheReturn=1');
 });
 
 
@@ -161,7 +161,7 @@ test('cache completion after BFCache restore still returns to the original host'
  assert.match(e.nodes.cacheStatus.textContent,/Cache atualizado.*Voltando ao site/);
  assert.equal(e.timers.length,1);
  e.timers[0].fn();
- assert.equal(e.replaced,'./?test=0');
+ assert.equal(e.replaced,'./?test=0&cacheReturn=1');
 });
 
 test('completed cache before pagehide never auto-redirects from a stale queued timer', () => {
@@ -184,4 +184,10 @@ test('cache completion while away remains manual and cannot schedule a redirect'
  e.events.pageshow({persisted:true});
  assert.equal(e.timers.length,0);
  assert.equal(e.replaced,null);
+});
+
+test('old publication or legacy completion cannot confirm the current offline release',()=>{
+ for(const data of [{type:'CACHE_COMPLETE',revision:'b'.repeat(40)},{type:'CACHE_EXISTS',protocol:1}]){
+  const e=environment();e.send(data);assert.equal(e.timers.length,0);assert.match(e.nodes.cacheStatus.textContent,/outra publicação/);
+ }
 });

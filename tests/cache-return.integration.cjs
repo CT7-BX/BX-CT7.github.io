@@ -22,7 +22,7 @@ test('blocked history cleanup cannot trap the visitor on the cache screen',()=>{
  assert.equal(env.location.href,'original');assert.equal(env.replacements.length,0);
 });
 test('normal first visit still opens cache while a cached visit stays on host',()=>{
- assert.equal(environment().location.href,'./cache.html');
+ assert.match(environment().location.href,/^\.\/cache\.html\?bxCacheRequest=\d+$/);
  assert.equal(environment('',{cached:true}).location.href,'original');
- assert.equal(environment('?cacheReturn=0').location.href,'./cache.html');
+ assert.match(environment('?cacheReturn=0').location.href,/^\.\/cache\.html\?bxCacheRequest=\d+$/);
 });

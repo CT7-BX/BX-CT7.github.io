@@ -9,7 +9,7 @@ function environment(options = {}) {
   for (const id of ['bx-site-status', 'bx-site-check', 'bx-site-message', 'bx-site-network', 'bx-site-revision'])
     nodes[id] = { textContent: '', style: {}, attributes: {}, getAttribute() { return options.revision || revision; },
       setAttribute(k, v) { this.attributes[k] = v; } };
-  let cacheClicks = 0, reloads = 0;
+  let cacheClicks = 0, reloads = 0, busy = !!options.hostBusy;
   if (!options.missingCache) nodes.updateCache = { click() { cacheClicks++; if(options.cacheThrows) throw Error('blocked'); } };
   const navigator = { onLine: options.offline ? false : true };
   class XHR {
@@ -24,14 +24,14 @@ function environment(options = {}) {
     addEventListener(name, fn) { documentEvents[name] = fn; }
   };
   vm.runInNewContext(source, { document,
-    navigator, window: { applicationCache: options.ps4 ? {} : undefined,
+    navigator, window: { bxHostRuntime:{isBusy(){return busy;}}, applicationCache: options.ps4 ? {} : undefined,
       location: { reload() { reloads++; if(options.reloadThrows) throw Error('blocked'); } }, addEventListener(name, fn) { events[name] = fn; },
       setInterval(fn, delay) { intervals.push({ fn, delay, cleared: false }); return intervals.length; },
       clearInterval(id) { intervals[id - 1].cleared = true; },
       setTimeout(fn, delay) { timeouts.push({fn, delay, cleared:false}); return timeouts.length; },
       clearTimeout(id) { timeouts[id - 1].cleared = true; } },
     isPS4Console() { return !!options.ps4; }, XMLHttpRequest: XHR });
-  return { nodes, requests, events, documentEvents, navigator, document, intervals, timeouts,
+  return { setBusy(value){busy=value;events["bx-host-state"]();},nodes, requests, events, documentEvents, navigator, document, intervals, timeouts,
     tick: () => intervals.filter(t => !t.cleared).forEach(t => t.fn()),
     update: () => nodes['bx-site-check'].onclick(),
     message: () => nodes['bx-site-message'].textContent, title: () => nodes['bx-site-revision'].textContent,
@@ -304,4 +304,10 @@ test('repeated online notifications do not cancel an in-flight release query', (
   env.navigator.onLine = false;
   env.events.offline();
   assert.equal(env.requests[1].aborted, true);
+});
+
+test('release polling cannot compete with initialization or an active host operation',()=>{
+ const e=environment({hostBusy:true});assert.equal(e.requests.length,0);e.setBusy(false);assert.equal(e.requests.length,1);current(e);
+ e.tick();const pending=e.requests[1];e.setBusy(true);assert.equal(pending.aborted,true);e.tick();assert.equal(e.requests.length,2);
+ e.setBusy(false);assert.equal(e.requests.length,2);e.tick();assert.equal(e.requests.length,3);
 });
