@@ -20,15 +20,18 @@ function environment(options = {}) {
   const listeners = {};
   const document = { documentElement: { getAttribute() { return options.catalogDisabled ? 'disabled' : null; } }, addEventListener(name, fn) { listeners[name] = fn; }, readyState: 'complete', body, createElement: node,
     getElementById(id) { return all().find(n => n.id === id) || null; }, execCommand() { return false; } };
-  const window = { localStorage: { getItem() { return null; } } };
-  const context = { window, document, navigator: {language: options.language || 'pt-BR'}, localStorage: window.localStorage,
-    user: { currentJbFlavor: 'nexHEN', exploitChain: 7 },
-    getPs4FwVersion() { return '13.52'; }, isPS4Console() { return true; },
+  const window = { localStorage: { getItem(key) { return key === 'GHVer' ? (options.ghVersion || null) : null; } } };
+  const context = { window, document, navigator: {language: options.language || 'pt-BR', onLine: options.offline ? false : true}, localStorage: window.localStorage,
+    user: { currentJbFlavor: options.flavor || 'nexHEN', exploitChain: 7 },
+    getPs4FwVersion() { return options.firmware || '13.52'; }, isPS4Console() { return true; },
     isFirmwareSupported() { return true; }, devMode: false,
     storage: { session: { getString() { return './includes/payloads/HEN/nexHEN-ps4.elf'; } } },
     XMLHttpRequest() { throw Error('Diagnostics must not make requests'); },
     jailbreak() { throw Error('Diagnostics must not launch'); } };
-  vm.runInNewContext(fs.readFileSync('overrides/dev-diagnostics.js', 'utf8'), context, { timeout: 1000 });
+  const reportSource=fs.readFileSync('overrides/dev-diagnostics.js', 'utf8');
+  const injected=options.matrix ? reportSource.replace(
+    '/* BX_SUPPORT_MATRIX */ null', JSON.stringify(options.matrix)) : reportSource;
+  vm.runInNewContext(injected, context, { timeout: 1000 });
   return { window, document, all, listeners, node, body };
 }
 
@@ -128,5 +131,60 @@ test('copied report headings support Portuguese, English and Spanish without cha
    const report=e.document.getElementById('bx-dev-report').value;
    assert.match(report,new RegExp(text),lang);
    assert.equal(e.all().some(n=>n.textContent==='Copiar diagnóstico'),true);
+ }
+});
+
+
+const sampleMatrix={entries:[
+ {firmware:'14.02',host_profile:'configured',
+  offline_manifest:'includes/caches/manifest/1402.manifest',
+  goldhen_options_checked:['GHv2.4b18.13','GHv2.4b18.14']},
+ {firmware:'13.53',host_profile:'not_configured',goldhen_options_checked:[]}
+]};
+
+function copiedPreflight(options) {
+ const e=environment({...options,matrix:sampleMatrix});
+ e.window.bxOpenDiagnostics();
+ const rowsBefore=e.document.getElementById('bx-dev-diagnostics').children.length;
+ e.all().find(n=>n.textContent==='Copiar diagnóstico').onclick();
+ return {report:e.document.getElementById('bx-dev-report').value,rowsBefore,e};
+}
+test('14.02 read-only preflight distinguishes documented GoldHEN choices from activation', () => {
+ const a=copiedPreflight({firmware:'14.02',flavor:'GoldHEN',ghVersion:'GHv2.4b18.14'});
+ assert.match(a.report,/GoldHEN selecionado consta da lista deste firmware: GHv2\.4b18\.14/);
+ assert.match(a.report,/Teste físico no console: não verificado/);
+ assert.match(a.report,/Manifesto offline documentado.*1402\.manifest/);
+ assert.doesNotMatch(a.report,/GoldHEN ativo no console: Sim/);
+ const b=copiedPreflight({firmware:'14.02',flavor:'GoldHEN',ghVersion:'GHv2.4b18.12'});
+ assert.match(b.report,/GoldHEN selecionado NÃO consta da lista deste firmware: GHv2\.4b18\.12/);
+ assert.equal(a.rowsBefore,b.rowsBefore,'preflight must not introduce visible rows');
+});
+test('unsupported firmware and offline/cache state produce explicit warnings', () => {
+ const noProfile=copiedPreflight({firmware:'13.53',flavor:'GoldHEN',ghVersion:'GHv2.4b18.14'});
+ assert.match(noProfile.report,/Perfil não configurado neste host/);
+ assert.doesNotMatch(noProfile.report,/GoldHEN selecionado consta/);
+ const offline=environment({firmware:'14.02',flavor:'GoldHEN',ghVersion:'GHv2.4b18.13',
+   matrix:sampleMatrix,offline:true});
+ offline.window.applicationCache={status:5};
+ offline.window.bxOpenDiagnostics();
+ offline.all().find(n=>n.textContent==='Copiar diagnóstico').onclick();
+ const report=offline.document.getElementById('bx-dev-report').value;
+ assert.match(report,/O navegador informa ausência de conexão/);
+ assert.match(report,/AppCache do navegador está vazio ou obsoleto/);
+ assert.match(report,/GHv2\.4b18\.13/);
+});
+test('GoldHEN preflight does not misclassify other selected HENs', () => {
+ const a=copiedPreflight({firmware:'14.02',flavor:'PS4HEN',ghVersion:'GHv2.4b18.12'});
+ assert.doesNotMatch(a.report,/GoldHEN selecionado NÃO consta da lista deste firmware/);
+ assert.match(a.report,/HEN selecionado \(não prova ativação\): PS4HEN/);
+});
+test('preflight status remains translated in Portuguese, English and Spanish', () => {
+ for(const [lang,needle] of [
+   ['pt-BR','Verificações locais (somente leitura):'],
+   ['en-US','Local checks (read-only):'],
+   ['es-ES','Comprobaciones locales (solo lectura):']
+ ]) {
+   const e=copiedPreflight({firmware:'14.02',flavor:'GoldHEN',ghVersion:'GHv2.4b18.13',language:lang});
+   assert.ok(e.report.includes(needle),lang);
  }
 });

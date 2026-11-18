@@ -96,3 +96,26 @@ assigned a local file path. It does **not** prove compatibility or activation
 on an actual PS4. The existing layout, controls and original binaries are
 untouched. Source firmware boundaries are not widened just to advertise
 a version.
+
+
+## Read-only firmware preflight and offline mapping
+
+The existing **Copiar diagnóstico** action now includes read-only checks for
+the selected firmware's static support profile, the saved GoldHEN selection,
+browser connectivity and the browser's AppCache status. The static GoldHEN
+version whitelist is explicitly described as a *selection check*, not a
+successful launch or real-console test. No automatic telemetry, network
+requests or retry attempts are triggered by this report.
+
+During each site build, the compatibility generator resolves every configured
+firmware's offline cache HTML and its manifest under the generated build
+directory, rejects paths outside the intended directories and requires an
+AppCache manifest header. Those paths are published in
+`compatibility-matrix.json` alongside a precise
+`offline_evidence: generated_files_only` marker. These fields are also
+validated by the Python release policy and Node integration tests.
+
+No console firmware is changed. Neither static file presence nor a successful
+CI run proves that the AppCache was installed or that GoldHEN executed on a
+physical PS4. The existing visual interface and original payloads are
+unchanged.

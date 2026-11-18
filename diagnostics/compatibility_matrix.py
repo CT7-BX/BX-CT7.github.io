@@ -41,6 +41,21 @@ def validate(data):
         if "default_chain_id" in row and row["default_chain_id"] is not None and (
             not isinstance(row["default_chain_id"], int) or isinstance(row["default_chain_id"], bool)):
             raise ValueError("Invalid default chain evidence")
+        # Cache paths are source-build evidence only, never proof that AppCache
+        # has installed successfully on a physical PS4.
+        if "offline_evidence" in row:
+            if row["offline_evidence"] != "generated_files_only":
+                raise ValueError("Invalid offline evidence")
+            cache_page, manifest = row.get("cache_page"), row.get("offline_manifest")
+            if row["host_profile"] == "configured":
+                if not isinstance(cache_page, str) or not re.fullmatch(
+                        r"includes/caches/[A-Za-z0-9._-]+\.html", cache_page):
+                    raise ValueError("Invalid configured cache route")
+                if not isinstance(manifest, str) or not re.fullmatch(
+                        r"includes/caches/manifest/[A-Za-z0-9._-]+\.manifest", manifest):
+                    raise ValueError("Invalid configured cache manifest")
+            elif cache_page is not None or manifest is not None:
+                raise ValueError("Unconfigured firmware cannot have offline cache route")
         seen.add(fw)
     if "goldhen_options" in data:
         versions = data["goldhen_options"]

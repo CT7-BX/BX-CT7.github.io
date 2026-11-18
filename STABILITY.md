@@ -368,3 +368,27 @@ bytes de GoldHEN, kernel, payloads ou cadeia de desbloqueio.
 - Testes de regressão simulam eventos de histórico, conclusão posterior,
   callbacks antigos, ciclos de foco e fechamento do acompanhamento.
   O layout, as cores e o conteúdo visual continuam idênticos.
+
+
+## Diagnóstico de pré-verificação e rotas de cache por firmware
+
+O relatório que o usuário copia pelo diagnóstico existente agora distingue
+explicitamente: perfil do firmware configurado ou ausente, opção GoldHEN
+indicada na matriz estática, estado de conexão informado pelo navegador,
+AppCache vazio/obsoleto e falta de confirmação em hardware. Mensagens de
+pré-verificação estão disponíveis em português, inglês e espanhol. Nada é
+transmitido automaticamente; nenhum fluxo de desbloqueio é alterado.
+
+Na geração do site, todas as opções de firmware com perfil configurado
+passam por verificação da página de cache selecionada, existência do manifesto
+correspondente e validade básica do conteúdo. O inventário JSON contém os
+campos `cache_page`, `offline_manifest` e
+`offline_evidence: generated_files_only`, sem declarar sucesso de instalação
+no navegador. Para firmwares sem perfil, ambos os caminhos permanecem nulos.
+Inconsistências impedem que uma atualização seja publicada.
+
+Testes adicionais cobrem diferenças de firmware/HEN, uso offline, mensagens
+de pré-verificação, localização, caminhos fora do diretório do build e
+concordância dos manifestos. HTML, CSS, visual neon e bytes de payloads
+permanecem intactos. Não há retry de exploração, reenvio automático de
+binários nem alegação de sucesso físico.

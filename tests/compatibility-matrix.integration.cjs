@@ -92,3 +92,24 @@ test('all listed firmwares have matching static routing and bounded GoldHEN vers
     assert.deepEqual(entry.goldhen_options_checked,[],fw);
   }
 });
+
+
+test('every configured firmware has a separately resolved offline page and manifest', () => {
+ const path=require('node:path');
+ for(const item of data.entries) {
+   assert.equal(item.offline_evidence,'generated_files_only');
+   if(item.host_profile!=='configured') {
+     assert.equal(item.cache_page,null,item.firmware);
+     assert.equal(item.offline_manifest,null,item.firmware);
+     continue;
+   }
+   assert.match(item.cache_page,/^includes\/caches\/[A-Za-z0-9._-]+\.html$/);
+   assert.match(item.offline_manifest,/^includes\/caches\/manifest\/[A-Za-z0-9._-]+\.manifest$/);
+   const html=fs.readFileSync('dist/'+item.cache_page,'utf8');
+   const ref=html.match(/\bmanifest="([^"]+)"/);
+   assert.ok(ref,item.firmware);
+   const resolved=path.relative('dist',path.resolve('dist',path.dirname(item.cache_page),ref[1])).replace(/\\/g,'/');
+   assert.equal(resolved,item.offline_manifest,item.firmware);
+   assert.match(fs.readFileSync('dist/'+item.offline_manifest,'utf8'),/^CACHE MANIFEST\n/,item.firmware);
+ }
+});

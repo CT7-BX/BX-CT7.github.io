@@ -89,3 +89,30 @@ class CompatibilityMatrixTests(unittest.TestCase):
             edit(bad)
             with self.assertRaises(ValueError):
                 matrix.validate(bad)
+
+
+    def test_offline_cache_evidence_rejects_missing_or_untrusted_paths(self):
+        import copy
+        data = json.loads(matrix.SOURCE.read_text(encoding="utf-8"))
+        configured = next(entry for entry in data["entries"] if entry["host_profile"] == "configured")
+        configured.update(
+            cache_page="includes/caches/cache1400.html",
+            offline_manifest="includes/caches/manifest/1400.manifest",
+            offline_evidence="generated_files_only",
+        )
+        matrix.validate(data)
+        for key, value in [
+            ("cache_page", "../escape.html"),
+            ("offline_manifest", "http://example.test/offline.manifest"),
+            ("offline_evidence", "physical_success"),
+        ]:
+            bad = copy.deepcopy(data)
+            next(x for x in bad["entries"] if x["host_profile"] == "configured")[key] = value
+            with self.assertRaises(ValueError):
+                matrix.validate(bad)
+        unsupported = copy.deepcopy(data)
+        next(x for x in unsupported["entries"] if x["host_profile"] == "not_configured").update(
+            offline_evidence="generated_files_only", cache_page="includes/caches/cache1400.html",
+            offline_manifest="includes/caches/manifest/1400.manifest")
+        with self.assertRaises(ValueError):
+            matrix.validate(unsupported)
