@@ -16,7 +16,7 @@ test('all critical host scripts have exact content identities and consistent off
  for(const [name,ref] of Object.entries(data.host_assets)){
   const hash=crypto.createHash('sha256').update(fs.readFileSync('dist/'+name)).digest('hex').slice(0,16);assert.equal(ref,name+'?bxv='+hash);
   for(const manifest of fs.readdirSync('dist/includes/caches/manifest'))if(manifest.endsWith('.manifest')){
-   const text=fs.readFileSync('dist/includes/caches/manifest/'+manifest,'utf8');assert.ok(!text.split('\n').includes('../../../'+name));
+   const text=fs.readFileSync('dist/includes/caches/manifest/'+manifest,'utf8');assert.ok(!text.split('\n').includes('../../../'+name));assert.ok(text.split('\n').includes('../../../'+ref),manifest+': '+name);
   }
  }
  const html=fs.readFileSync('dist/index.html','utf8');assert.ok(html.includes('./'+data.host_assets['includes/js/host-return.js']));

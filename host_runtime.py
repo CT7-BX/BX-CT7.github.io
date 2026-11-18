@@ -112,6 +112,8 @@ def assemble_host(root, source):
         text = text.replace('../../../exploit.html\n','../../../exploit.html?bxHostRevision='+revision+'\n')
         for path, ref in references.items():
             text = text.replace('../../../'+path+'\n','../../../'+ref+'\n')
+            if '../../../'+ref not in text.splitlines():
+                text = text.replace('CACHE:', 'CACHE:\n../../../'+ref,1)
         manifest.write_text(text)
     if styles_before != {p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob('*.css')}: raise ValueError('Runtime rebuild changed styles')
     if pages_before != {p.relative_to(root).as_posix():appearance(p.read_text()) for p in root.rglob('*.html')}: raise ValueError('Runtime rebuild changed visible markup')

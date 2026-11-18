@@ -290,6 +290,7 @@ def check_host_runtime():
         entries = manifest.read_text().splitlines()
         for name, reference in metadata['host_assets'].items():
             check('../../../' + name not in entries, 'Unversioned critical host dependency: ' + name)
+            check('../../../' + reference in entries, 'Missing critical offline dependency: ' + name)
         for name in ('host-intent.js','host-return.js'):
             check('../../../' + metadata['host_assets']['includes/js/' + name] in entries, 'Missing host coordinator: ' + str(manifest))
         check('../../../host-runtime.json' in entries, 'Missing host metadata')
