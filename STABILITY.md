@@ -336,3 +336,17 @@ components, payload bytes or unlocking chains are changed.
   os payloads, a lógica do firmware ou as rotinas de desbloqueio.
 - Testes no GitHub Actions verificam a implementação e os recursos estáticos;
   a estabilidade física no WebKit PS4 e em sessões offline requer teste real.
+
+
+## Inventário integral das opções de firmware e GoldHEN
+
+O site passa a gerar o relatório publicado de compatibilidade diretamente
+das opções já existentes na interface e das funções de seleção do host.
+Todos os firmwares do seletor e todas as versões GoldHEN exibidas são
+auditados. A checagem exige que os arquivos locais existam e preserva
+a rejeição explícita de versões sem perfil, como 13.53 e 14.01.
+
+A seleção simulada de um binário indica apenas uma rota configurada no
+código; não certifica funcionamento no console. Não são modificados:
+firmware do PS4, opções visíveis do seletor, interface, HTML, CSS,
+bytes de GoldHEN, kernel, payloads ou cadeia de desbloqueio.
