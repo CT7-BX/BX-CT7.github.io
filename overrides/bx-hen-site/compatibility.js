@@ -41,6 +41,7 @@
      ['Performance (API, indicativo)',(function(){try{var p=window.performance;return p&&typeof p.now==='function'?'relógio de alta resolução disponível (não medido)':p?'API presente, sem relógio de alta resolução':'API indisponível';}catch(e){return 'consulta bloqueada';}})()],
      ['Cópia de relatório (API, indicativo)',(function(){try{return typeof document.queryCommandSupported==='function'?(document.queryCommandSupported('copy')?'comando de cópia indicado como suportado (não testado)':'comando de cópia não indicado como suportado'):'verificação de suporte indisponível';}catch(e){return 'consulta de suporte bloqueada';}})()],
      ['JSON (relatórios locais)',(function(){try{return typeof JSON!=='undefined'&&typeof JSON.stringify==='function'&&typeof JSON.parse==='function'&&JSON.parse(JSON.stringify({teste:1})).teste===1?'operacional':'indisponível';}catch(e){return 'falhou';}})()],
+     ['XMLHttpRequest (API, indicativo)',(function(){try{return typeof window.XMLHttpRequest==='function'?'API disponível (rede não testada)':'API indisponível';}catch(e){return 'consulta bloqueada';}})()],
      ['Download HTML (indicativo)',('download' in document.createElement('a'))?'atributo suportado':'atributo não detectado'],
      ['HTTPS',location.protocol==='https:'?'sim':'não'],
      ['Estado de carregamento (indicativo)',typeof document.readyState==='string'?document.readyState:'não informado'],
