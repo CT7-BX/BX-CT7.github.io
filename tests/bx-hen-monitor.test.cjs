@@ -395,3 +395,26 @@ test('multiple completed executions use grammatical plural status', () => {
   env.requests[0].respond(200,report([run(1),run(2,'failure')]));
   assert.match(env.get('bx-monitor-status').textContent,/Últimas 2 execuções concluídas/);
 });
+
+test('rapid page history returns ignore late callbacks and keep only the newest result', () => {
+  const env = environment();
+  const initial = env.requests[0];
+  env.events.pagehide();
+  env.events.pageshow({ persisted: true });
+  const second = env.requests[1];
+  env.events.pagehide();
+  env.events.pageshow({ persisted: true });
+  const latest = env.requests[2];
+  assert.equal(initial.aborted, true);
+  assert.equal(second.aborted, true);
+  assert.equal(env.pendingTimers(), 1);
+  initial.respond(200, report([run(111)]));
+  second.respond(200, report([run(222)]));
+  second.onerror();
+  assert.equal(env.get('bx-monitor-runs').children.length, 0);
+  latest.respond(200, report([run(333)]));
+  assert.equal(env.pendingTimers(), 0);
+  assert.equal(env.get('bx-monitor-runs').attributes['aria-busy'], 'false');
+  assert.equal(env.get('bx-monitor-count').textContent, '1 registro');
+  assert.match(env.get('bx-monitor-runs').children[0].children[0].children[0].textContent, /333/);
+});
