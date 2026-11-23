@@ -43,6 +43,7 @@
      ['JSON (relatórios locais)',(function(){try{return typeof JSON!=='undefined'&&typeof JSON.stringify==='function'&&typeof JSON.parse==='function'&&JSON.parse(JSON.stringify({teste:1})).teste===1?'operacional':'indisponível';}catch(e){return 'falhou';}})()],
      ['Fetch (API, indicativo)',(function(){try{return typeof window.fetch==='function'?'API disponível (rede não testada)':'API indisponível';}catch(e){return 'consulta bloqueada';}})()],
      ['XMLHttpRequest (API, indicativo)',(function(){try{return typeof window.XMLHttpRequest==='function'?'API disponível (rede não testada)':'API indisponível';}catch(e){return 'consulta bloqueada';}})()],
+     ['Eventos DOM (API, indicativo)',(function(){try{return typeof document.addEventListener==='function'&&typeof document.removeEventListener==='function'?'APIs disponíveis (eventos não disparados)':'APIs indisponíveis';}catch(e){return 'consulta bloqueada';}})()],
      ['Download HTML (indicativo)',('download' in document.createElement('a'))?'atributo suportado':'atributo não detectado'],
      ['HTTPS',location.protocol==='https:'?'sim':'não'],
      ['Estado de carregamento (indicativo)',typeof document.readyState==='string'?document.readyState:'não informado'],
