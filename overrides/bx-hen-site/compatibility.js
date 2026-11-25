@@ -62,6 +62,8 @@
      ['Visibilidade da página',typeof document.visibilityState==='string'?(document.visibilityState==='visible'?'visível':document.visibilityState==='hidden'?'em segundo plano':'estado: '+document.visibilityState):'API indisponível'],
      ['Preferência por movimento reduzido',(function(){try{return typeof window.matchMedia==='function'?(window.matchMedia('(prefers-reduced-motion: reduce)').matches?'ativada':'não ativada ou não suportada'):'API indisponível';}catch(e){return 'consulta indisponível';}})()],
      ['Desbloqueio BX-HEN','não implementado'],
+     ['DeadHEN (referência documental)','V1.0.0; build declarada para 14.02; ItsSploited-IDntUseModz; não integrado nem validado no PS4'],
+     ['PhantomHEN (referência documental)','README PS4HEN v2.2.0 BETA: 5.05 a 12.02; não integrado nem validado no PS4'],
      ['GoldHEN ativo','não verificável pela página']
    ];
    last={project:'BX-HEN',module:'Compatibility Center 0.1',timestamp:new Date().toISOString(),scope:'diagnóstico local, não é teste de jailbreak',results:items};
