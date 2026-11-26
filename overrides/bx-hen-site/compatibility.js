@@ -65,6 +65,9 @@
      ['Desbloqueio BX-HEN','não implementado'],
      ['DeadHEN (referência documental)','V1.0.0; build declarada para 14.02; ItsSploited-IDntUseModz; não integrado nem validado no PS4'],
      ['PhantomHEN (referência documental)','README PS4HEN v2.2.0 BETA: 5.05 a 12.02; não integrado nem validado no PS4'],
+     ['DeadHEN (validação 13.52)','suporte ao 13.52 não confirmado pelo README; inicialização física do 14.02 não verificada pelo autor'],
+     ['PhantomHEN (validação 13.52)','suporte ao 13.52 não confirmado pelo README; faixa declarada 5.05 a 12.02'],
+     ['Licenças de terceiros','Akatsuki: AGPL-3.0 ou posterior; licenças integrais dos componentes DeadHEN e PhantomHEN não verificadas'],
      ['GoldHEN ativo','não verificável pela página']
    ];
    last={project:'BX-HEN',module:'Compatibility Center 0.1',timestamp:new Date().toISOString(),scope:'diagnóstico local, não é teste de jailbreak',results:items};
