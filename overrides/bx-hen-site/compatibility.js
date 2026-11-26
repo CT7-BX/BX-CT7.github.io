@@ -56,6 +56,7 @@
      ['Tela (CSS px)',(window.screen&&screen.width||0)+' x '+(window.screen&&screen.height||0)],
      ['Escala de pixels',typeof window.devicePixelRatio==='number'?String(window.devicePixelRatio):'não informada'],
      ['Orientação do viewport (indicativo)',(function(){var w=document.documentElement.clientWidth||0,h=document.documentElement.clientHeight||0;return !w||!h?'não informada':w>h?'paisagem':h>w?'retrato':'quadrado';})()],
+     ['Navegação por teclado (API, indicativo)',(function(){try{return typeof window.KeyboardEvent==='function'?'API presente (entrada não testada)':'API não detectada';}catch(e){return 'consulta bloqueada';}})()],
      ['Entrada por toque',('ontouchstart' in window)?'API detectada':'API não detectada'],
      ['Cookies (configuração)',typeof navigator.cookieEnabled==='boolean'?(navigator.cookieEnabled?'habilitados (indicativo)':'desabilitados (indicativo)'):'não informado'],
      ['Foco da janela',typeof document.hasFocus==='function'?(document.hasFocus()?'janela com foco':'janela sem foco'):'API indisponível'],
